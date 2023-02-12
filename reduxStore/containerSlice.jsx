@@ -31,7 +31,8 @@ const initialState = {
     selectedItems: [],
     containersPerPage: 20,
     containersPageNumber: 1,
-    containerList: []
+    containerList: [],
+    trashBoxId:null
 };
 
 const containerSlice = createSlice({
@@ -114,11 +115,15 @@ const containerSlice = createSlice({
                 const {title, container, id} = newResultItem(c, state.workspaceKey);
                 return {title: title.replace(/<\/?[^>]+(>|$)/g, ""), container, id};
             });
+        },
+        trashBoxIdLoaded: (state, action) => {
+            const trashBoxId = action.payload.trashBoxId;
+            state.trashBoxId = trashBoxId;
         }
     }
 })
 
-export const {activityChanged, clearContainer, changeContainerOnly, initContainer, setWorkspaceKeyReady, setMode, pageLoaded, clearItems, selectItem, deselectItem, clearSelected, containersLoaded} = containerSlice.actions;
+export const {activityChanged, clearContainer, changeContainerOnly, initContainer, setWorkspaceKeyReady, setMode, pageLoaded, clearItems, selectItem, deselectItem, clearSelected, containersLoaded, trashBoxIdLoaded} = containerSlice.actions;
 
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityChanged(type));
@@ -306,6 +311,34 @@ export const listItemsThunk = (data) => async (dispatch, getState) => {
     });
 }
 
+export const getTrashBoxThunk = (data) => async (dispatch, getState) => {
+    newActivity(dispatch, "Loading", () => {
+        return new Promise(async (resolve, reject) => {
+            const state = getState().container;
+            
+            PostCall({
+                api:'/memberAPI/getTrashBox',
+                body:{
+                    teamSpace:state.workspace
+                }
+            }).then( data => {
+                debugLog(debugOn, data);
+                if(data.status === 'ok') {                                  
+                    const {trashBoxId} = data;
+                    dispatch(trashBoxIdLoaded({trashBoxId}));
+                    resolve();
+                } else {
+                    debugLog(debugOn, "listItems failed: ", data.error);
+                    reject(data.error);
+                }
+            }).catch( error => {
+                debugLog(debugOn, "listItems failed: ", error)
+                reject("listItems failed!");
+            })
+        });
+    });
+}
+
 export const listContainerThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, "Loading", () => {
         const state = getState().container;
@@ -428,6 +461,81 @@ export const getLastItemInContainer = async (container) => {
 export const dropItems = async (data) => {
     const api = '/memberAPI/' + data.action;
     const payload = data.payload;
+    return new Promise(async (resolve, reject) => {
+        PostCall({
+            api,
+            body: payload
+        }).then( data => {
+            debugLog(debugOn, data);
+            if(data.status === 'ok') {
+                resolve();
+            } else {
+                debugLog(debugOn, "drop items inside failed: ", data.error);
+                reject(data.error);
+            }
+        }).catch( error => {
+            debugLog(debugOn, "drop items inside failed: ", error)
+            reject("drop items inside failed!");
+        })
+    });
+}
+
+export const trashItems = async (data) => {
+    const api = '/memberAPI/trashItems' ;
+    const payload = data.payload;
+    return new Promise(async (resolve, reject) => {
+        PostCall({
+            api,
+            body: payload
+        }).then( data => {
+            debugLog(debugOn, data);
+            if(data.status === 'ok') {
+                resolve();
+            } else {
+                debugLog(debugOn, "drop items inside failed: ", data.error);
+                reject(data.error);
+            }
+        }).catch( error => {
+            debugLog(debugOn, "drop items inside failed: ", error)
+            reject("drop items inside failed!");
+        })
+    });
+}
+
+export const emptyTrashBoxItems = async (data) => {
+    const api = '/memberAPI/emptyTrashBoxItems' ;
+    const payload = data.payload;
+    return new Promise(async (resolve, reject) => {
+        PostCall({
+            api,
+            body: payload
+        }).then( data => {
+            debugLog(debugOn, data);
+            if(data.status === 'ok') {
+                resolve();
+            } else {
+                debugLog(debugOn, "drop items inside failed: ", data.error);
+                reject(data.error);
+            }
+        }).catch( error => {
+            debugLog(debugOn, "drop items inside failed: ", error)
+            reject("drop items inside failed!");
+        })
+    });
+}
+
+export const restoreItemsFromTrash = async (data) => {
+    const api = '/memberAPI/restoreItemsFromTrash' ;
+    const payload = data.payload;
+    payload.selectedItems = payload.selectedItems.map(i=>({
+        container:i.container,
+        id:i.id,
+        position:i.position,
+        title:i.title,
+        originalContainer:i.itemPack.originalContainer,
+        originalPosition:i.itemPack.originalPosition,
+    }))
+    payload.selectedItems = JSON.stringify(payload.selectedItems);
     return new Promise(async (resolve, reject) => {
         PostCall({
             api,

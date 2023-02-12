@@ -16,9 +16,10 @@ import NewItemModal from './newItemModal'
 import ItemCard from './itemCard'
 
 import { getItemLink } from '../lib/bSafesCommonUI'
-import { createANewItem, listItemsThunk, searchItemsThunk } from '../reduxStore/containerSlice';
+import { createANewItem, listItemsThunk, searchItemsThunk, getTrashBoxThunk } from '../reduxStore/containerSlice';
 import { clearPage, itemPathLoaded } from '../reduxStore/pageSlice';
 import { debugLog } from '../lib/helper'
+import Link from 'next/link';
 
 export default function Workspace() {
     const debugOn = false;
@@ -36,6 +37,7 @@ export default function Workspace() {
     const [searchValue, setSearchValue] = useState("");
 
     const itemsState = useSelector( state => state.container.items);
+    const trashBoxId = useSelector( state => state.container.trashBoxId);
 
     const [selectedItemType, setSelectedItemType] = useState(null);
     const [addAction, setAddAction] = useState(null);
@@ -97,6 +99,7 @@ export default function Workspace() {
         const itemPath = [{_id: workspaceId}];
         dispatch(itemPathLoaded(itemPath));
         dispatch(listItemsThunk({pageNumber: 1}));
+        dispatch(getTrashBoxThunk());
     }, [workspaceId]);
 
     return (
@@ -136,6 +139,15 @@ export default function Workspace() {
             {items}
             <br />
             <br />
+            {trashBoxId && <Row>
+                <Col xs={12} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }}>
+                    <Link href={"/trashBox/" + trashBoxId}>
+                        <Button variant="light" className='pull-right border-0 shadow-none'>
+                            <i class="fa fa-5x fa-trash" aria-hidden="true" />
+                        </Button>
+                    </Link>
+                </Col>
+            </Row>}
         </Container>
     )
 
