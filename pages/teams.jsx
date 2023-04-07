@@ -19,6 +19,7 @@ import { clearContainer } from '../reduxStore/containerSlice';
 import { clearItems } from '../reduxStore/teamSlice';
 import { createANewTeam, listTeamsThunk } from '../reduxStore/teamSlice';
 import { debugLog } from '../lib/helper'
+import { PaginationControl } from 'react-bootstrap-pagination-control';
 
 export default function Teams() {
     const debugOn = true;
@@ -30,6 +31,9 @@ export default function Teams() {
     const publicKeyPem = useSelector(state => state.auth.publicKey);
 
     const teams = useSelector(state => state.team.teams);
+    const pageNumber = useSelector(state => state.team.pageNumber);
+    const itemsPerPage = useSelector(state => state.team.itemsPerPage);
+    const total = useSelector(state => state.team.total);
 
     const [addAction, setAddAction] = useState(null);
     const [targetTeam, setTargetTeam] = useState(null);
@@ -56,9 +60,8 @@ export default function Teams() {
         }
     }
 
-    const loadTeams = () => {
-        dispatch(listTeamsThunk());
-        //loadTeams();
+    const loadTeams = (pageNumber) => {
+        dispatch(listTeamsThunk({pageNumber}));
         setContainerCleared(false);
     }
 
@@ -113,6 +116,23 @@ export default function Teams() {
                             })}
                         </Col>
                     </Row>
+                    {teams && teams.length > 0 && 
+                    <Row>
+                        <Col sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }}>
+                            <div className='mt-4 d-flex justify-content-center'>
+                                <PaginationControl
+                                    page={pageNumber}
+                                    // between={4}
+                                    total={total}
+                                    limit={itemsPerPage}
+                                    changePage={(page) => {
+                                        loadTeams(page)
+                                    }}
+                                    ellipsis={1}
+                                />
+                            </div>
+                        </Col>
+                    </Row>}
                 </Container>
             </ContentPageLayout>
         </div>
