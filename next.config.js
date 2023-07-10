@@ -23,6 +23,7 @@ const nextConfig = {
       type: "javascript/auto",
     });
   
+  
     config.module.noParse = /\.wasm$/;
   
     config.module.rules.forEach(rule => {
