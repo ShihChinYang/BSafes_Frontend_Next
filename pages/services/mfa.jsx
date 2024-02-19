@@ -31,6 +31,7 @@ export default function MFA() {
     const tokenRef = useRef(null);
     const wordsRef = useRef(null);
 
+    const dataCenterSelected = !!useSelector(state=>state.auth.dataCenterKey);
     const mfa = useSelector(state => state.auth.mfa);
     const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
 
@@ -80,9 +81,12 @@ export default function MFA() {
         tokenRef.current.focus();
     }, []);
 
-    useEffect(() => {
-        if (isLoggedIn) {
-            router.push('/safe');
+    useEffect(()=> {
+        if(isLoggedIn) {
+            if (dataCenterSelected)
+                router.push('/safe');
+            else
+               router.push('/services/dataCenterSetup');
         }
     }, [isLoggedIn]);
 

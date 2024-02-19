@@ -34,6 +34,7 @@ export default function LogIn() {
     const clientEncryptionKey = useSelector(state=> state.auth.clientEncryptionKey);
     const activity = useSelector(state => state.auth.activity);
     const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
+    const dataCenterSelected = !!useSelector(state=>state.auth.dataCenterKey);
 
     const nicknameChanged = (e) => {
         setNickname(e.target.value);
@@ -73,7 +74,10 @@ export default function LogIn() {
 
     useEffect(() => {
         if (isLoggedIn) {
-            router.push('/safe');
+            if (dataCenterSelected)
+                router.push('/safe');
+            else
+               router.push('/services/dataCenterSetup');
         }
     }, [isLoggedIn])
 
