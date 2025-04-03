@@ -16,8 +16,7 @@ import ContentPageLayout from '../../../components/layouts/contentPageLayout';
 import PageItemWrapper from "../../../components/pageItemWrapper";
 
 import DiaryTopControlPanel from "../../../components/diaryTopControlPanel";
-import ItemTopRows from "../../../components/itemTopRows";
-import PageCommons from "../../../components/pageCommons";
+import DiaryPagePanel from "../../../components/diaryPagePanel";
 import TurningPageControls from "../../../components/turningPageControls";
 
 import { setNavigationInSameContainer } from '../../../reduxStore/containerSlice';
@@ -140,16 +139,8 @@ export default function DiaryPage() {
                     />
                     <Row id="BSafesPage">
                         <Col lg={{ span: 10, offset: 1 }}>
-                            <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.diaryPanel} ${pageStyle}`}>
-                                <ItemTopRows />
-                                <Row className="mt-5">
-                                    <Col xs={12} sm={{ span: 10, offset: 1 }} md={{ span: 10, offset: 1 }}>
-                                        {distance && <h2>{distance}</h2>}
-                                        <h4>{pageDate && format(pageDate, 'EEEE, LLL. dd, yyyy')}</h4>
-                                    </Col>
-                                </Row>
-                                <PageCommons />
-                            </div>
+                            <DiaryPagePanel pageStyle={pageStyle} distance={distance} pageDate={pageDate}>
+                            </DiaryPagePanel>
                         </Col>
                     </Row>
 

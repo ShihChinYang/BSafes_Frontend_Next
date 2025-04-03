@@ -12,8 +12,7 @@ import ContentPageLayout from '../../../components/layouts/contentPageLayout';
 import PageItemWrapper from "../../../components/pageItemWrapper";
 
 import TopControlPanel from "../../../components/topControlPanel"
-import ItemTopRows from "../../../components/itemTopRows";
-import PageCommons from "../../../components/pageCommons";
+import PagePanel from "../../../components/pagePanel";
 import TurningPageControls from "../../../components/turningPageControls";
 import SampleItemNoticeToast from "../../../components/sampleItemNoticeToast";
 
@@ -146,10 +145,7 @@ export default function NotebookPage() {
                     <TopControlPanel pageNumber={pageNumber} onCoverClicked={handleCoverClicked} onContentsClicked={handleContentsClicked} onPageNumberChanged={handlePageNumberChanged} onGotoFirstItem={handleGoToFirstItem} onGotoLastItem={handleGoToLastItem}></TopControlPanel>
                     <Row id="BSafesPage">
                         <Col lg={{span:10, offset:1}}>
-                            <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.notebookPanel} ${pageStyle}`}>
-                                <ItemTopRows />
-                                <PageCommons />
-                            </div>  
+                            <PagePanel/>  
                         </Col>
                     </Row> 
 

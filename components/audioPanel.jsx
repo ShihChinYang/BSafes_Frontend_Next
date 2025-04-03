@@ -81,7 +81,7 @@ export default function AudioPanel({ panelIndex, panel, onAudioClicked, editorMo
 
 
     return (
-        <div style={{borderStyle:"solid", borderRadius:"2px", padding:"0px"}}>
+        <div style={{borderStyle:"solid", borderRadius:"7px", borderColor:"#adb7a5"}}>
             <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/*" className="d-none editControl" id="audios" />
             <Row className="pt-3 pb-1 px-3">
                 <Col xs={11} style={{overflow:"hidden", whiteSpace:"nowrap", textOverflow: "ellipsis"}}>
@@ -129,7 +129,7 @@ export default function AudioPanel({ panelIndex, panel, onAudioClicked, editorMo
             </Row>
             <Row className="pt-2">
                 <Col xs={8} sm={9}>
-                    <div className="">
+                    <div className="m-1">
                         <Editor editorId={panelIndex} showWriteIcon={true} mode={editorMode} content={panel.words} onContentChanged={onContentChanged} showPen={false} editable={editable} hideIfEmpty={true} />
                     </div>
                 </Col>

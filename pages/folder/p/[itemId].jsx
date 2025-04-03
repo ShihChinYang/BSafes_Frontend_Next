@@ -12,8 +12,7 @@ import ContentPageLayout from '../../../components/layouts/contentPageLayout';
 import PageItemWrapper from "../../../components/pageItemWrapper";
 
 import TopControlPanel from "../../../components/topControlPanel";
-import ItemTopRows from "../../../components/itemTopRows";
-import PageCommons from "../../../components/pageCommons";
+import PagePanel from "../../../components/pagePanel";
 import TurningPageControls from "../../../components/turningPageControls";
 
 import { setNavigationInSameContainer, getFirstItemInContainer, getLastItemInContainer} from '../../../reduxStore/containerSlice';
@@ -130,10 +129,7 @@ export default function FolderPage() {
                     <TopControlPanel onCoverClicked={handleCoverClicked} onContentsClicked={handleContentsClicked} onGotoFirstItem={handleGoToFirstItem} onGotoLastItem={handleGoToLastItem}></TopControlPanel>
                     <Row id="BSafesPage">
                         <Col lg={{span:10, offset:1}}>
-                            <div className={`${BSafesStyle.pagePanel}`}>
-                                <ItemTopRows />
-                                <PageCommons />
-                            </div>
+                            <PagePanel/>
                         </Col>
                     </Row> 
                     <TurningPageControls onNextClicked={gotoNextPage} onPreviousClicked={gotoPreviousPage} />

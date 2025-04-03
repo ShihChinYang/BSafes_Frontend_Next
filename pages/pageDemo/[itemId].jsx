@@ -11,8 +11,7 @@ import ContentPageLayout from '../../components/layouts/contentPageLayout';
 import PageItemWrapper from "../../components/pageItemWrapper";
 
 import TopControlPanel from "../../components/topControlPanel"
-import ItemTopRows from "../../components/itemTopRows";
-import PageCommons from "../../components/pageCommons";
+import PagePanel from "../../components/pagePanel";
 import TurningPageControls from "../../components/turningPageControls";
 import SampleItemNoticeModal from "../../components/sampleItemNoticeModal";
 
@@ -159,10 +158,7 @@ export default function Page() {
                     {!hideFunction &&
                         <TopControlPanel onCoverClicked={handleCoverClicked} onContentsClicked={handleContentsClicked} ></TopControlPanel>
                     }
-                    <div className={BSafesStyle.pagePanel}>
-                        <ItemTopRows />
-                        <PageCommons />
-                    </div>
+                    <PagePanel/>
                     <TurningPageControls onNextClicked={gotoNextItem} onPreviousClicked={gotoPreviousItem} showAlert={endOfContainer} alertClosed={() => setEndOfContainer(false)} />
                 </PageItemWrapper>
             </ContentPageLayout>

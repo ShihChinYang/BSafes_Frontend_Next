@@ -9,10 +9,10 @@ import BSafesStyle from '../../styles/BSafes.module.css'
 import Scripts from "../../components/scripts";
 import ContentPageLayout from '../../components/layouts/contentPageLayout';
 import PageItemWrapper from "../../components/pageItemWrapper";
+import PagePanel from "../../components/pagePanel";
 
 import TopControlPanel from "../../components/topControlPanel"
-import ItemTopRows from "../../components/itemTopRows";
-import PageCommons from "../../components/pageCommons";
+
 import TurningPageControls from "../../components/turningPageControls";
 
 import { setNavigationInSameContainer } from "../../reduxStore/containerSlice";
@@ -143,10 +143,7 @@ export default function Page() {
                     {!hideFunction &&
                         <TopControlPanel onCoverClicked={handleCoverClicked} onContentsClicked={handleContentsClicked} ></TopControlPanel>
                     }
-                    <div className={BSafesStyle.pagePanel}>
-                        <ItemTopRows />
-                        <PageCommons />
-                    </div>
+                    <PagePanel/>
                     <TurningPageControls onNextClicked={gotoNextItem} onPreviousClicked={gotoPreviousItem} showAlert={endOfContainer} alertClosed={() => setEndOfContainer(false)} />
                 </PageItemWrapper>
             </ContentPageLayout>
