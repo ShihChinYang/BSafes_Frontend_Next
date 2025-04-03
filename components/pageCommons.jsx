@@ -942,7 +942,7 @@ export default function PageCommons() {
                     <br />
                     {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
                         <div className="audios">
-                            <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/*" multiple className="d-none editControl" id="audios" />
+                            <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/mp3, audio/wav" multiple className="d-none editControl" id="audios" />
                             <Row>
                                 <Col id="audios" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.audiosDragDropZoneActive : BSafesStyle.audiosDragDropZone}`}>
                                     <Button id="audios" onClick={handleAudioButton} variant="link" className="text-dark btn btn-labeled">
