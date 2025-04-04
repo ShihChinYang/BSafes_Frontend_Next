@@ -146,7 +146,7 @@ export default function VideoPanel({ panelIndex, panel, onVideoClicked, editorMo
                             {panel.play ?
                                 <>
                                     {panel.src ?
-                                        <video alt="Video broken" playsInline controls autoPlay muted poster={panel.thumbnail} src={panel.src} onPlaying={onPlaying} onCanPlay={onCanPlay} onLoadedMetadata={onLoadedMetadata} onLoadedData={onLoadedData} className='w-100' /> :
+                                        <video alt="Video broken" playsInline controls autoPlay poster={panel.thumbnail} src={panel.src} onPlaying={onPlaying} onCanPlay={onCanPlay} onLoadedMetadata={onLoadedMetadata} onLoadedData={onLoadedData} className='w-100' /> :
                                         <>
                                             <Image alt="image broken" src={panel.thumbnail} fluid />
                                         </>

@@ -95,7 +95,7 @@ export default function AudioPanel({ panelIndex, panel, onAudioClicked, editorMo
                             {panel.play ?
                                 <>
                                     {panel.src ?
-                                        <audio alt="Audio broken" playsInline controls autoPlay muted src={panel.src} onPlaying={onPlaying} onCanPlay={onCanPlay} onLoadedMetadata={onLoadedMetadata} onLoadedData={onLoadedData} className='w-100' /> :
+                                        <audio alt="Audio broken" controls autoPlay src={panel.src} onPlaying={onPlaying} onCanPlay={onCanPlay} onLoadedMetadata={onLoadedMetadata} onLoadedData={onLoadedData} className='w-100' /> :
                                         <>
                                             <Button onClick={handleAudioClicked}><i className="fa fa-play" aria-hidden="true"></i> Play</Button>
                                         </> 
