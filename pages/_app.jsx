@@ -5,6 +5,7 @@ import Head from "next/head";
 import Script from 'next/script';
 
 import '../styles/materia.css'
+import 'bootstrap-icons/font/bootstrap-icons.min.css'
 import 'boxicons/css/boxicons.min.css'
 import '../styles/bsafesStore.css'
 import '../styles/react-tagsinput-bsafes.css'
@@ -26,6 +27,7 @@ function MyApp({ Component, pageProps }) {
   const debugOn = true;
   const dispatch = useDispatch()
   useEffect(() => {
+    import("bootstrap/dist/js/bootstrap.min.js");
     window.EXCALIDRAW_ASSET_PATH = "/js/";
     if (process.env.NEXT_PUBLIC_platform === 'iOS') {
       const pingFromNative = () => {
