@@ -16,8 +16,8 @@ const MakeupSection = () => {
               <div className="makeup-content">
                 <span>BROW BESTSELLERS</span>
                 <h2>Everything Documented, Private & Secure!</h2>
-                <p>Whatever your summer looks like, bring your own heat with up to 25% off Lumin Brand.Pellentesque ipsum dui, laoreet vitae ex in, pellentesque aliquam leo.</p>
-                <Link legacyBehavior href="/shop"><a className="primary-btn1 style-2 hover-btn3">*Shop All Brows*</a></Link>
+                <p hidden>Whatever your summer looks like, bring your own heat with up to 25% off Lumin Brand.Pellentesque ipsum dui, laoreet vitae ex in, pellentesque aliquam leo.</p>
+                {false && <Link legacyBehavior href="/shop"><a className="primary-btn1 style-2 hover-btn3">*Shop All Brows*</a></Link>}
               </div>
             </div>
           </div>

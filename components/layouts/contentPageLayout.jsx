@@ -427,7 +427,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                 </div>
             }
 
-            {(!workspace || (workspace && !workspace.startsWith("d:"))) && showNaveBar && ((accountVersion === '' || accountVersion === 'v1')) &&
+            {(!workspace || (workspace && !workspace.startsWith("d:"))) && showNaveBar && ((accountVersion === '' || accountVersion === 'v1' || (accountVersion === 'v2' && !((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn)))) &&
                 <Navbar bg="light" className={BSafesStyle.bsafesNavbar}>
                     <Container fluid>
                         {workspaceName ?
@@ -442,13 +442,12 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                                 </span>
                             </Navbar.Brand>
                         }
-                        {showNavbarMenu && <Dropdown align="end" className="justify-content-end">
+                        {showNavbarMenu && (accountVersion === 'v1') && (isLoggedIn || (router.asPath === '/v1/keyEnter')) && <Dropdown align="end" className="justify-content-end">
                             <Dropdown.Toggle variant="link" id="dropdown-basic" className={BSafesStyle.navbarMenu}>
                                 <span className={BSafesStyle.memberBadge}>{displayName && displayName.charAt(0)}</span>
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
-
                                 {isLoggedIn &&
                                     <Dropdown.Item onClick={lock}>Lock</Dropdown.Item>
                                 }
@@ -494,13 +493,10 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                     </Container>
                 </Navbar>
             }
-            {(!workspace || (workspace && !workspace.startsWith("d:"))) && showNaveBar && (accountVersion === 'v2') &&
+            {(!workspace || (workspace && !workspace.startsWith("d:"))) && showNaveBar && (accountVersion === 'v2') && ((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn) &&
                 <Navbar key={false} expand="false" bg="light" className={`${BSafesStyle.bsafesNavbar} py-2`}>
                     <Container>
                         {true && <>
-                            {(localSessionState && localSessionState.authState !== 'MFARequired' && !isLoggedIn) &&
-                                <Navbar.Brand href='/'><h1>BSafes</h1></Navbar.Brand>
-                            }
                             {(localSessionState && localSessionState.authState === 'MFARequired' && !isLoggedIn) &&
                                 <Navbar.Brand><h2>Security</h2></Navbar.Brand>
                             }

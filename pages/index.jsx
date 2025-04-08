@@ -449,7 +449,7 @@ export default function Home() {
                                 <Container>
                                     <Row style={{ paddingTop: '0px' }}>
                                         <Col xs={12} md={6} className={BSafesStyle.featureCardImageTop}>
-                                            <Image className={BSafesStyle.featureCardNormalImage} src='/images/feature_oneClick.png'></Image>
+                                            <Image className={BSafesStyle.featureCardNormalImage} src='/images/feature_OneClick.png'></Image>
                                         </Col>
                                         <Col xs={12} md={6} className={BSafesStyle.featureCardText}>
                                             <h1 className={BSafesStyle.featureCardTitle}>One-Click Encrypt & Back Up</h1>
