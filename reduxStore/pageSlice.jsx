@@ -3564,7 +3564,7 @@ export const uploadAudiosThunk = (data) => async (dispatch, getState) => {
 
         for (let i = 0; i < state.audioPanels.length; i++) {
             const audioPanel = state.audioPanels[i];
-            let audio = { s3KeyPrefix: audioPanel.s3KeyPrefix, fileType: audioPanel.fileType, fileName: audioPanel.fileName, fileSize: audioPanel.fileSize, encryptedFileSize: audioPanel.encryptedFileSize, numberOfChunks: audioPanel.numberOfChunks };                audio.fileName = forge.util.encode64(encryptBinaryString(encodeURI(audioPanel.fileName), state.itemKey));
+            let audio = { s3KeyPrefix: audioPanel.s3KeyPrefix, fileType: audioPanel.fileType, fileName: audioPanel.fileName, fileSize: audioPanel.fileSize, encryptedFileSize: audioPanel.encryptedFileSize, numberOfChunks: audioPanel.numberOfChunks }; audio.fileName = forge.util.encode64(encryptBinaryString(encodeURI(audioPanel.fileName), state.itemKey));
             let words = null;
             if (state.itemCopy) words = findAudioWordsByKey(state.itemCopy.audios, audio.s3KeyPrefix);
             audio.words = words;
@@ -4327,10 +4327,8 @@ const downloadAnAttachment = (dispatch, getState, state, attachment, itemId) => 
                 });
             }
             if (!isUsingServiceWorker) {
-                if (process.env.NEXT_PUBLIC_platform === 'android') {
-                    fileInUint8Array = new Uint8Array(attachment.fileSize);
-                    fileInUint8ArrayIndex = 0;
-                }
+                fileInUint8Array = new Uint8Array(attachment.fileSize);
+                fileInUint8ArrayIndex = 0;
                 return true;
             } else {
                 try {
