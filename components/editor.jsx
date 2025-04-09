@@ -163,14 +163,17 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             if (!elements || !elements.length) {
                 return;
             }
+            const appState = ExcalidrawRef.current.getAppState();
             Excalidraw.exportToCanvas({
                 elements,
                 appState: {
-                    ...ExcalidrawRef.current.getAppState(),
+                    ...appState,
                     exportWithDarkMode: false,
-                    exportBackground: true
+                    exportBackground: true,
+                    exportScale:2
                 },
                 files: ExcalidrawRef.current.getFiles(),
+                maxWidthOrHeight: 2048
             }).then(canvas => {
                 canvas.toBlob(blob => {
                     blob.name = 'excalidraw.png';
