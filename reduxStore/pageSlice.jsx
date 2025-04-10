@@ -1975,7 +1975,7 @@ export const downloadVideoThunk = (data) => async (dispatch, getState) => {
                         try {
                             let result = await preS3ChunkDownload(state.id, chunkIndex, s3KeyPrefix, false, dispatch);
                             let response;
-                            response = await XHRDownload(state.id, dispatch, result.signedURL, downloadingAudio, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInAudiosDownloadQueue);
+                            response = await XHRDownload(state.id, dispatch, result.signedURL, downloadingVideo, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInVideosDownloadQueue);
 
                             debugLog(debugOn, "downloadChunk completed. Length: ", response.byteLength);
                             if (state.activeRequest !== itemId) {

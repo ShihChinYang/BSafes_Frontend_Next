@@ -216,8 +216,6 @@ export default function PageCommons() {
         if (contentByDOM)
             setcontentEditorContentWithImagesAndVideos(contentByDOM.innerHTML);
         dispatch(getS3SignedUrlForContentUploadThunk());
-        dispatch(setContentEditorMode("Writing"));
-
     }
 
     const handleDraftSample = (content) => {
@@ -227,14 +225,17 @@ export default function PageCommons() {
 
     const handleDraftClicked = () => {
         dispatch(loadDraftThunk());
+        if ( editorScriptsLoaded) {
+            dispatch(setInitialContentRendered(true));
+        }
     }
 
     const handleDraftDelete = () => {
         dispatch(clearDraft());
     }
 
-    function afterContentReadOnly() { 
-        if(navigationInSameContainer && editorScriptsLoaded ){
+    function afterContentReadOnly() {
+        if (navigationInSameContainer && editorScriptsLoaded) {
             dispatch(setInitialContentRendered(true));
         }
     }
@@ -251,6 +252,7 @@ export default function PageCommons() {
         }
         if (editorId === 'content') {
             beforeWritingContent();
+            dispatch(setContentEditorMode("Writing"));
             setEditingEditorId("content");
             thisReadyForSaving = false;
         } else if (editorId === 'title') {
@@ -346,7 +348,10 @@ export default function PageCommons() {
     const handleWrite = () => {
         debugLog(debugOn, "handleWrite");
         beforeWritingContent();
-        setEditingEditorId("content");
+        if (!draftLoaded || (draftLoaded && contentImagesDownloadQueue.length === 0)) {
+            dispatch(setContentEditorMode("Writing"));
+            setEditingEditorId("content");
+        }
     }
 
     const setEditingEditorMode = (mode) => {
@@ -669,9 +674,9 @@ export default function PageCommons() {
     }, [activity]);
 
     useEffect(() => {
+        setcontentEditorContentWithImagesAndVideos(contentEditorContent);
         if (contentEditorContent === null) return;
         afterContentReadOnly();
-        setcontentEditorContentWithImagesAndVideos(contentEditorContent);
         // eslint-disable-next-line react-hooks/exhaustive-deps    
     }, [contentEditorContent]);
 
@@ -823,10 +828,16 @@ export default function PageCommons() {
     useEffect(() => {
         if (contentImagesAllDownloaded && draftLoaded) {
             handleWrite();
-            setWritingAfterDraftLoaded(false);
             setRenderingDraft(false);
         }
     }, [contentImagesAllDownloaded, draftLoaded]);
+
+    useEffect(() => {
+        if (draftLoaded && contentEditorContentWithImagesAndVideos && contentEditorContentWithImagesAndVideos !== contentEditorContent) {
+            dispatch(setContentEditorMode("Writing"));
+            setEditingEditorId("content");
+        }
+    }, [contentEditorContentWithImagesAndVideos])
 
     const photoSwipeGallery = () => {
         return (
