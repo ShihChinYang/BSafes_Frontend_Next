@@ -141,6 +141,7 @@ const initialState = {
     scripts: scripts.length>0?[scripts[0]]:[],
     index: 0,
     done: true,
+    editorScriptsLoaded: false,
 }
 
 const scriptsSlice = createSlice({
@@ -157,11 +158,14 @@ const scriptsSlice = createSlice({
                 debugLog(debugOn, action.payload + ' loaded. current count:' + state.index);
             }
         },
+        setEditorScriptsLoaded: (state, action) => {
+            state.editorScriptsLoaded = action.payload;
+        },
     }
 })
 
 
-export const { loaded } = scriptsSlice.actions;
+export const { loaded, setEditorScriptsLoaded } = scriptsSlice.actions;
 export const scriptsReducer = scriptsSlice.reducer;
 
 export default scriptsSlice;

@@ -81,7 +81,6 @@ const PageItemWrapper = ({ itemId, children }) => {
         `App is changing to ${url} ${shallow ? 'with' : 'without'
         } shallow routing`
       )
-
       dispatch(abort());
       dispatch(clearPage());
       dispatch(clearItems());

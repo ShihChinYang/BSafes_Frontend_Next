@@ -44,6 +44,7 @@ const initialState = {
     title: null,
     titleText: null,
     content: null,
+    initialContentRendered: false,
     contentSize: 0,
     contentImagesDownloadQueue: [],
     contentImagedDownloadIndex: 0,
@@ -86,7 +87,7 @@ const initialState = {
     draftLoaded: false,
     originalContent: null,
     contentType: '',
-    contentEditorMode: 'ReadOnly'
+    contentEditorMode: 'ReadOnly',
 }
 
 const dataFetchedFunc = (state, action) => {
@@ -399,6 +400,9 @@ const pageSlice = createSlice({
             if (action.payload.item.id !== state.activeRequest) return;
             state.content = action.payload.item.content;
             findMediasInContent(state, state.content);
+        },
+        setInitialContentRendered:  (state, action) => {
+            state.initialContentRendered = action.payload;
         },
         itemPathLoaded: (state, action) => {
             state.itemPath = action.payload;
@@ -988,7 +992,7 @@ const pageSlice = createSlice({
     }
 })
 
-export const { cleanPageSlice, resetPageActivity, activityStart, activityDone, activityError, clearPage, initPage, setIOSActivity, setChangingPage, abort, setActiveRequest, setNavigationMode, setPageItemId, setPageStyle, setPageNumber, dataFetched, setOldVersion, contentDecrypted, itemPathLoaded, decryptPageItem, containerDataFetched, setContainerData, newItemKey, newItemCreated, newVersionCreated, clearItemVersions, itemVersionsFetched, downloadingContentImage, contentImageDownloaded, contentImageDownloadFailed, setContentImagesAllDownloaded, updateContentImagesDisplayIndex, downloadContentVideo, downloadingContentVideo, contentVideoDownloaded, contentVideoFromServiceWorker, playingContentVideo, addUploadImages, uploadingImage, imageUploaded, downloadingImage, imageDownloaded, imageDownloadFailed, addUploadAttachments, setAbortController, uploadingAttachment, stopUploadingAnAttachment, attachmentUploaded, uploadAChunkFailed, addDownloadAttachment, stopDownloadingAnAttachment, downloadingAttachment, setXHR, attachmentDownloaded, setAttachmentSelectedForDownload, writerClosed, setupWriterFailed, downloadAChunkFailed, setImageWordsMode, setCommentEditorMode, pageCommentsFetched, newCommentAdded, commentUpdated, setS3SignedUrlForContentUpload, setDraft, clearDraft, draftLoaded, setDraftLoaded, loadOriginalContent, addUploadVideos, uploadingVideo, videoUploaded, setVideoWordsMode, downloadVideo, downloadingVideo, videoFromServiceWorker, updateVideoChunksMap, playingVideo, addUploadAudios, uploadingAudio, audioUploaded, setAudioWordsMode, downloadAudio, downloadingAudio, audioFromServiceWorker, updateAudioChunksMap, playingAudio, setContentType, setContentEditorMode } = pageSlice.actions;
+export const { cleanPageSlice, resetPageActivity, activityStart, activityDone, activityError, clearPage, initPage, setIOSActivity, setChangingPage, abort, setActiveRequest, setNavigationMode, setPageItemId, setPageStyle, setPageNumber, dataFetched, setOldVersion, contentDecrypted, setInitialContentRendered, itemPathLoaded, decryptPageItem, containerDataFetched, setContainerData, newItemKey, newItemCreated, newVersionCreated, clearItemVersions, itemVersionsFetched, downloadingContentImage, contentImageDownloaded, contentImageDownloadFailed, setContentImagesAllDownloaded, updateContentImagesDisplayIndex, downloadContentVideo, downloadingContentVideo, contentVideoDownloaded, contentVideoFromServiceWorker, playingContentVideo, addUploadImages, uploadingImage, imageUploaded, downloadingImage, imageDownloaded, imageDownloadFailed, addUploadAttachments, setAbortController, uploadingAttachment, stopUploadingAnAttachment, attachmentUploaded, uploadAChunkFailed, addDownloadAttachment, stopDownloadingAnAttachment, downloadingAttachment, setXHR, attachmentDownloaded, setAttachmentSelectedForDownload, writerClosed, setupWriterFailed, downloadAChunkFailed, setImageWordsMode, setCommentEditorMode, pageCommentsFetched, newCommentAdded, commentUpdated, setS3SignedUrlForContentUpload, setDraft, clearDraft, draftLoaded, setDraftLoaded, loadOriginalContent, addUploadVideos, uploadingVideo, videoUploaded, setVideoWordsMode, downloadVideo, downloadingVideo, videoFromServiceWorker, updateVideoChunksMap, playingVideo, addUploadAudios, uploadingAudio, audioUploaded, setAudioWordsMode, downloadAudio, downloadingAudio, audioFromServiceWorker, updateAudioChunksMap, playingAudio, setContentType, setContentEditorMode} = pageSlice.actions;
 
 
 const newActivity = async (dispatch, type, activity) => {

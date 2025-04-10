@@ -126,6 +126,7 @@ const containerSlice = createSlice({
         },
         initContainer: (state, action) => {
             state.container = action.payload.container;
+            state.navigationInSameContainer = false;
             state.workspace = action.payload.workspaceId;
             state.workspaceName = action.payload.workspaceName || 'Personal';
             state.workspaceKey = action.payload.workspaceKey;
@@ -140,6 +141,7 @@ const containerSlice = createSlice({
         },
         changeContainerOnly: (state, action) => {
             state.container = action.payload.container;
+            state.navigationInSameContainer = false;
             state.total = 0;
             state.hits = [];
             state.items = [];

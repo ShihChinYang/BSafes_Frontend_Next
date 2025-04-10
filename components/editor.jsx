@@ -21,7 +21,8 @@ import { putS3Object } from "../lib/s3Helper";
 import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryString, encryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync } from "../lib/crypto";
 import { rotateImage, downScaleImage } from '../lib/wnImage';
 
-import { newItemKey, putS3ObjectInServiceWorkerDB } from "../reduxStore/pageSlice";
+import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered } from "../reduxStore/pageSlice";
+import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 
 let Excalidraw = null;
 export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null }) {
@@ -248,8 +249,12 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             await ic.Others;
             Excalidraw = (await ic.Excalidraw)[0];
             setScriptsLoaded(true);
-
+            dispatch(setEditorScriptsLoaded(true));
         });
+        return () => {
+            console.log("Editor Unmounted");
+            dispatch(setEditorScriptsLoaded(false));
+        }
     }, []);
 
     useEffect(() => {
@@ -271,6 +276,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
         window.bsafesFroala.arraryBufferToStr = arraryBufferToStrHook;
         window.bsafesFroala.getEditorConfig = getEditorConfigHook;
         // eslint-disable-next-line react-hooks/exhaustive-deps
+        dispatch(setInitialContentRendered(true));
     }, [scriptsLoaded])
 
     useEffect(() => {

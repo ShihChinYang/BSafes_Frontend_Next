@@ -21,13 +21,15 @@ import Comments from "./comments";
 
 import BSafesStyle from '../styles/BSafes.module.css'
 
-import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode } from "../reduxStore/pageSlice";
+import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered } from "../reduxStore/pageSlice";
 import { debugLog } from '../lib/helper';
 
 export default function PageCommons() {
     const debugOn = true;
     const dispatch = useDispatch();
 
+    const editorScriptsLoaded = useSelector(state => state.scripts.editorScriptsLoaded);
+    const navigationInSameContainer = useSelector(state => state.container.navigationInSameContainer);
     const workspaceKey = useSelector(state => state.container.workspaceKey);
     const workspaceSearchKey = useSelector(state => state.container.searchKey);
     const workspaceSearchIV = useSelector(state => state.container.searchIV);
@@ -42,6 +44,7 @@ export default function PageCommons() {
     const titleEditorContent = useSelector(state => state.page.title);
     const contentEditorMode = useSelector(state => state.page.contentEditorMode);
     const contentEditorContent = useSelector(state => state.page.content);
+    const initialContentRendered = useSelector(state => state.page.initialContentRendered);
     const [contentEditorContentWithImagesAndVideos, setcontentEditorContentWithImagesAndVideos] = useState(null);
 
     const [editingEditorId, setEditingEditorId] = useState(null);
@@ -230,8 +233,10 @@ export default function PageCommons() {
         dispatch(clearDraft());
     }
 
-    function afterContentReadOnly() {
-
+    function afterContentReadOnly() { 
+        if(navigationInSameContainer && editorScriptsLoaded ){
+            dispatch(setInitialContentRendered(true));
+        }
     }
 
     const handlePenClicked = (editorId, purpose) => {
@@ -671,7 +676,7 @@ export default function PageCommons() {
     }, [contentEditorContent]);
 
     useEffect(() => {
-        if (draftLoaded && !renderingDraft) return;
+        if (!initialContentRendered || (draftLoaded && !renderingDraft)) return;
         let image, imageElement, containerElement;
         let i = contentImagesDisplayIndex;
 
@@ -740,7 +745,7 @@ export default function PageCommons() {
 
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps    
-    }, [contentImagesDownloadQueue, renderingDraft]);
+    }, [initialContentRendered, contentImagesDownloadQueue, renderingDraft]);
 
     useEffect(() => {
         let video, videoElement;
