@@ -171,7 +171,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     ...appState,
                     exportWithDarkMode: false,
                     exportBackground: true,
-                    exportScale:2
+                    exportScale: 2
                 },
                 files: ExcalidrawRef.current.getFiles(),
                 maxWidthOrHeight: 2048
@@ -249,11 +249,16 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             await ic.Others;
             Excalidraw = (await ic.Excalidraw)[0];
             setScriptsLoaded(true);
-            dispatch(setEditorScriptsLoaded(true));
+            if (editorId === "content") {
+                dispatch(setEditorScriptsLoaded(true));
+            }
         });
         return () => {
             console.log("Editor Unmounted");
-            dispatch(setEditorScriptsLoaded(false));
+            if (editorId === "content") {
+                setScriptsLoaded(false);
+                dispatch(setEditorScriptsLoaded(false));
+            }
         }
     }, []);
 
@@ -548,17 +553,17 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                             </Row>
                         </>
                         :
-                        <>{ editorId === 'content' ?
+                        <>{editorId === 'content' ?
                             <Row>
                                 <span> . </span>
-                            </Row>:
+                            </Row> :
                             ""
                         }
                         </>
 
                     }
                     {((contentType !== 'DrawingPage' || editorId === 'title') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
-                        <Row style={{margin:"0px"}} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
+                        <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                             <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
                             </div>
                         </Row>
