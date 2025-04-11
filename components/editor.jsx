@@ -154,7 +154,12 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const drawing = () => {
         const loadExcalidrawState = () => {
             setTimeout(() => {
-                const contentSample = getDrawingContent();
+                const drawingContent = getDrawingContent();
+                const contentSample = ({
+                    metadata: {
+                        ExcalidrawSerializedJSON: drawingContent
+                    }
+                });
                 setOriginalContent(contentSample);
 
                 if (!editorOn) {
