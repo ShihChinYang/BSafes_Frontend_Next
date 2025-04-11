@@ -282,6 +282,9 @@ export default function PageCommons() {
 
         if (editingEditorId === "content") {
             if (contentType === "DrawingPage" || content !== contentEditorContent) {
+                if(contentType === "WritingPage"){
+                    setcontentEditorContentWithImagesAndVideos(content);
+                }
                 dispatch(saveContentThunk({ content, workspaceKey }));
             } else {
                 setEditingEditorMode("ReadOnly");
@@ -586,6 +589,14 @@ export default function PageCommons() {
     };
 
     const handleContentWritingModeReady = (e) => {
+        const bSafesDownloadVideoImages = document.getElementsByClassName('bSafesDownloadVideo');
+        for (let i = 0; i < bSafesDownloadVideoImages.length; i++) {
+            let image = bSafesDownloadVideoImages[i];
+            let containerElement = image.parentNode;
+            let playVideoElement = createPlayVideoButton(image);
+            containerElement.appendChild(playVideoElement);
+            playVideoElement.onclick = handleVideoClick;
+        }
         return;
     }
 
@@ -622,6 +633,11 @@ export default function PageCommons() {
     }
 
     const handleContentReadOnlyModeReady = (e) => {
+        const playVideos = document.querySelectorAll('.bsafesPlayVideo');
+        playVideos.forEach((playVideo) => {
+            playVideo.remove();
+        });
+
         const bSafesDownloadVideoImages = document.getElementsByClassName('bSafesDownloadVideo');
         for (let i = 0; i < bSafesDownloadVideoImages.length; i++) {
             let image = bSafesDownloadVideoImages[i];
@@ -747,7 +763,6 @@ export default function PageCommons() {
                 }
                 dispatch(updateContentImagesDisplayIndex(i + 1));
             }
-
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps    
     }, [initialContentRendered, contentImagesDownloadQueue, renderingDraft]);

@@ -118,17 +118,16 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
         froalaOptions.videoInsertButtons = ['videoBack', '|', 'videoUpload']
         froalaOptions.imageInsertButtons = ['imageBack', '|', 'imageUpload']
         $(editorRef.current).froalaEditor(froalaOptions);
-        if (editorId === 'content') {
-            const contentSample = $(editorRef.current).froalaEditor('html.get');
-            setOriginalContent(contentSample);
-        }
-
         editorRef.current.style.overflowX = null;
         if (!editorOn) {
             debugLog(debugOn, "setEditorOn")
             setEditorOn(true);
         }
         if (writingModeReady) writingModeReady();
+        if (editorId === 'content') {
+            const contentSample = $(editorRef.current).froalaEditor('html.get');
+            setOriginalContent(contentSample);
+        }
     }
 
     const drawing = () => {

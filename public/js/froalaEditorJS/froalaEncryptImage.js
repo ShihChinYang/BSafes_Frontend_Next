@@ -1055,7 +1055,7 @@ const { downScaleImage } = require('./bsafesAPIHooks');
       var link = window.URL.createObjectURL(image);
 
       const imageLoaded = async () => {
-				const result = await downScaleImage(img, exifOrientation, 720);
+				const result = await downScaleImage(img, exifOrientation, 4096);
         imageDataInBinaryString = result.byteString;
         imageWidth = result.width;
         imageHeight = result.height;
