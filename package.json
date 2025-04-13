@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@excalidraw/excalidraw": "^0.17.6",
+    "@excalidraw/excalidraw": "^0.18.0",
     "@fontsource-variable/dancing-script": "^5.0.19",
     "@fontsource-variable/edu-sa-beginner": "^5.0.13",
     "@fontsource-variable/montserrat": "^5.0.20",
