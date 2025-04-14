@@ -32,7 +32,7 @@ const BestSellingProduct = () => {
             <div className="col-lg-4 col-md-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img double-img">
-                  <Link legacyBehavior href="/test/product-default">
+                  <Link legacyBehavior href="/test/product-thumb-bottom">
                     <a>
                     <img src="/assets/img/home1/product-img-1.png" alt="" className="img1" />
                     <img src="/assets/img/home1/product-img-4.png" alt="" className="img2" />
@@ -89,7 +89,7 @@ const BestSellingProduct = () => {
                   </div>
                 </div>
                 <div className="product-card-content">
-                  <h6><Link legacyBehavior href="/test/product-default"><a  className="hover-underline">Poutsicle Hydrating Lip Stain.</a></Link></h6>
+                  <h6><Link legacyBehavior href="/test/product-thumb-bottom"><a  className="hover-underline">Poutsicle Hydrating Lip Stain.</a></Link></h6>
                   <p><Link legacyBehavior href="/shop"><a>REVLON</a></Link></p>
                   <p className="price">$150.00 <del>$200.00</del></p>
                   <div className="rating">
@@ -111,7 +111,7 @@ const BestSellingProduct = () => {
             <div className="col-lg-4 col-md-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img double-img">
-                  <Link legacyBehavior href="/test/product-default">
+                  <Link legacyBehavior href="/test/product-thumb-bottom">
                   <a>
                     <img src="/assets/img/home1/product-img-3.png" alt="" className="img1" />
                     <img src="/assets/img/home1/product-img-20.png" alt="" className="img2" />
@@ -150,7 +150,7 @@ const BestSellingProduct = () => {
                   </div>
                 </div>
                 <div className="product-card-content">
-                  <h6><Link legacyBehavior href="/test/product-default"><a  className="hover-underline">Velvet Red Charm</a></Link></h6>
+                  <h6><Link legacyBehavior href="/test/product-thumb-bottom"><a  className="hover-underline">Velvet Red Charm</a></Link></h6>
                   <p><Link legacyBehavior href="/shop"><a>Aqua Kiss</a></Link></p>
                   <p className="price">$150.00 <del>$200.00</del></p>
                   <div className="rating">
@@ -170,7 +170,7 @@ const BestSellingProduct = () => {
             <div className="col-lg-4 col-md-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img">
-                  <Link legacyBehavior href="/test/product-default">
+                  <Link legacyBehavior href="/test/product-thumb-bottom">
                   <a>
                     <img src="/assets/img/home1/product-img-4.png" alt="" />
                     <div className="batch">
@@ -208,7 +208,7 @@ const BestSellingProduct = () => {
                   </div>
                 </div>
                 <div className="product-card-content">
-                  <h6><Link legacyBehavior href="/test/product-default"><a  className="hover-underline">Hydrating Waves</a></Link></h6>
+                  <h6><Link legacyBehavior href="/test/product-thumb-bottom"><a  className="hover-underline">Hydrating Waves</a></Link></h6>
                   <p><Link legacyBehavior href="/shop"><a>Sea Breeze</a></Link></p>
                   <p className="price">$150.00 - $200.00</p>
                   <ul className="product-size">
@@ -224,7 +224,7 @@ const BestSellingProduct = () => {
             <div className="col-lg-4 col-md-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img">
-                  <Link legacyBehavior href="/test/product-default">
+                  <Link legacyBehavior href="/test/product-thumb-bottom">
                   <a>
                     <img src="/assets/img/home1/product-img-5.png" alt="" />
                     <div className="batch">
@@ -265,7 +265,7 @@ const BestSellingProduct = () => {
                   </div>
                 </div>
                 <div className="product-card-content">
-                  <h6><Link legacyBehavior href="/test/product-default"><a  className="hover-underline">Organic Jojoba Blend</a></Link></h6>
+                  <h6><Link legacyBehavior href="/test/product-thumb-bottom"><a  className="hover-underline">Organic Jojoba Blend</a></Link></h6>
                   <p><Link legacyBehavior href="/shop"><a>Lash Luxe</a></Link></p>
                   <p className="price">$150.00 <del>$200.00</del></p>
                   <div className="rating">
@@ -285,7 +285,7 @@ const BestSellingProduct = () => {
             <div className="col-lg-4 col-md-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img double-img">
-                  <Link legacyBehavior href="/test/product-default">
+                  <Link legacyBehavior href="/test/product-thumb-bottom">
                   <a>
                     <img src="/assets/img/home1/product-img-6.png" alt="" className="img1" />
                     <img src="/assets/img/home1/product-img-7.png" alt="" className="img2" />
@@ -324,7 +324,7 @@ const BestSellingProduct = () => {
                   </div>
                 </div>
                 <div className="product-card-content">
-                  <h6><Link legacyBehavior href="/test/product-default"><a  className="hover-underline">Nourishing Herbal Cleanse</a></Link></h6>
+                  <h6><Link legacyBehavior href="/test/product-thumb-bottom"><a  className="hover-underline">Nourishing Herbal Cleanse</a></Link></h6>
                   <p><Link legacyBehavior href="/shop"><a>Radiance</a></Link></p>
                   <p className="price">$150.00 <del>$200.00</del></p>
                   <div className="rating">
@@ -344,7 +344,7 @@ const BestSellingProduct = () => {
             <div className="col-lg-4 col-md-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img double-img">
-                  <Link legacyBehavior href="/test/product-default">
+                  <Link legacyBehavior href="/test/product-thumb-bottom">
                   <a>
                     <img src="/assets/img/home1/product-img-3.png" alt="" className="img1" />
                     <img src="/assets/img/home1/product-img-20.png" alt="" className="img2" />
@@ -383,7 +383,7 @@ const BestSellingProduct = () => {
                   </div>
                 </div>
                 <div className="product-card-content">
-                  <h6><Link legacyBehavior href="/test/product-default"><a  className="hover-underline">Velvet Red Charm</a></Link></h6>
+                  <h6><Link legacyBehavior href="/test/product-thumb-bottom"><a  className="hover-underline">Velvet Red Charm</a></Link></h6>
                   <p><Link legacyBehavior href="/shop"><a>Aqua Kiss</a></Link></p>
                   <p className="price">$150.00 <del>$200.00</del></p>
                   <div className="rating">

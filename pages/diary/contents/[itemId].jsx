@@ -17,7 +17,8 @@ import ItemRow from "../../../components/itemRow";
 import TurningPageControls from "../../../components/turningPageControls";
 import PaginationControl from "../../../components/paginationControl";
 
-import { setStartDateValue, setDiaryContentsPageFirstLoaded, listItemsThunk, searchItemsThunk } from "../../../reduxStore/containerSlice";
+import { listItemsThunk, searchItemsThunk } from "../../../reduxStore/containerSlice";
+import { setPageStyle } from "../../../reduxStore/pageSlice";
 import { } from "../../../reduxStore/pageSlice";
 import { debugLog } from "../../../lib/helper";
 
@@ -44,6 +45,7 @@ export default function DiaryContents() {
     const workspaceKeyReady = useSelector(state => state.container.workspaceKeyReady);
 
     const pageItemId = useSelector(state => state.page.id);
+    const pageStyle = useSelector(state => state.page.style);
     const [allItemsInCurrentPage, setAllItemsInCurrentPage] = useState([]);
     const showingMonthDate = startDate;
     const currentMonthYear = format(showingMonthDate, 'MMM. yyyy') //=> 'Nov'
@@ -84,6 +86,12 @@ export default function DiaryContents() {
     }
 
     useEffect(() => {
+        let currentMonth = startDate.getMonth();
+        if (currentMonth % 2) {
+            dispatch(setPageStyle(BSafesStyle.leftPagePanel));
+        } else {
+            dispatch(setPageStyle(BSafesStyle.rightPagePanel));
+        }
         if (diaryContentsPageFirstLoaded) return;
         debugLog(debugOn, "startDate changed:", format(startDate, 'yyyyLL'))
         setAllItemsInCurrentPage([]);
@@ -147,7 +155,7 @@ export default function DiaryContents() {
                         datePickerViewMode="monthYear" showSearchIcon />
                     <Row>
                         <Col lg={{ span: 10, offset: 1 }}>
-                            <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.diaryPanel}`}>
+                            <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.diaryPanel} ${pageStyle}`}>
                                 <br />
                                 <br />
                                 <p className='fs-1 text-center'>{currentMonthYear}</p>
