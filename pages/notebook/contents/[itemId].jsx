@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { useRouter } from "next/router";
 
@@ -15,6 +15,7 @@ import TurningPageControls from "../../../components/turningPageControls";
 import PaginationControl from "../../../components/paginationControl";
 
 import { listItemsThunk, searchItemsThunk, getFirstItemInContainer, getLastItemInContainer } from "../../../reduxStore/containerSlice";
+import { setPageStyle } from "../../../reduxStore/pageSlice";
 import { } from "../../../reduxStore/pageSlice";
 import { debugLog } from "../../../lib/helper";
 
@@ -34,6 +35,7 @@ export default function NotebookContents() {
     const totalNumberOfPages = useSelector(state => state.container.totalNumberOfPages);
     const itemsPerPage = useSelector(state => state.container.itemsPerPage);
     const total = useSelector(state => state.container.total);
+    const pageStyle = useSelector(state => state.page.style);
 
     const pageItemId = useSelector(state => state.page.id);
 
@@ -61,7 +63,7 @@ export default function NotebookContents() {
                     nextPageId = 'np:' + idParts.join(':') + ':1';
                     newLink = `/notebook/p/${nextPageId}`;
                 } else {
-                    listItems({ pageNumber: pageNumber+1 });
+                    listItems({ pageNumber: pageNumber + 1 });
                     return;
                 }
                 break;
@@ -131,6 +133,18 @@ export default function NotebookContents() {
             dispatch(searchItemsThunk({ searchValue, pageNumber }));
     }
 
+    useEffect(() => {
+        if (pageNumber) {
+            debugLog(debugOn, "pageNumber: ", pageNumber);
+            if (pageNumber % 2) {
+                dispatch(setPageStyle(BSafesStyle.leftPagePanel));
+            } else {
+                dispatch(setPageStyle(BSafesStyle.rightPagePanel));
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pageNumber]);
+
     return (
         <div className={BSafesStyle.pageBackground}>
             <ContentPageLayout>
@@ -139,7 +153,7 @@ export default function NotebookContents() {
                     <TopControlPanel onCoverClicked={handleCoverClicked} onPageNumberChanged={handlePageNumberChanged} onSubmitSearch={handleSubmitSearch} onCancelSearch={handleCancelSearch} onGotoFirstItem={handleGoToFirstItem} onGotoLastItem={handleGoToLastItem}></TopControlPanel>
                     <Row>
                         <Col lg={{ span: 10, offset: 1 }}>
-                            <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.notebookPanel}`}>
+                            <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.notebookPanel} ${pageStyle}`}>
                                 <br />
                                 <br />
                                 <p className='fs-1 text-center'>Contents</p>
