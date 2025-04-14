@@ -220,7 +220,7 @@ export default function Folder() {
                                     <TurningPageControls cover={true} onNextClicked={gotoNextItem} onPreviousClicked={gotoPreviousItem} showAlert={endOfContainer} alertClosed={()=>setEndOfContainer(false)}/>
                                     <Row className="justify-content-center">
                                         <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
-                                            <Editor editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
+                                            <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
                                         </Col>
                                     </Row>
                                     <br />
@@ -229,7 +229,7 @@ export default function Folder() {
                                             <ContainerOpenButton handleOpen={handleOpen} />
                                         </Col>
                                     </Row>
-                                    <PageCommonControls isEditing={editingEditorId} onWrite={handleWrite} onSave={handleSave} onCancel={handleCancel} />
+                                    <PageCommonControls showWriteBtn={false} isEditing={editingEditorId} onWrite={handleWrite} onSave={handleSave} onCancel={handleCancel} />
                                 </div>
                             }
                             </Col>

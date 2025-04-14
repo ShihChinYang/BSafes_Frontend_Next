@@ -33,7 +33,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .screenBottomLeft {
@@ -182,16 +182,16 @@
 }
 
 .btnFloating {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   color: #FFF;
   box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.5), 3px 3px 3px rgba(0, 0, 0, 0.25);
   position: fixed;
   display: inline-block;
   cursor: default;
-  padding-top: 8px;
-  z-index: 15000;
+  padding-top: 4px;
+  z-index: 1500;
 }
 
 .btnFloatingAdd {
@@ -200,24 +200,27 @@
 }
 
 .btnFloatingWrite {
+  width: 64px;
+  height: 64px;
   background: #03A9F4;
   bottom: 12px;
   right: 24px;
-  padding-left: 10px;
+  padding-top: 13px;
+  padding-left: 13px;
 }
 
 .btnFloatingSave {
   background: #229954;
-  bottom: 72px;
-  right: 24px;
-  padding-left: 10px;
+  bottom: 60px;
+  right: 48px;
+  padding-left: 9px;
 }
 
 .btnFloatingCancel {
   background: #F39C12;
-  bottom: 12px;
-  right: 24px;
-  padding-left: 14px;
+  bottom: 60px;
+  right: 12px;
+  padding-left: 10px;
 }
 
 /* End of custom buttons */
@@ -230,7 +233,7 @@
   width: 100%;
   height: 54px;
   margin: 0px;
-  z-index: 100;
+  z-index: 1800;
 }
 
 .toolbarButton {
