@@ -206,21 +206,29 @@
   bottom: 12px;
   right: 24px;
   padding-top: 13px;
-  padding-left: 13px;
+  padding-left: 15px;
 }
 
 .btnFloatingSave {
   background: #229954;
   bottom: 60px;
-  right: 48px;
+  right: 60px;
   padding-left: 9px;
 }
 
 .btnFloatingCancel {
   background: #F39C12;
   bottom: 60px;
-  right: 12px;
+  right: 24px;
   padding-left: 10px;
+}
+
+.btnFloatingForWriting {
+  bottom: 24px;
+}
+
+.btnFloatingForDrawing {
+  bottom: 68px;
 }
 
 /* End of custom buttons */

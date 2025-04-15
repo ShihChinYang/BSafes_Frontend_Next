@@ -33,6 +33,7 @@ export default function PageCommons() {
     const workspaceKey = useSelector(state => state.container.workspaceKey);
     const workspaceSearchKey = useSelector(state => state.container.searchKey);
     const workspaceSearchIV = useSelector(state => state.container.searchIV);
+    const turningPage = useSelector(state => state.container.turningPage);
 
     const activity = useSelector(state => state.page.activity);
 
@@ -934,7 +935,7 @@ export default function PageCommons() {
                 </Row>
                 <br />
                 <br />
-                {!(contentType === 'DrawingPage' && contentEditorMode === "Writing") && <>
+                {!turningPage && !(contentType === 'DrawingPage' && contentEditorMode === "Writing") && <>
                     {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
                         <div className="videos">
                             <input ref={videoFilesInputRef} onChange={handleVideoFiles} type="file" accept="video/*" multiple className="d-none editControl" id="videos" />

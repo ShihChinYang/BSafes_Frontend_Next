@@ -48,7 +48,8 @@ const initialState = {
     movingItemsTask: null,
     reloadAPage: false,
     itemTrashed: false,
-    listingDone: false
+    listingDone: false,
+    turningPage: false,
 };
 
 function separateActivities(activities, getTitle) {
@@ -293,11 +294,14 @@ const containerSlice = createSlice({
             state.workspaceName = demoWorkspaceInfo.demoWorkspaceName;
             state.searchKey = demoWorkspaceInfo.demoWorkspaceSearchKey;
             state.searchIV = demoWorkspaceInfo.demoWorkspaceSearchIV;
+        },
+        setTurningPage:(state, action) => {
+            state.turningPage = action.payload;
         }
     }
 })
 
-export const { cleanContainerSlice, resetContainerActivity, activityStart, activityDone, activityError, setListingItems, clearContainer, setNavigationInSameContainer, changeContainerOnly, initContainer, setWorkspaceKeyReady, setMode, pageLoaded, clearItems, setNewItem, clearNewItem, selectItem, deselectItem, clearSelected, containersLoaded, setStartDateValue, setDiaryContentsPageFirstLoaded, trashBoxIdLoaded, clearActivities, activitiesLoaded, setMovingItemsTask, completedMovingAnItem, insertAnItemBefore, insertAnItemAfter, setReloadAPage, clearReoloadAPage, setItemTrashed, setListingDone, setDemoWorkspace } = containerSlice.actions;
+export const { cleanContainerSlice, resetContainerActivity, activityStart, activityDone, activityError, setListingItems, clearContainer, setNavigationInSameContainer, changeContainerOnly, initContainer, setWorkspaceKeyReady, setMode, pageLoaded, clearItems, setNewItem, clearNewItem, selectItem, deselectItem, clearSelected, containersLoaded, setStartDateValue, setDiaryContentsPageFirstLoaded, trashBoxIdLoaded, clearActivities, activitiesLoaded, setMovingItemsTask, completedMovingAnItem, insertAnItemBefore, insertAnItemAfter, setReloadAPage, clearReoloadAPage, setItemTrashed, setListingDone, setDemoWorkspace, setTurningPage } = containerSlice.actions;
 
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
