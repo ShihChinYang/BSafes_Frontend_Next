@@ -191,7 +191,7 @@
   display: inline-block;
   cursor: default;
   padding-top: 4px;
-  z-index: 1500;
+  z-index: 150;
 }
 
 .btnFloatingAdd {

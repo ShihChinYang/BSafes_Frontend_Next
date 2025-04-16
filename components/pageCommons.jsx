@@ -236,7 +236,7 @@ export default function PageCommons() {
     }
 
     function afterContentReadOnly() {
-        if (navigationInSameContainer && editorScriptsLoaded) {
+        if (editorScriptsLoaded) {
             dispatch(setInitialContentRendered(true));
         }
     }
