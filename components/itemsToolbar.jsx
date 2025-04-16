@@ -180,7 +180,7 @@ export default function ItemsToolbar() {
                     </Col>
                 </Row>
             </Collapse>
-            <Modal show={showMoveModal} onHide={handleCloseTrigger}>
+            <Modal className={BSafesStyle.itemsToolbarModal} show={showMoveModal} onHide={handleCloseTrigger}>
                 <Modal.Header closeButton>
                     <Modal.Title>Move items to</Modal.Title>
                 </Modal.Header>

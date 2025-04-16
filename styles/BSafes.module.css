@@ -41,7 +41,7 @@
   top: 95%;
   left: 10%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .inputBox {
@@ -252,6 +252,10 @@
   background: transparent;
 }
 
+.itemsToolbarModal {
+  z-index: 2000;
+}
+
 .itemsMovingProgress {
   position: fixed;
   width: 100px;
@@ -259,7 +263,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
+  z-index: 2010;
 }
 
 /* End of items toolbar */
