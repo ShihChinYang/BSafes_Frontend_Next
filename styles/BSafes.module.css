@@ -456,7 +456,7 @@
   position: relative;
   background-color: transparent;
   display: inline-block;
-  z-index: 1000;
+  z-index: 80;
   color: black;
 }
 
