@@ -1671,7 +1671,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         return new Promise(async (resolve, reject) => {
                             const response = await getS3ObjectFromServiceWorkerDB(s3Key);
                             if (!(response.status === 'ok' && response.object)) {
-                                const signedURL = await preS3Download(itemId, s3Key, dispatch);
+                                const signedURL = await preS3Download(itemId, s3Key);
                                 const response = await XHRDownload(null, dispatch, signedURL, null);
                                 const buffer = Buffer.from(response, 'binary');
                                 const downloadedBinaryString = buffer.toString('binary');
@@ -1704,8 +1704,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         } else {
                             PostCall({
                                 api: '/memberAPI/getPageItem',
-                                body: { itemId },
-                                dispatch
+                                body: { itemId }
                             }).then(async result => {
                                 debugLog(debugOn, result);
                                 if (result.status === 'ok' && result.item) {
@@ -1752,7 +1751,30 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         ]
                     }
                 } else if (data.itemId.startsWith('dp')) {
-
+                    const idParts = data.itemId.split(":");
+                    const thisPageDateStr = idParts.at(-1);
+                    const dateParts = thisPageDateStr.split("-");
+                    idParts.splice(-1);
+                    const pageIdPrefix = idParts.join(":");
+                    const thisPageDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+                    const thisPageTime = thisPageDate.getTime();
+                    const aDay = 24*60*60*1000;
+                    function getADateString(distance) {
+                        const theTime = thisPageTime + distance * aDay;
+                        const theDate = new Date(theTime);
+                        const theYear = theDate.getFullYear();
+                        const theMonth= theDate.getMonth() + 1;
+                        const theDay = theDate.getDate();
+                        const theDateString = `${theYear}-${theMonth<10?"0":""}${theMonth}-${theDay<10?"0":""}${theDay}`
+                        return theDateString;
+                    } 
+                    adjacentPages = [
+                        `${pageIdPrefix}:${getADateString(3)}`,
+                        `${pageIdPrefix}:${getADateString(-2)}`,
+                        `${pageIdPrefix}:${getADateString(2)}`,
+                        `${pageIdPrefix}:${getADateString(-1)}`,
+                        `${pageIdPrefix}:${getADateString(1)}`,
+                    ]
                 }
                 let queue = getState().page.adjacentPagesDownloadQueue;
                 let queueLength = queue.length;
@@ -1783,7 +1805,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     getItemFromServer();
                 }
                 await getItemPath(data.itemId, dispatch, getState);
-                if (data.itemId.startsWith("np" || data.itemid.startsWith("dp"))) {
+                if (data.itemId.startsWith("np") || data.itemId.startsWith("dp")) {
                     await downloadAdjacentPages();
                 }
 
@@ -2570,10 +2592,16 @@ async function createNewItemVersion(itemCopy, dispatch) {
                     itemVersion: JSON.stringify(itemCopy)
                 },
                 dispatch
-            }).then(data => {
+            }).then(async data => {
                 debugLog(debugOn, data);
                 if (data.status === 'ok') {
                     debugLog(debugOn, `createNewItemVersion succeeded`);
+                    const params = {
+                        table: 'itemVersions',
+                        key: itemCopy.id,
+                        data: itemCopy
+                    }
+                    await writeDataToServiceWorkerDBTable(params);
                     resolve(data)
                 } else {
                     debugLog(debugOn, `createNewItemVersion failed: `, data.error)
@@ -2627,11 +2655,17 @@ function createANotebookPage(data, dispatch) {
                 api: '/memberAPI/createANotebookPage',
                 body: data,
                 dispatch
-            }).then(result => {
+            }).then(async result => {
                 debugLog(debugOn, result);
 
                 if (result.status === 'ok') {
                     if (result.item) {
+                        const params = {
+                            table: 'itemVersions',
+                            key: result.item.id,
+                            data: result.item
+                        }
+                        await writeDataToServiceWorkerDBTable(params);
                         resolve(result.item);
                     } else {
                         debugLog(debugOn, "woo... failed to create a notebook page!", data.error);
@@ -2670,11 +2704,17 @@ function createADiaryPage(data, dispatch) {
                 api: '/memberAPI/createADiaryPage',
                 body: data,
                 dispatch
-            }).then(result => {
+            }).then(async result => {
                 debugLog(debugOn, result);
 
                 if (result.status === 'ok') {
                     if (result.item) {
+                        const params = {
+                            table: 'itemVersions',
+                            key: result.item.id,
+                            data: result.item
+                        }
+                        await writeDataToServiceWorkerDBTable(params);
                         resolve(result.item);
                     } else {
                         debugLog(debugOn, "woo... failed to create a diary page!", data.error);
