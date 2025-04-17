@@ -89,6 +89,7 @@ const initialState = {
     originalContent: null,
     contentType: '',
     contentEditorMode: 'ReadOnly',
+    adjacentPagesDownloadQueue: []
 }
 
 const dataFetchedFunc = (state, action) => {
@@ -958,7 +959,7 @@ const pageSlice = createSlice({
         clearDraft: (state, action) => {
             state.draft = null;
             state.draftContentType = null;
-            const {draftId, draftContentTypeId} = formDraftId(state.id);
+            const { draftId, draftContentTypeId } = formDraftId(state.id);
             localStorage.removeItem(draftId);
             localStorage.removeItem(draftContentTypeId);
         },
@@ -973,7 +974,7 @@ const pageSlice = createSlice({
             state.draftLoaded = true;
             state.draft = null;
             state.draftContentType = null;
-            const {draftId, draftContentTypeId} = formDraftId(state.id);
+            const { draftId, draftContentTypeId } = formDraftId(state.id);
             localStorage.removeItem(draftContentTypeId);
             localStorage.removeItem(draftId);
             state.contentImagesDownloadQueue = [];
@@ -999,11 +1000,111 @@ const pageSlice = createSlice({
         },
         setContentEditorMode: (state, action) => {
             state.contentEditorMode = action.payload;
+        },
+        addAdjacentPagesToDownloadQueue: (state, action) => {
+            state.adjacentPagesDownloadQueue = action.payload.concat(state.adjacentPagesDownloadQueue);
+        },
+        adjacentPageDownloaded: (state, action) => {
+            if (action.payload === state.adjacentPagesDownloadQueue.at(-1))
+                state.adjacentPagesDownloadQueue.pop();
         }
     }
 })
 
-export const { cleanPageSlice, resetPageActivity, activityStart, activityDone, activityError, clearPage, initPage, setIOSActivity, setChangingPage, abort, setActiveRequest, setNavigationMode, setPageItemId, setPageStyle, setPageNumber, dataFetched, setOldVersion, contentDecrypted, setInitialContentRendered, itemPathLoaded, decryptPageItem, containerDataFetched, setContainerData, newItemKey, newItemCreated, newVersionCreated, clearItemVersions, itemVersionsFetched, downloadingContentImage, contentImageDownloaded, contentImageDownloadFailed, setContentImagesAllDownloaded, updateContentImagesDisplayIndex, downloadContentVideo, downloadingContentVideo, contentVideoDownloaded, contentVideoFromServiceWorker, playingContentVideo, addUploadImages, uploadingImage, imageUploaded, downloadingImage, imageDownloaded, imageDownloadFailed, addUploadAttachments, setAbortController, uploadingAttachment, stopUploadingAnAttachment, attachmentUploaded, uploadAChunkFailed, addDownloadAttachment, stopDownloadingAnAttachment, downloadingAttachment, setXHR, attachmentDownloaded, setAttachmentSelectedForDownload, writerClosed, setupWriterFailed, downloadAChunkFailed, setImageWordsMode, setCommentEditorMode, pageCommentsFetched, newCommentAdded, commentUpdated, setS3SignedUrlForContentUpload, setDraft, clearDraft, loadDraft, setDraftLoaded, loadOriginalContent, addUploadVideos, uploadingVideo, videoUploaded, setVideoWordsMode, downloadVideo, downloadingVideo, videoFromServiceWorker, updateVideoChunksMap, playingVideo, addUploadAudios, uploadingAudio, audioUploaded, setAudioWordsMode, downloadAudio, downloadingAudio, audioFromServiceWorker, updateAudioChunksMap, playingAudio, setContentType, setContentEditorMode } = pageSlice.actions;
+export const {
+    cleanPageSlice,
+    resetPageActivity,
+    activityStart,
+    activityDone,
+    activityError,
+    clearPage,
+    initPage,
+    setIOSActivity,
+    setChangingPage,
+    abort,
+    setActiveRequest,
+    setNavigationMode,
+    setPageItemId,
+    setPageStyle,
+    setPageNumber,
+    dataFetched,
+    setOldVersion,
+    contentDecrypted,
+    setInitialContentRendered,
+    itemPathLoaded,
+    decryptPageItem,
+    containerDataFetched,
+    setContainerData,
+    newItemKey,
+    newItemCreated,
+    newVersionCreated,
+    clearItemVersions,
+    itemVersionsFetched,
+    downloadingContentImage,
+    contentImageDownloaded,
+    contentImageDownloadFailed,
+    setContentImagesAllDownloaded,
+    updateContentImagesDisplayIndex,
+    downloadContentVideo,
+    downloadingContentVideo,
+    contentVideoDownloaded,
+    contentVideoFromServiceWorker,
+    playingContentVideo,
+    addUploadImages,
+    uploadingImage,
+    imageUploaded,
+    downloadingImage,
+    imageDownloaded,
+    imageDownloadFailed,
+    addUploadAttachments,
+    setAbortController,
+    uploadingAttachment,
+    stopUploadingAnAttachment,
+    attachmentUploaded,
+    uploadAChunkFailed,
+    addDownloadAttachment,
+    stopDownloadingAnAttachment,
+    downloadingAttachment,
+    setXHR,
+    attachmentDownloaded,
+    setAttachmentSelectedForDownload,
+    writerClosed,
+    setupWriterFailed,
+    downloadAChunkFailed,
+    setImageWordsMode,
+    setCommentEditorMode,
+    pageCommentsFetched,
+    newCommentAdded,
+    commentUpdated,
+    setS3SignedUrlForContentUpload,
+    setDraft,
+    clearDraft,
+    loadDraft,
+    setDraftLoaded,
+    loadOriginalContent,
+    addUploadVideos,
+    uploadingVideo,
+    videoUploaded,
+    setVideoWordsMode,
+    downloadVideo,
+    downloadingVideo,
+    videoFromServiceWorker,
+    updateVideoChunksMap,
+    playingVideo,
+    addUploadAudios,
+    uploadingAudio,
+    audioUploaded,
+    setAudioWordsMode,
+    downloadAudio,
+    downloadingAudio,
+    audioFromServiceWorker,
+    updateAudioChunksMap,
+    playingAudio,
+    setContentType,
+    setContentEditorMode,
+    addAdjacentPagesToDownloadQueue,
+    adjacentPageDownloaded
+} = pageSlice.actions;
 
 
 const newActivity = async (dispatch, type, activity) => {
@@ -1192,12 +1293,38 @@ const prepareADemoPageItem = (workspace, type, data) => {
     return item;
 }
 
+const addItemToServiceWorkerDB = async (id, item) => {
+    const params = {
+        table: 'itemVersions',
+        key: id,
+        data: item
+    }
+    return writeDataToServiceWorkerDBTable(params);
+}
+
+const getItemFromServiceWorkerDB = (itemId) => {
+    const params = {
+        table: 'itemVersions',
+        key: itemId
+    }
+    return readDataFromServiceWorkerDBTable(params);
+}
+
 const getDemoItemFromServiceWorkerDB = (itemId) => {
     const params = {
         table: 'itemVersions',
         key: itemId
     }
     return readDataFromServiceWorkerDBTable(params);
+}
+
+const putS3ObjectToServiceWorkerDB = (s3Key, data) => {
+    const params = {
+        table: 's3Objects',
+        key: s3Key,
+        data
+    }
+    return writeDataToServiceWorkerDBTable(params);
 }
 
 const getS3ObjectFromServiceWorkerDB = (s3Key) => {
@@ -1325,6 +1452,7 @@ export const putS3ObjectInServiceWorkerDB = (s3Key, data, onProgress) => {
 
 export const getPageItemThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, pageActivity.GetPageItem, () => {
+        const navigationInSameContainer = getState().container.navigationInSameContainer;
 
         if (data.itemId.startsWith('np')) {
             dispatch(setPageNumber(parseInt(data.itemId.split(':').pop())));
@@ -1411,7 +1539,71 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
 
                 })
             }
-            if (!isDemoMode()) {
+            async function processResultItem(result) {
+                dispatch(dataFetched({ item: result.item }));
+                if (result.item.content && result.item.content.startsWith('s3Object/')) {
+                    dispatch(setContentType('WritingPage'));
+                    const s3Key = forge.util.decode64(result.item.content.substring(9));
+                    const response = await getS3ObjectFromServiceWorkerDB(s3Key);
+                    let downloadedBinaryString = null;
+                    if (response.status === 'ok' && response.object) {
+                        downloadedBinaryString = response.object;
+                    } else {
+                        const signedContentUrl = result.item.signedContentUrl;
+                        const response = await XHRDownload(null, dispatch, signedContentUrl, null);
+                        const buffer = Buffer.from(response, 'binary');
+                        downloadedBinaryString = buffer.toString('binary');
+                        await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
+                    }
+                    debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                    await itemKeyReady();
+                    const decryptedContent = decryptBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
+                    debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
+                    const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
+                    dispatch(contentDecrypted({ item: { id: data.itemId, content: decodedContent } }));
+                    state = getState().page;
+                    startDownloadingContentImages(data.itemId, dispatch, getState);
+                    resolve();
+                } else if (result.item.content && result.item.content.startsWith('s3DrawingObject/')) {
+                    dispatch(setContentType('DrawingPage'));
+                    const s3Key = forge.util.decode64(result.item.content.substring(16));
+                    const response = await getS3ObjectFromServiceWorkerDB(s3Key);
+                    let downloadedBinaryString = null;
+                    if (response.status === 'ok' && response.object) {
+                        downloadedBinaryString = response.object;
+                    } else {
+                        const signedContentUrl = result.item.signedContentUrl;
+                        const response = await XHRDownload(null, dispatch, signedContentUrl, null);
+                        const buffer = Buffer.from(response, 'binary');
+                        downloadedBinaryString = buffer.toString('binary');
+                        await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
+                    }
+                    debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                    await itemKeyReady();
+                    const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
+                    debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
+                    const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
+                    const decodedContent = (forge.util.decodeUtf8(decryptedImageStr));
+                    const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decodedContent);
+                    const blob = new Blob([decryptedImageDataInUint8Array], {
+                        type: 'image/*'
+                    });
+                    const link = window.URL.createObjectURL(blob);
+                    blob.src = link;
+                    blob.metadata = {
+                        ExcalidrawExportedImage: true,
+                        ExcalidrawSerializedJSON: forge.util.decodeUtf8(embeddJSON)
+                    };
+                    dispatch(contentDecrypted({ item: { id: data.itemId, content: blob } }));
+                    resolve();
+                } else if (result.item.content) {
+                    dispatch(setContentType('WritingPage'));
+                    resolve();
+                } else {
+                    resolve();
+                }
+            }
+            function getItemFromServer() {
                 debugLog(debugOn, "/memberAPI/getPageItem: ", data.itemId);
                 PostCall({
                     api: '/memberAPI/getPageItem',
@@ -1427,54 +1619,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             return;
                         }
                         if (result.item) {
-                            dispatch(dataFetched({ item: result.item }));
-                            if (result.item.content && result.item.content.startsWith('s3Object/')) {
-                                dispatch(setContentType('WritingPage'));
-                                const signedContentUrl = result.item.signedContentUrl;
-                                const response = await XHRDownload(null, dispatch, signedContentUrl, null);
-                                const buffer = Buffer.from(response, 'binary');
-                                const downloadedBinaryString = buffer.toString('binary');
-                                debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                                await itemKeyReady();
-                                const decryptedContent = decryptBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
-                                debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
-                                const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
-                                dispatch(contentDecrypted({ item: { id: data.itemId, content: decodedContent } }));
-                                state = getState().page;
-                                startDownloadingContentImages(data.itemId, dispatch, getState);
-                                resolve();
-                            } else if (result.item.content && result.item.content.startsWith('s3DrawingObject/')) {
-                                dispatch(setContentType('DrawingPage'));
-                                const signedContentUrl = result.item.signedContentUrl;
-                                const response = await XHRDownload(null, dispatch, signedContentUrl, null);
-
-                                const buffer = Buffer.from(response, 'binary');
-                                const downloadedBinaryString = buffer.toString('binary');
-                                debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-
-                                await itemKeyReady();
-                                const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
-                                debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
-                                const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
-                                const decodedContent = (forge.util.decodeUtf8(decryptedImageStr));
-                                const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decodedContent);
-                                const blob = new Blob([decryptedImageDataInUint8Array], {
-                                    type: 'image/*'
-                                });
-                                const link = window.URL.createObjectURL(blob);
-                                blob.src = link;
-                                blob.metadata = {
-                                    ExcalidrawExportedImage: true,
-                                    ExcalidrawSerializedJSON: forge.util.decodeUtf8(embeddJSON)
-                                };
-                                dispatch(contentDecrypted({ item: { id: data.itemId, content: blob } }));
-                                resolve();
-                            } else if (result.item.content) {
-                                dispatch(setContentType('WritingPage'));
-                                resolve();
-                            } else {
-                                resolve();
-                            }
+                            await processResultItem(result);
+                            await addItemToServiceWorkerDB(data.itemId, result.item);
                         } else {
                             if (data.navigationInSameContainer) {
                                 debugLog(debugOn, "setNavigationMode ...");
@@ -1505,7 +1651,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         const draftContentType = localStorage.getItem(draftContentTypeId);
                         //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
                         if (draft) {
-                            dispatch(setDraft({draft, draftContentType}));
+                            dispatch(setDraft({ draft, draftContentType }));
                         }
 
                     } else {
@@ -1516,7 +1662,131 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     debugLog(debugOn, "woo... failed to get a page item:", error)
                     reject("Failed to get a page item.");
                 })
+            }
+
+            async function downloadAdjacentPages() {
+
+                function downloadAPage(itemId) {
+                    function downloadS3Object(s3Key) {
+                        return new Promise(async (resolve, reject) => {
+                            const response = await getS3ObjectFromServiceWorkerDB(s3Key);
+                            if (!(response.status === 'ok' && response.object)) {
+                                const signedURL = await preS3Download(itemId, s3Key, dispatch);
+                                const response = await XHRDownload(null, dispatch, signedURL, null);
+                                const buffer = Buffer.from(response, 'binary');
+                                const downloadedBinaryString = buffer.toString('binary');
+                                await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
+                            }
+                            resolve();
+                        });
+                    }
+
+                    return new Promise(async (resolve, reject) => {
+                        let item = null;
+                        
+                        async function getContentObject(item) {
+                            if (item) {
+                                let s3Key = null;
+                                if (item.content && item.content.startsWith('s3Object/')) {
+                                    s3Key = forge.util.decode64(item.content.substring(9));
+                                } else if (item.content && item.content.startsWith('s3DrawingObject/')) {
+                                    s3Key = forge.util.decode64(item.content.substring(16));
+                                }
+                                if (s3Key) {
+                                    await downloadS3Object(s3Key);
+                                }
+                            }
+                        }
+                        const result = await getItemFromServiceWorkerDB(itemId);
+                        if ((result.status === 'ok') && result.item) {
+                            await getContentObject(result.item);
+                            resolve();
+                        } else {
+                            PostCall({
+                                api: '/memberAPI/getPageItem',
+                                body: { itemId },
+                                dispatch
+                            }).then(async result => {
+                                debugLog(debugOn, result);
+                                if (result.status === 'ok' && result.item) {
+                                    await addItemToServiceWorkerDB(itemId, result.item);
+                                    await getContentObject(result.item);
+                                }
+                                resolve();
+                            })
+                        }
+                    })
+                }
+
+                let adjacentPages = [];
+                if (data.itemId.startsWith('np')) {
+                    const idParts = data.itemId.split(":");
+                    const thisPageNumber = parseInt(idParts.at(-1));
+                    idParts.splice(-1);
+                    const pageIdPrefix = idParts.join(":");
+                    let startPage = thisPageNumber - 2;
+                    if (startPage < 1) startPage = 1;
+                    if (thisPageNumber > 2) {
+                        adjacentPages = [
+                            `${pageIdPrefix}:${thisPageNumber + 3}`,
+                            `${pageIdPrefix}:${thisPageNumber - 2}`,
+                            `${pageIdPrefix}:${thisPageNumber + 2}`,
+                            `${pageIdPrefix}:${thisPageNumber - 1}`,
+                            `${pageIdPrefix}:${thisPageNumber + 1}`,
+                        ]
+                    } else if (thisPageNumber > 1) {
+                        adjacentPages = [
+                            `${pageIdPrefix}:${thisPageNumber + 4}`,
+                            `${pageIdPrefix}:${thisPageNumber + 3}`,
+                            `${pageIdPrefix}:${thisPageNumber + 2}`,
+                            `${pageIdPrefix}:${thisPageNumber - 1}`,
+                            `${pageIdPrefix}:${thisPageNumber + 1}`,
+                        ]
+                    } else {
+                        adjacentPages = [
+                            `${pageIdPrefix}:${thisPageNumber + 5}`,
+                            `${pageIdPrefix}:${thisPageNumber + 4}`,
+                            `${pageIdPrefix}:${thisPageNumber + 3}`,
+                            `${pageIdPrefix}:${thisPageNumber + 2}`,
+                            `${pageIdPrefix}:${thisPageNumber + 1}`,
+                        ]
+                    }
+                } else if (data.itemId.startsWith('dp')) {
+
+                }
+                let queue = getState().page.adjacentPagesDownloadQueue;
+                let queueLength = queue.length;
+                let itemId;
+                dispatch(addAdjacentPagesToDownloadQueue(adjacentPages))
+                if (queueLength === 0) {
+                    queue = getState().page.adjacentPagesDownloadQueue;
+                    queueLength = queue.length;
+                    while (queueLength > 0) {
+                        itemId = queue.at(-1)
+                        await downloadAPage(itemId);
+                        dispatch(adjacentPageDownloaded(itemId));
+                        queue = getState().page.adjacentPagesDownloadQueue;
+                        queueLength = queue.length;
+                    }
+                }
+            }
+
+            if (!isDemoMode()) {
+                if (navigationInSameContainer) {
+                    const result = await getItemFromServiceWorkerDB(data.itemId);
+                    if ((result.status === 'ok') && result.item) {
+                        await processResultItem(result);
+                    } else {
+                        getItemFromServer();
+                    }
+                } else {
+                    getItemFromServer();
+                }
                 await getItemPath(data.itemId, dispatch, getState);
+                if (data.itemId.startsWith("np" || data.itemid.startsWith("dp"))) {
+                    await downloadAdjacentPages();
+                }
+
             } else {
                 const result = await getDemoItemFromServiceWorkerDB(data.itemId);
                 state = getState().page;
@@ -1620,7 +1890,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     const draftContentType = localStorage.getItem(draftContentTypeId);
                     //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
                     if (draft) {
-                        dispatch(setDraft({draft, draftContentType}));
+                        dispatch(setDraft({ draft, draftContentType }));
                     }
                 } else {
                     debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
@@ -2818,7 +3088,7 @@ export const saveDraftThunk = (data) => async (dispatch, getState) => {
             const { draftId, draftContentTypeId } = formDraftId(state.id);
             localStorage.setItem(draftId, encodedContent);
             localStorage.setItem(draftContentTypeId, state.contentType);
-            dispatch(setDraft({draft:encodedContent, draftContentType:state.contentType}));
+            dispatch(setDraft({ draft: encodedContent, draftContentType: state.contentType }));
             resolve();
         } catch (error) {
             alert('error');
