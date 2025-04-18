@@ -1683,7 +1683,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
 
                     return new Promise(async (resolve, reject) => {
                         let item = null;
-                        
+
                         async function getContentObject(item) {
                             if (item) {
                                 let s3Key = null;
@@ -1758,16 +1758,16 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     const pageIdPrefix = idParts.join(":");
                     const thisPageDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
                     const thisPageTime = thisPageDate.getTime();
-                    const aDay = 24*60*60*1000;
+                    const aDay = 24 * 60 * 60 * 1000;
                     function getADateString(distance) {
                         const theTime = thisPageTime + distance * aDay;
                         const theDate = new Date(theTime);
                         const theYear = theDate.getFullYear();
-                        const theMonth= theDate.getMonth() + 1;
+                        const theMonth = theDate.getMonth() + 1;
                         const theDay = theDate.getDate();
-                        const theDateString = `${theYear}-${theMonth<10?"0":""}${theMonth}-${theDay<10?"0":""}${theDay}`
+                        const theDateString = `${theYear}-${theMonth < 10 ? "0" : ""}${theMonth}-${theDay < 10 ? "0" : ""}${theDay}`
                         return theDateString;
-                    } 
+                    }
                     adjacentPages = [
                         `${pageIdPrefix}:${getADateString(3)}`,
                         `${pageIdPrefix}:${getADateString(-2)}`,
@@ -3188,6 +3188,12 @@ export const saveContentThunk = (data) => async (dispatch, getState) => {
                             }
                             dispatch(setS3SignedUrlForContentUpload(null));
                             await putS3Object(s3Key, signedURL, data, config, dispatch);
+                            const params = {
+                                table: 's3Objects',
+                                key: s3Key,
+                                data
+                            }
+                            await writeDataToServiceWorkerDBTable(params);
                             resolve();
                         } catch (error) {
                             debugLog(debugOn, "uploadContentToS3 failed: ", error);

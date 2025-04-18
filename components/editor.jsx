@@ -182,7 +182,9 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     if (res.files)
                         ExcalidrawRef.current.addFiles(Object.values(res.files));
                     loadExcalidrawState();
-                    ExcalidrawRef.current.scrollToContent();
+                    ExcalidrawRef.current.scrollToContent(savedJSON.elements[0], {
+                        fitToContent: true,
+                      });
                 }
             }
             setTimeout(() => {
