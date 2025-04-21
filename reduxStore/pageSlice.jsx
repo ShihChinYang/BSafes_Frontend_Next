@@ -1704,7 +1704,9 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         } else {
                             PostCall({
                                 api: '/memberAPI/getPageItem',
-                                body: { itemId }
+                                body: { itemId, 
+                                    adjacentPage: true
+                                }
                             }).then(async result => {
                                 debugLog(debugOn, result);
                                 if (result.status === 'ok' && result.item) {
@@ -1798,6 +1800,14 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     const result = await getItemFromServiceWorkerDB(data.itemId);
                     if ((result.status === 'ok') && result.item) {
                         await processResultItem(result);
+                        PostCall({
+                            api: '/memberAPI/updateLastAccessedPage',
+                            body: payload
+                        }).then(async result => {
+                            debugLog(debugOn, result);
+                        }).catch(error => {
+                            debugLog(debugOn, "woo... failed to updateLastAccessedPage", error)
+                        })
                     } else {
                         getItemFromServer();
                     }
