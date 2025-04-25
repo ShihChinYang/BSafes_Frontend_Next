@@ -218,6 +218,8 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             if (!elements || !elements.length) {
                 return;
             }
+            const serialized = Excalidraw.serializeAsJSON(ExcalidrawRef.current.getSceneElements(), ExcalidrawRef.current.getAppState(), ExcalidrawRef.current.getFiles(), 'local');
+            //elements.splice(1,1);
             const appState = ExcalidrawRef.current.getAppState();
             Excalidraw.exportToCanvas({
                 elements,
@@ -231,8 +233,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                 maxWidthOrHeight: 2048
             }).then(canvas => {
                 canvas.toBlob(blob => {
-                    blob.name = 'excalidraw.png';
-                    const serialized = Excalidraw.serializeAsJSON(ExcalidrawRef.current.getSceneElements(), ExcalidrawRef.current.getAppState(), ExcalidrawRef.current.getFiles(), 'local');
+                    blob.name = 'excalidraw.png';    
                     blob.src = window.URL.createObjectURL(blob);
                     blob.metadata = {
                         ExcalidrawExportedImage: true,
