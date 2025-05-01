@@ -72,6 +72,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const [editorOn, setEditorOn] = useState(false);
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
     const [originalContent, setOriginalContent] = useState(null);
+    const [viewportWidth, setViewportWidth] = useState(0);
     const [monitorExcalidrawInterval, setMonitorExcalidrawInterval] = useState(null);
     const [bottomBarRectBottom, setBottomBarRectBottom] = useState(0);
     const [needToUpdatePageCommonControls, setNeedToUpdatePageCommonControls] = useState(false);
@@ -79,11 +80,14 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     debugLog(debugOn, "Rendering editor, id,  mode: ", `${editorId} ${mode}`);
 
     const updatePageCommonControlsBottom = () => {
-        if(!ExcalidrawRef.current) return;
-        const elements = ExcalidrawRef.current.getSceneElements();
-        ExcalidrawRef.current.scrollToContent(elements[0], {
-            fitToContent: true
-        });
+        if (!ExcalidrawRef.current) return;
+        if (window.innerWidth !== viewportWidth) {
+            const elements = ExcalidrawRef.current.getSceneElements();
+            ExcalidrawRef.current.scrollToContent(elements[0], {
+                fitToContent: true
+            });
+            setViewportWidth(window.innerWidth);
+        }
         debugLog(debugOn, "updatePageCommonControlsBottom, window.innerHeight", window.innerHeight);
         const targetDiv = document.getElementsByClassName("App-bottom-bar")[0].getElementsByClassName("Island")[0];
         const rect = targetDiv.getBoundingClientRect();
@@ -212,8 +216,8 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                         const rect = targetDiv.getBoundingClientRect();
                         debugLog(debugOn, "monitor excalidraw interval: ", `${bottomBarRectBottomRef.current}, ${rect.bottom}`);
                         if (rect.bottom !== bottomBarRectBottomRef.current) {
-                           setBottomBarRectBottom(rect.bottom);
-                           bottomBarRectBottomRef.current = rect.bottom;
+                            setBottomBarRectBottom(rect.bottom);
+                            bottomBarRectBottomRef.current = rect.bottom;
                         }
                     }
                     const thisInterval = setInterval(() => {
