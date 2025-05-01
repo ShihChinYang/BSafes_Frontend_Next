@@ -15,13 +15,13 @@ import jquery from "jquery"
 
 import BSafesStyle from '../styles/BSafes.module.css'
 
-import { getEditorConfig } from "../lib/bSafesCommonUI";
+import { getEditorConfig, newResultItem } from "../lib/bSafesCommonUI";
 import { debugLog, PostCall, convertUint8ArrayToBinaryString, getBrowserInfo, arraryBufferToStr } from "../lib/helper";
 import { putS3Object } from "../lib/s3Helper";
 import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryString, encryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync } from "../lib/crypto";
 import { rotateImage, downScaleImage } from '../lib/wnImage';
 
-import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered } from "../reduxStore/pageSlice";
+import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom } from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 
 let Excalidraw = null;
@@ -46,11 +46,16 @@ let Excalidraw = null;
  * @param {boolean} [props.showWriteIcon=false] - Whether to show the writing icon.
  * @param {function(Object) | null} [props.onDrawingClicked=null] - Callback when the drawing icon is clicked.
  */
+
+
 export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null }) {
-    const debugOn = false;
+    const debugOn = true;
     const dispatch = useDispatch();
 
     const editorRef = useRef(null);
+    const monitorExcalidrawCallback = useRef();
+    const bottomBarRectBottomRef = useRef();
+
     const ExcalidrawRef = useRef(null);
     const [draftInterval, setDraftInterval] = useState(null);
     const [intervalState, setIntervalState] = useState(null);
@@ -67,8 +72,25 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const [editorOn, setEditorOn] = useState(false);
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
     const [originalContent, setOriginalContent] = useState(null);
+    const [monitorExcalidrawInterval, setMonitorExcalidrawInterval] = useState(null);
+    const [bottomBarRectBottom, setBottomBarRectBottom] = useState(0);
+    const [needToUpdatePageCommonControls, setNeedToUpdatePageCommonControls] = useState(false);
 
     debugLog(debugOn, "Rendering editor, id,  mode: ", `${editorId} ${mode}`);
+
+    const updatePageCommonControlsBottom = () => {
+        if(!ExcalidrawRef.current) return;
+        const elements = ExcalidrawRef.current.getSceneElements();
+        ExcalidrawRef.current.scrollToContent(elements[0], {
+            fitToContent: true
+        });
+        debugLog(debugOn, "updatePageCommonControlsBottom, window.innerHeight", window.innerHeight);
+        const targetDiv = document.getElementsByClassName("App-bottom-bar")[0].getElementsByClassName("Island")[0];
+        const rect = targetDiv.getBoundingClientRect();
+        debugLog(debugOn, "updatePageCommonControlsBottom, rect.bottom", rect.bottom);
+        const pageCommonControlsBottom = window.innerHeight - rect.bottom + rect.height + 4;
+        dispatch(setPageCommonControlsBottom(pageCommonControlsBottom));
+    }
 
     const writing = () => {
         if (!scriptsLoaded) return;
@@ -184,7 +206,20 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     loadExcalidrawState();
                     ExcalidrawRef.current.scrollToContent(savedJSON.elements[0], {
                         fitToContent: true,
-                      });
+                    });
+                    monitorExcalidrawCallback.current = () => {
+                        const targetDiv = document.getElementsByClassName("App-bottom-bar")[0].getElementsByClassName("Island")[0];
+                        const rect = targetDiv.getBoundingClientRect();
+                        debugLog(debugOn, "monitor excalidraw interval: ", `${bottomBarRectBottomRef.current}, ${rect.bottom}`);
+                        if (rect.bottom !== bottomBarRectBottomRef.current) {
+                           setBottomBarRectBottom(rect.bottom);
+                           bottomBarRectBottomRef.current = rect.bottom;
+                        }
+                    }
+                    const thisInterval = setInterval(() => {
+                        monitorExcalidrawCallback.current();
+                    }, 500);
+                    setMonitorExcalidrawInterval(thisInterval);
                 }
             }
             setTimeout(() => {
@@ -233,7 +268,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                 maxWidthOrHeight: 2048
             }).then(canvas => {
                 canvas.toBlob(blob => {
-                    blob.name = 'excalidraw.png';    
+                    blob.name = 'excalidraw.png';
                     blob.src = window.URL.createObjectURL(blob);
                     blob.metadata = {
                         ExcalidrawExportedImage: true,
@@ -266,6 +301,10 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             setOriginalContent(null);
             setEditorOn(false);
             if (readOnlyModeReady) readOnlyModeReady();
+            if (monitorExcalidrawInterval) {
+                clearInterval(monitorExcalidrawInterval);
+                setMonitorExcalidrawInterval(null);
+            }
         }
     }
 
@@ -391,6 +430,21 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             default:
         }
     }, [intervalState])
+
+    useEffect(() => {
+        if (bottomBarRectBottom) {
+            debugLog(debugOn, "bottomBarRectBottom changed");
+            setNeedToUpdatePageCommonControls(true);
+        }
+    }, [bottomBarRectBottom])
+
+    useEffect(() => {
+        if (needToUpdatePageCommonControls) {
+            debugLog(debugOn, "needToUpdatePageCommonControls")
+            updatePageCommonControlsBottom();
+            setNeedToUpdatePageCommonControls(false);
+        }
+    }, [needToUpdatePageCommonControls]);
 
     const handlePenClicked = (purpose) => {
         onPenClicked(editorId, purpose);

@@ -211,14 +211,12 @@
 
 .btnFloatingSave {
   background: #229954;
-  bottom: 60px;
   right: 60px;
   padding-left: 9px;
 }
 
 .btnFloatingCancel {
   background: #F39C12;
-  bottom: 60px;
   right: 24px;
   padding-left: 10px;
 }

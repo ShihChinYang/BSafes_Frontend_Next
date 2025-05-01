@@ -89,7 +89,8 @@ const initialState = {
     originalContent: null,
     contentType: '',
     contentEditorMode: 'ReadOnly',
-    adjacentPagesDownloadQueue: []
+    adjacentPagesDownloadQueue: [],
+    pageCommonControlsBottom:0,
 }
 
 const dataFetchedFunc = (state, action) => {
@@ -1007,6 +1008,9 @@ const pageSlice = createSlice({
         adjacentPageDownloaded: (state, action) => {
             if (action.payload === state.adjacentPagesDownloadQueue.at(-1))
                 state.adjacentPagesDownloadQueue.pop();
+        },
+        setPageCommonControlsBottom: (state, action) => {
+            state.pageCommonControlsBottom = action.payload;
         }
     }
 })
@@ -1103,7 +1107,8 @@ export const {
     setContentType,
     setContentEditorMode,
     addAdjacentPagesToDownloadQueue,
-    adjacentPageDownloaded
+    adjacentPageDownloaded,
+    setPageCommonControlsBottom
 } = pageSlice.actions;
 
 

@@ -28,7 +28,7 @@ function MyApp({ Component, pageProps }) {
   const dispatch = useDispatch()
   useEffect(() => {
     import("bootstrap/dist/js/bootstrap.min.js");
-    window.EXCALIDRAW_ASSET_PATH = "/js/";
+    window.EXCALIDRAW_ASSET_PATH = "/js/excalidraw/";
     if (process.env.NEXT_PUBLIC_platform === 'iOS') {
       const pingFromNative = () => {
         debugLog(debugOn, "pingFromNative");
