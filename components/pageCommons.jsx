@@ -282,7 +282,7 @@ export default function PageCommons() {
         debugLog(debugOn, `editor-id: ${editorId} content: ${content}`);
 
         if (editingEditorId === "content") {
-            if (contentType === "DrawingPage" || content !== contentEditorContent) {
+            if (contentType === "DrawingPage" || draftLoaded || content !== contentEditorContent) {
                 if(contentType === "WritingPage"){
                     setcontentEditorContentWithImagesAndVideos(content);
                 }
@@ -291,6 +291,7 @@ export default function PageCommons() {
                 setEditingEditorMode("ReadOnly");
                 setEditingEditorId(null);
             }
+            dispatch(setDraftLoaded(false));
         } else if (editingEditorId === "title") {
             if (content !== titleEditorContent) {
                 dispatch(saveTitleThunk(content, workspaceKey, workspaceSearchKey, workspaceSearchIV));
@@ -413,7 +414,6 @@ export default function PageCommons() {
     const handleSave = () => {
         debugLog(debugOn, "handleSave");
         setEditingEditorMode("Saving");
-        dispatch(setDraftLoaded(false));
         setReadyForSaving(false);
     }
 

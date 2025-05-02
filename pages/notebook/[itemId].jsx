@@ -133,7 +133,7 @@ export default function Notebook() {
                         <br/>
                         <Row>
                             <Col lg={{span:10, offset:1}}>                       
-                            { 
+                            { router.query.itemId && !router.query.itemId.startsWith("n:$") &&
                                 <div className={`${BSafesStyle.notebookPanel} ${BSafesStyle.notebookCoverPanel} ${BSafesStyle.containerCoverPanel}`}>
                                     <ItemTopRows />
                                     <br />
