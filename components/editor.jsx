@@ -211,19 +211,6 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     ExcalidrawRef.current.scrollToContent(savedJSON.elements[0], {
                         fitToContent: true,
                     });
-                    monitorExcalidrawCallback.current = () => {
-                        const targetDiv = document.getElementsByClassName("App-bottom-bar")[0].getElementsByClassName("Island")[0];
-                        const rect = targetDiv.getBoundingClientRect();
-                        debugLog(debugOn, "monitor excalidraw interval: ", `${bottomBarRectBottomRef.current}, ${rect.bottom}`);
-                        if (rect.bottom !== bottomBarRectBottomRef.current) {
-                            setBottomBarRectBottom(rect.bottom);
-                            bottomBarRectBottomRef.current = rect.bottom;
-                        }
-                    }
-                    const thisInterval = setInterval(() => {
-                        monitorExcalidrawCallback.current();
-                    }, 500);
-                    setMonitorExcalidrawInterval(thisInterval);
                 }
             }
             setTimeout(() => {
@@ -233,6 +220,19 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
         else {
             loadExcalidrawState();
         }
+        monitorExcalidrawCallback.current = () => {
+            const targetDiv = document.getElementsByClassName("App-bottom-bar")[0].getElementsByClassName("Island")[0];
+            const rect = targetDiv.getBoundingClientRect();
+            debugLog(debugOn, "monitor excalidraw interval: ", `${bottomBarRectBottomRef.current}, ${rect.bottom}`);
+            if (rect.bottom !== bottomBarRectBottomRef.current) {
+                setBottomBarRectBottom(rect.bottom);
+                bottomBarRectBottomRef.current = rect.bottom;
+            }
+        }
+        const thisInterval = setInterval(() => {
+            monitorExcalidrawCallback.current();
+        }, 500);
+        setMonitorExcalidrawInterval(thisInterval);
     }
 
     const getDrawingContent = () => {
@@ -292,7 +292,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     const readOnly = () => {
         if (editorOn) {
-            if (contentType === "WritingPage") {
+            if ((editorId !== 'content') || (contentType === "WritingPage")) {
                 $(editorRef.current).froalaEditor('destroy');
                 $(editorRef.current).html(content);
                 editorRef.current.style.overflowX = 'auto';
@@ -694,7 +694,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                         </>
 
                     }
-                    {((contentType !== 'DrawingPage' || editorId === 'title') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
+                    {((editorId !== 'content' || contentType === 'WritingPage') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                             <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
                             </div>
