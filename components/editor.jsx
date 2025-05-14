@@ -20,6 +20,7 @@ import { debugLog, PostCall, convertUint8ArrayToBinaryString, getBrowserInfo, ar
 import { putS3Object } from "../lib/s3Helper";
 import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryString, encryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync } from "../lib/crypto";
 import { rotateImage, downScaleImage } from '../lib/wnImage';
+import { productIdDelimiter } from "../lib/productID";
 
 import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom } from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
@@ -49,7 +50,7 @@ let Excalidraw = null;
 
 
 export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null }) {
-    const debugOn = true;
+    const debugOn = false;
     const dispatch = useDispatch();
 
     const editorRef = useRef(null);
@@ -79,8 +80,13 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     debugLog(debugOn, "Rendering editor, id,  mode: ", `${editorId} ${mode}`);
 
+    let productId = "";
+    if (itemId && itemId.split(":")[1].startsWith(`${productIdDelimiter}`)) {
+        productId = itemId.split(productIdDelimiter)[1];
+    }
+
     const updatePageCommonControlsBottom = () => {
-        if (!ExcalidrawRef.current) return;
+        if (!window || !document || !ExcalidrawRef.current) return;
         if (window.innerWidth !== viewportWidth) {
             const elements = ExcalidrawRef.current.getSceneElements();
             ExcalidrawRef.current.scrollToContent(elements[0], {
@@ -649,7 +655,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
         <>
             {scriptsLoaded ?
                 <>
-                    {(showPen) && (editable) ?
+                    {productId === "" && (showPen) && (editable) ?
                         <>
                             <Row>
                                 <Col xs={6}>
@@ -694,7 +700,28 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                         </>
 
                     }
-                    {((editorId !== 'content' || contentType === 'WritingPage') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
+                    {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
+                        <div style={{ position: "relative" }}>
+                            <div style={{ padding: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
+                                <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
+                                </div>
+                            </div>
+                            {showPen && editable && productId !== "" && showWriteIcon &&
+                                <OverlayTrigger
+                                    placement="top"
+                                    delay={{ show: 250, hide: 400 }}
+                                    overlay={(props) => (
+                                        <Tooltip id="button-tooltip" {...props}>
+                                            Write
+                                        </Tooltip>
+                                    )}
+                                >
+                                    <Button variant="link" style={{ position: "absolute", top: "0px", right: "-12px", width: "24px", zIndex: "100" }} className="text-dark p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button>
+                                </OverlayTrigger>
+                            }
+                        </div>
+                    }
+                    {(editorId !== 'title' && (editorId !== 'content' || contentType === 'WritingPage') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                             <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
                             </div>

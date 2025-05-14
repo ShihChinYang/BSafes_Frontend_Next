@@ -601,6 +601,7 @@
 }
 
 .pageBackground {
+  min-height: 100vh ;
   background-color: rgb(161, 158, 158);
   padding-bottom: 30px;
 }

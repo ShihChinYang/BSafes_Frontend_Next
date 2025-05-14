@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 import BSafesStyle from '../../styles/BSafes.module.css'
+import BSafesProductsStyle from '../../styles/bsafesProducts.module.css'
 
 import Scripts from "../../components/scripts";
 import ContentPageLayout from '../../components/layouts/contentPageLayout';
@@ -22,6 +23,7 @@ import { saveTitleThunk } from "../../reduxStore/pageSlice";
 
 import { debugLog } from "../../lib/helper";
 import { getCoverAndContentsLink} from "../../lib/bSafesCommonUI";
+import { productIdDelimiter } from "../../lib/productID";
 
 export default function Notebook() {
     const debugOn = false;
@@ -42,6 +44,11 @@ export default function Notebook() {
 
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
     const titleEditorContent = useSelector(state => state.page.title);
+
+    let productId = "";
+    if(router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`)){
+        productId = router.query.itemId.split(productIdDelimiter)[1];
+    }
 
     const handlePenClicked = (editorId) => {
         debugLog(debugOn, `pen ${editorId} clicked`);
@@ -133,7 +140,7 @@ export default function Notebook() {
                         <br/>
                         <Row>
                             <Col lg={{span:10, offset:1}}>                       
-                            { router.query.itemId && !router.query.itemId.startsWith("n:$") &&
+                            { router.query.itemId && !router.query.itemId.startsWith(`n:${productIdDelimiter}`) &&
                                 <div className={`${BSafesStyle.notebookPanel} ${BSafesStyle.notebookCoverPanel} ${BSafesStyle.containerCoverPanel}`}>
                                     <ItemTopRows />
                                     <br />
@@ -145,6 +152,23 @@ export default function Notebook() {
                                     </Row>
                                     <br />
                                     <Row>
+                                        <Col>
+                                            <ContainerOpenButton handleOpen={handleOpen}/>
+                                        </Col>
+                                    </Row>
+                                    <PageCommonControls showWriteBtn={false} isEditing={editingEditorId} onWrite={handleWrite} onSave={handleSave} onCancel={handleCancel}/>
+                                </div> 
+                            }
+                            { router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`) &&
+                                <div className={`${BSafesProductsStyle[`${productId}_Cover`]}`}>
+                                    <ItemTopRows />
+                                    <Row className="justify-content-center">
+                                        <div className={`${BSafesProductsStyle[`${productId}_CoverTitle`]}`}>
+                                            <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
+                                        </div> 
+                                    </Row>
+                                    <br />
+                                    <Row hidden>
                                         <Col>
                                             <ContainerOpenButton handleOpen={handleOpen}/>
                                         </Col>
