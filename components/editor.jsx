@@ -655,15 +655,15 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
         <>
             {scriptsLoaded ?
                 <>
-                    {productId === "" && (showPen) && (editable) ?
+                    {(showPen) && (editable) ?
                         <>
                             <Row>
                                 <Col xs={6}>
-                                    {(editorId === 'title' && content === '<h2></h2>') && <h6 className='m-0 text-secondary'>Title</h6>}
+                                    {(productId === "") && (editorId === 'title' && (!content || (content === '<h2></h2>'))) && <h6 className='m-0 text-secondary'>Title</h6>}
                                     {(editorId === 'content' && content === null) && <h6 className='m-0 text-secondary'>Write {showDrawIcon ? `or Draw` : ``}</h6>}
                                 </Col>
                                 <Col xs={6}>
-                                    {showWriteIcon && <OverlayTrigger
+                                    {(editorId === "content" || (productId === "")) && showWriteIcon && <OverlayTrigger
                                         placement="top"
                                         delay={{ show: 250, hide: 400 }}
                                         overlay={(props) => (
@@ -702,7 +702,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     }
                     {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div style={{ position: "relative" }}>
-                            <div style={{ padding: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
+                            <div style={{ paddingTop: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                                 {!content &&
                                     <h6 className='m-0 text-secondary'>Title</h6>
                                 }

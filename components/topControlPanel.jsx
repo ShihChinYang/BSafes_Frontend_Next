@@ -190,7 +190,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
                     <Card className={controlPanelStyle}>
                         <Card.Body className=''>
                             <Row>
-                                <Col xs={4}>
+                                <Col xs={6}>
                                     {((pageActivity === 0) && (containerActivity === 0)) && (workspaceId && workspaceId.startsWith("d:") && (containerInWorkspace === workspaceId || (pageItemId && pageItemId.startsWith("p:")))) && <Button onClick={onHomeClicked} variant='link' size='sm' className='text-white'><i className="fa fa-home fa-lg" aria-hidden="true"></i></Button>}
                                     {((pageActivity === 0) && (containerActivity === 0)) && !containerInWorkspace && <Button variant='link' size='sm' className='text-white'><i className="fa fa-square fa-lg" aria-hidden="true"></i></Button>}
                                     {((pageActivity === 0) && (containerActivity === 0)) && containerInWorkspace && (containerInWorkspace.startsWith('u') || containerInWorkspace.startsWith('t')) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-square fa-lg" aria-hidden="true"></i></Button>}
@@ -204,7 +204,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
                                             (containerInWorkspace.startsWith('b') && !router.asPath.includes('\/contents\/'))
                                         ))) && <Button variant='link' size='sm' className='text-white' onClick={onContentsClicked}><i className="fa fa-list-ul fa-lg" aria-hidden="true"></i></Button>}
                                 </Col>
-                                <Col xs={8}>
+                                <Col xs={6}>
                                     {(pageNumber || (containerInWorkspace && containerInWorkspace.startsWith('n'))) &&
                                         <Form.Group className='pull-right'>
                                             <Form.Control ref={pageNumberInputRef} type="text" defaultValue={pageNumber ? pageNumber : ''} className={`${BSafesStyle.pageNavigationPart} ${BSafesStyle.pageNumberInput} pt-0 pb-0`} />
