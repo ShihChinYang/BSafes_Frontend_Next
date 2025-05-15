@@ -23,6 +23,7 @@ import BSafesStyle from '../styles/BSafes.module.css'
 
 import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered } from "../reduxStore/pageSlice";
 import { debugLog } from '../lib/helper';
+import { productIdDelimiter } from "../lib/productID";
 
 export default function PageCommons() {
     const debugOn = true;
@@ -81,6 +82,11 @@ export default function PageCommons() {
 
     const attachmentsInputRef = useRef(null);
     const [attachmentsDragActive, setAttachmentsDragActive] = useState(false);
+
+    let productId = "";
+    if (pageItemId && pageItemId.split(":")[1].startsWith(productIdDelimiter)) {
+        productId = pageItemId.split(productIdDelimiter)[1];
+    }
 
     const onVideoClicked = (queueId) => {
         debugLog(debugOn, "onVideoClicked: ", queueId);
@@ -226,7 +232,7 @@ export default function PageCommons() {
 
     const handleDraftClicked = () => {
         dispatch(loadDraftThunk());
-        if ( editorScriptsLoaded) {
+        if (editorScriptsLoaded) {
             dispatch(setInitialContentRendered(true));
         }
     }
@@ -283,7 +289,7 @@ export default function PageCommons() {
 
         if (editingEditorId === "content") {
             if (contentType === "DrawingPage" || draftLoaded || content !== contentEditorContent) {
-                if(contentType === "WritingPage"){
+                if (contentType === "WritingPage") {
                     setcontentEditorContentWithImagesAndVideos(content);
                 }
                 dispatch(saveContentThunk({ content, workspaceKey }));
@@ -911,21 +917,29 @@ export default function PageCommons() {
             <div className="pageCommons">
                 {!(contentType === 'DrawingPage' && contentEditorMode === "Writing") &&
                     <>
-                        <Row className="justify-content-center">
-                            <Col sm="10">
-                                <hr />
-                            </Col>
-                        </Row>
+                        {productId === "" ?
+                            <Row className="justify-content-center">
+                                <Col sm="10">
+                                    <hr />
+                                </Col>
+                            </Row>
+                            :
+                            <hr style={{margin:"0px"}} />
+                        }
                         <Row className="justify-content-center">
                             <Col sm="10" >
                                 <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion)} />
                             </Col>
                         </Row>
-                        <Row className="justify-content-center">
-                            <Col sm="10">
-                                <hr />
-                            </Col>
-                        </Row>
+                        {productId === "" ?
+                            <Row className="justify-content-center">
+                                <Col sm="10">
+                                    <hr/>
+                                </Col>
+                            </Row>
+                            :
+                            <hr style={{margin:"0px"}} />
+                        }
                     </>
                 }
                 <Row className="justify-content-center">
@@ -935,6 +949,7 @@ export default function PageCommons() {
                 </Row>
                 <br />
                 <br />
+                <hr />
                 {!turningPage && !(contentType === 'DrawingPage' && contentEditorMode === "Writing") && <>
                     {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
                         <div className="videos">

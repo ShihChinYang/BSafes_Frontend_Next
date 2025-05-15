@@ -91,7 +91,7 @@ export default function ItemTopRows() {
     }, [activity]);
 
     return (
-        <Container>
+        <>
             <Row>
                 <Col xs="2" className="px-0 pt-2">
                     <OverlayTrigger
@@ -101,9 +101,17 @@ export default function ItemTopRows() {
                                 <TagHelp />
                             </Tooltip>
                         }
-                    ><Button variant="link" className="text-dark pull-right p-0"><i className="fa fa-question" aria-hidden="true"></i></Button></OverlayTrigger><label className="pull-right py-2"><span><i className="fa fa-tags fa-lg" aria-hidden="true"></i></span></label>
+                    ><Button variant="link" className="text-dark p-0 pull-right"><i className="fa fa-question" aria-hidden="true"></i></Button></OverlayTrigger>
+                    <label className="mx-1 pull-right"><span><i className="fa fa-tags" aria-hidden="true"></i></span></label>
                 </Col>
-                <Col>
+                <Col xs="6">
+                    {oldVersion ?
+                        <TagsInput value={tags} onChange={handleChange} disabled />
+                        :
+                        <TagsInput value={tags} onChange={handleChange} />
+                    }
+                </Col>
+                <Col xs="4">
                     <div className="pull-right">
                         <span>{itemCopy && `v.${itemCopy.version}`}</span><Button variant="link" className="text-dark" onClick={openVersionsHistoryModal}  ><i className="fa fa-history" aria-hidden="true"></i></Button>
                         {false && <Button variant="link" className="text-dark" >
@@ -112,8 +120,8 @@ export default function ItemTopRows() {
                     </div>
                 </Col>
             </Row>
-            <Row>
-                <Col xs={{offset:"0", span:"12"}} sm={{offset:"1", span:"10"}}>
+            <Row hidden>
+                <Col xs={{ offset: "0", span: "12" }} sm={{ offset: "1", span: "10" }}>
                     {oldVersion ?
                         <TagsInput value={tags} onChange={handleChange} disabled />
                         :
@@ -129,7 +137,7 @@ export default function ItemTopRows() {
             </Row>}
             <FeatureNotAvailableForDemoToast show={showFeatureNotAvailableForDemoToast} message="The Versions feature is not available for demo!" handleClose={() => { setShowFeatureNotAvailableForDemoToast(false) }} />
             <VersionsHistoryModal onLinkChanged={handleLinkChanged} versionsHistoryModalOpened={versionsHistoryModalOpened} closeVersionsHistoryModal={() => setVersionsHistoryModalOpened(false)} />
-        </Container>
+        </>
     )
 }
 

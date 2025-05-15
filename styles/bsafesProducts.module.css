@@ -1,12 +1,14 @@
 /*--- A001 ---*/
 .A001_Cover {
+    position: relative;
     width: 360px;
     height: 480px;
     background-color: brown;
-    margin:auto;
+    margin: auto;
     border-left: 30px solid #000;
     border-radius: 0 20px 20px 0;
 }
+
 .A001_CoverTitle {
     width: 280px;
     height: 48px;
@@ -18,10 +20,11 @@
 
 /*--- A002 ---*/
 .A002_Cover {
+    position: relative;
     width: 360px;
     height: 480px;
     background-color: yellowgreen;
-    margin:auto;
+    margin: auto;
     border-left: 30px solid #000;
     border-radius: 0 20px 20px 0;
 }
@@ -31,4 +34,23 @@
     border-radius: 5px;
     background-color: white;
 }
+.A002_PagePanel {
+    position: relative;
+    width: 360px;
+    min-height: 480px;
+    background-color: #fff;
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 48px;
+}
+.A002_TopControlPanel {
+    background-color: black;
+    margin: auto;
+    max-width: 400px;
+    min-height: 61px;
+}
+
 /*--- End of A002 ---*/

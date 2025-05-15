@@ -703,6 +703,9 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div style={{ position: "relative" }}>
                             <div style={{ padding: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
+                                {!content &&
+                                    <h6 className='m-0 text-secondary'>Title</h6>
+                                }
                                 <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
                                 </div>
                             </div>

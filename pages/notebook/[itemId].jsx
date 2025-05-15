@@ -168,7 +168,7 @@ export default function Notebook() {
                                         </div> 
                                     </Row>
                                     <br />
-                                    <Row hidden>
+                                    <Row>
                                         <Col>
                                             <ContainerOpenButton handleOpen={handleOpen}/>
                                         </Col>
