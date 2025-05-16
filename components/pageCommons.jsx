@@ -30,7 +30,6 @@ export default function PageCommons() {
     const dispatch = useDispatch();
 
     const editorScriptsLoaded = useSelector(state => state.scripts.editorScriptsLoaded);
-    const navigationInSameContainer = useSelector(state => state.container.navigationInSameContainer);
     const workspaceKey = useSelector(state => state.container.workspaceKey);
     const workspaceSearchKey = useSelector(state => state.container.searchKey);
     const workspaceSearchIV = useSelector(state => state.container.searchIV);
@@ -40,6 +39,7 @@ export default function PageCommons() {
 
     const abort = useSelector(state => state.page.abort);
     const pageItemId = useSelector(state => state.page.id);
+    const getPageContentDone = useSelector(state => state.page.getPageContentDone);
     const itemCopy = useSelector(state => state.page.itemCopy);
     const oldVersion = useSelector(state => state.page.oldVersion);
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
@@ -695,6 +695,12 @@ export default function PageCommons() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activity]);
+
+    useEffect(()=>{
+        if(getPageContentDone){
+            alert();
+        }
+    }, [getPageContentDone])
 
     useEffect(() => {
         setcontentEditorContentWithImagesAndVideos(contentEditorContent);

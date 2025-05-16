@@ -91,6 +91,7 @@ const initialState = {
     contentEditorMode: 'ReadOnly',
     adjacentPagesDownloadQueue: [],
     pageCommonControlsBottom:0,
+    getPageContentDone: false,
 }
 
 const dataFetchedFunc = (state, action) => {
@@ -1011,6 +1012,9 @@ const pageSlice = createSlice({
         },
         setPageCommonControlsBottom: (state, action) => {
             state.pageCommonControlsBottom = action.payload;
+        },
+        setGetPageContentDone: (state, action) => {
+            state.getPageContentDone = action.payload;
         }
     }
 })
@@ -1108,7 +1112,8 @@ export const {
     setContentEditorMode,
     addAdjacentPagesToDownloadQueue,
     adjacentPageDownloaded,
-    setPageCommonControlsBottom
+    setPageCommonControlsBottom,
+    setGetPageContentDone,
 } = pageSlice.actions;
 
 
@@ -1651,6 +1656,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                 reject("Failed to get a page item!!!");
                             }
                         }
+                        dispatch(setGetPageContentDone(true));
                         const { draftId, draftContentTypeId } = formDraftId(data.itemId);
                         const draft = localStorage.getItem(draftId);
                         const draftContentType = localStorage.getItem(draftContentTypeId);
@@ -1922,6 +1928,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             }
                         }
                     }
+                    dispatch(setGetPageContentDone(true));
                     const { draftId, draftContentTypeId } = formDraftId(data.itemId);
                     const draft = localStorage.getItem(draftId);
                     const draftContentType = localStorage.getItem(draftContentTypeId);
