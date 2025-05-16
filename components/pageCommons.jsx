@@ -949,7 +949,7 @@ export default function PageCommons() {
                     </>
                 }
                 <Row className="justify-content-center">
-                    <Col className={`contenEditorRow`} xs="12" sm="10" >
+                    <Col className={`contenEditorRow`} xs="12" sm="10" style={{minHeight:"280px"}}>
                         <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} />
                     </Col>
                 </Row>

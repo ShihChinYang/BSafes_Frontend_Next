@@ -44,6 +44,10 @@ export default function NotebookCoverCommon({ demo = false }) {
 
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
     const titleEditorContent = useSelector(state => state.page.title);
+    let productId = ""
+    if (router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`)) {
+        productId = router.query.itemId.split(productIdDelimiter)[1];
+    }
 
     const handlePenClicked = (editorId) => {
         debugLog(debugOn, `pen ${editorId} clicked`);
@@ -96,7 +100,7 @@ export default function NotebookCoverCommon({ demo = false }) {
         debugLog(debugOn, "handleOpen");
 
         const idParts = pageItemId.split(":");
-        const product = demo?NotebookDemo:'notebook';
+        const product = demo ? NotebookDemo : 'notebook';
         const firstPage = `/${product}/p/np:${idParts[1]}:${idParts[2]}:${idParts[3]}:1`;
         router.push(firstPage);
 
