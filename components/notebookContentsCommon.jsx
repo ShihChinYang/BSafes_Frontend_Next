@@ -40,11 +40,11 @@ export default function NotebookContentsCommon({ demo = false }) {
     const pageItemId = useSelector(state => state.page.id);
     const pageStyle = useSelector(state => state.page.style);
 
-    const items = itemsState.map((item, index) =>
-        <ItemRow itemIndex={index} key={index} item={item} />
-    );
-
     const product = demo ? NotebookDemo : 'notebook';
+
+    const items = itemsState.map((item, index) =>
+        <ItemRow itemIndex={index} key={index} item={item} productID={product}/>
+    );
 
     function gotoAnotherPage(anotherPageNumber) {
         if (!(pageItemId)) return;
