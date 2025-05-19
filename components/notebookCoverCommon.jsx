@@ -44,6 +44,8 @@ export default function NotebookCoverCommon({ demo = false }) {
 
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
     const titleEditorContent = useSelector(state => state.page.title);
+    
+    const product = demo ? NotebookDemo : 'notebook';
     let productId = ""
     if (router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`)) {
         productId = router.query.itemId.split(productIdDelimiter)[1];
@@ -98,12 +100,9 @@ export default function NotebookCoverCommon({ demo = false }) {
 
     const handleOpen = async () => {
         debugLog(debugOn, "handleOpen");
-
         const idParts = pageItemId.split(":");
-        const product = demo ? NotebookDemo : 'notebook';
         const firstPage = `/${product}/p/np:${idParts[1]}:${idParts[2]}:${idParts[3]}:1`;
         router.push(firstPage);
-
     }
 
     const handleCoverClicked = () => {

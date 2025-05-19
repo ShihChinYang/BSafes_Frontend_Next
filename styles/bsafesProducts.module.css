@@ -28,6 +28,13 @@
     border-left: 30px solid #000;
     border-radius: 0 20px 20px 0;
 }
+.A002_Contents {
+    position: relative;
+    width: 360px;
+    min-height: 480px;
+    background-color: #fff;
+    margin: auto;
+}
 .A002_CoverTitle {
     width: 280px;
     height: 48px;

@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 
 import ContentPageLayout from './layouts/contentPageLayout';
 import PageItemWrapper from "./pageItemWrapper";
@@ -16,7 +17,7 @@ import PaginationControl from "./paginationControl";
 
 import { listItemsThunk, searchItemsThunk, getFirstItemInContainer, getLastItemInContainer } from "../reduxStore/containerSlice";
 import { setPageStyle } from "../reduxStore/pageSlice";
-import { NotebookDemo } from "../lib/productID";
+import { productIdDelimiter, NotebookDemo } from "../lib/productID";
 import { debugLog } from "../lib/helper";
 
 
@@ -41,6 +42,16 @@ export default function NotebookContentsCommon({ demo = false }) {
     const pageStyle = useSelector(state => state.page.style);
 
     const product = demo ? NotebookDemo : 'notebook';
+    let productId = ""
+    if (router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`)) {
+        productId = router.query.itemId.split(productIdDelimiter)[1];
+    }
+    let panelStyle = "";
+    if(productId === ""){
+        panelStyle = `${BSafesStyle.pagePanel} ${BSafesStyle.notebookPanel} ${pageStyle}`;
+    } else {
+        panelStyle = `${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
+    }
 
     const items = itemsState.map((item, index) =>
         <ItemRow itemIndex={index} key={index} item={item} productID={product}/>
@@ -154,9 +165,10 @@ export default function NotebookContentsCommon({ demo = false }) {
                 <PageItemWrapper itemId={router.query.itemId}>
                     <br />
                     <TopControlPanel onCoverClicked={handleCoverClicked} onPageNumberChanged={handlePageNumberChanged} onSubmitSearch={handleSubmitSearch} onCancelSearch={handleCancelSearch} onGotoFirstItem={handleGoToFirstItem} onGotoLastItem={handleGoToLastItem}></TopControlPanel>
+                    <br />
                     <Row id="BSafesPage">
                         <Col lg={{ span: 10, offset: 1 }}>
-                            <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.notebookPanel} ${pageStyle}`}>
+                            <div className={`${panelStyle}`}>
                                 <br />
                                 <br />
                                 <p className='fs-1 text-center'>Contents</p>

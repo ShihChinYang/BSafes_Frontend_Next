@@ -1631,7 +1631,9 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         if (result.item) {
                             await processResultItem(result);
                             await addItemToServiceWorkerDB(data.itemId, result.item);
+                            dispatch(setGetPageContentDone(true));
                         } else {
+                            dispatch(setGetPageContentDone(true));
                             if (data.navigationInSameContainer) {
                                 debugLog(debugOn, "setNavigationMode ...");
                                 dispatch(setNavigationMode(true));
@@ -1656,7 +1658,6 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                 reject("Failed to get a page item!!!");
                             }
                         }
-                        dispatch(setGetPageContentDone(true));
                         const { draftId, draftContentTypeId } = formDraftId(data.itemId);
                         const draft = localStorage.getItem(draftId);
                         const draftContentType = localStorage.getItem(draftContentTypeId);
@@ -1887,11 +1888,12 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             resolve();
                         }
                     }
-
                     if (result.item) {
                         const item = result.item;
                         await decryptADemoItem(item);
+                        dispatch(setGetPageContentDone(true));
                     } else {
+                        dispatch(setGetPageContentDone(true));
                         if (data.itemId.startsWith('p:') || data.itemId.startsWith('n:') || data.itemId.startsWith('d:')) {
                             const workspace = getState().container.workspace;
                             const workspaceKey = getState().container.workspaceKey;
@@ -1928,7 +1930,6 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             }
                         }
                     }
-                    dispatch(setGetPageContentDone(true));
                     const { draftId, draftContentTypeId } = formDraftId(data.itemId);
                     const draft = localStorage.getItem(draftId);
                     const draftContentType = localStorage.getItem(draftContentTypeId);
