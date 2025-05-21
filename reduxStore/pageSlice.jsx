@@ -90,7 +90,7 @@ const initialState = {
     contentType: '',
     contentEditorMode: 'ReadOnly',
     adjacentPagesDownloadQueue: [],
-    pageCommonControlsBottom:0,
+    pageCommonControlsBottom: 0,
     getPageContentDone: false,
 }
 
@@ -1716,7 +1716,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         } else {
                             PostCall({
                                 api: '/memberAPI/getPageItem',
-                                body: { itemId, 
+                                body: {
+                                    itemId,
                                     adjacentPage: true
                                 }
                             }).then(async result => {
@@ -4639,6 +4640,147 @@ export const uploadAttachmentsThunk = (data) => async (dispatch, getState) => {
                 resolve();
             }
         });
+    });
+}
+
+export const saveAFileThunk = (data) => async (dispatch, getState) => {
+    return new Promise(async (resolve, reject) => {
+        const attachment = data.attachment;
+        let messageChannel, fileInUint8Array, fileInUint8ArrayIndex, i, numberOfChunks;
+        const isUsingServiceWorker = usingServiceWorker();
+        async function setupWriter() {
+            function talkToServiceWorker() {
+                return new Promise(async (resolve, reject) => {
+                    navigator.serviceWorker.getRegistration("/downloadFile/").then((registration) => {
+                        if (registration) {
+                            messageChannel = new MessageChannel();
+                            registration.active.postMessage({
+                                type: 'INIT_PORT',
+                                fileName: attachment.fileName,
+                                fileSize: attachment.fileSize,
+                                browserInfo: getBrowserInfo()
+                            }, [messageChannel.port2]);
+                            messageChannel.port1.onmessage = (event) => {
+                                // Print the result
+                                debugLog(debugOn, event.data);
+                                if (event.data) {
+                                    switch (event.data.type) {
+                                        case 'STREAM_OPENED':
+                                            const iframe = document.createElement('iframe');
+                                            iframe.hidden = true;
+                                            iframe.src = '/downloadFile/' + event.data.stream.id;
+                                            document.body.appendChild(iframe);
+                                            debugLog(debugOn, "STREAM_OPENED");
+                                            resolve();
+                                            break;
+                                        case 'STREAM_CLOSED':
+                                            messageChannel.port1.onmessage = null
+                                            messageChannel.port1.close();
+                                            messageChannel.port2.close();
+                                            messageChannel = null;
+                                            dispatch(writerClosed());
+                                            break;
+                                        default:
+                                    }
+                                }
+                            };
+                        } else {
+                            debugLog(debugOn, "s");
+                            reject("serviceWorker.getRegistration error")
+                        }
+                    });
+                }).catch((error) => {
+                    debugLog(debugOn, "serviceWorker.getRegistration error: ", error);
+                    reject("serviceWorker.getRegistration error.");
+                });
+            }
+            if (!isUsingServiceWorker) {
+                fileInUint8Array = new Uint8Array(attachment.fileSize);
+                fileInUint8ArrayIndex = 0;
+                return true;
+            } else {
+                try {
+                    await talkToServiceWorker();
+                    return true;
+                } catch (error) {
+                    debugLog(debugOn, "setupWriter failed: ", error)
+                    return false;
+                }
+            }
+        }
+        function reconnectWriter() {
+            if (!isUsingServiceWorker) {
+                if (process.env.NEXT_PUBLIC_platform !== 'android') {
+                    fileInUint8Array = state.writer.fileInUint8Array;
+                    fileInUint8ArrayIndex = state.writer.fileInUint8ArrayIndex;
+                }
+            } else {
+                messageChannel = state.writer;
+            }
+        }
+        function closeWriter() {
+            if (!isUsingServiceWorker) {
+                dispatch(writerClosed());
+            } else {
+                messageChannel.port1.postMessage({
+                    type: 'END_OF_FILE'
+                });
+            }
+        }
+        function writeAChunkToFile(chunk) {
+            return new Promise(async (resolve, reject) => {
+                if (!isUsingServiceWorker) {
+                    if (process.env.NEXT_PUBLIC_platform !== 'android') {
+                        for (let offset = 0; offset < chunk.length; offset++) {
+                            if (fileInUint8ArrayIndex + offset < fileInUint8Array.length) {
+                                fileInUint8Array[fileInUint8ArrayIndex + offset] = chunk.charCodeAt(offset);
+                            } else {
+                                reject("writeAChunkToFile error: fileInUint8Array overflow");
+                                return;
+                            }
+                        }
+                        fileInUint8ArrayIndex += chunk.length;
+                    } else {
+                        if (process.env.NEXT_PUBLIC_platform === 'android') {
+                            if (Android) {
+                                console.log("Android.addAChunkToFile ...")
+                                Android.addAChunkToFile(0, numberOfChunks, chunk, attachment.uriString)
+                            }
+                        }
+                    }
+                    resolve();
+                } else {
+                    messageChannel.port1.postMessage({
+                        type: 'BINARY',
+                        chunk
+                    });
+                    resolve();
+                }
+            })
+        }
+        numberOfChunks = 1;
+        try {
+            if (!(await setupWriter())) {
+                dispatch(setupWriterFailed());
+                reject("Failed to setup the writer.");
+                return;
+            };
+            writeAChunkToFile(attachment.data);
+            if ((process.env.NEXT_PUBLIC_platform !== 'android') && !isUsingServiceWorker) {
+                let blob = new Blob([fileInUint8Array], {
+                    type: attachment.fileType
+                });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = attachment.fileName;
+                link.click();
+            }
+            closeWriter();
+            resolve();
+        } catch (error) {
+            debugLog(debugOn, "saveAFileThunk failed: ", error);
+            reject("downloadDecryptAndAssemble error.");
+        }
     });
 }
 

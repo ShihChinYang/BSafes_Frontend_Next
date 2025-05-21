@@ -9,6 +9,8 @@ import Image from 'react-bootstrap/Image';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 
+const forge = require('node-forge');
+
 import { Blocks } from 'react-loader-spinner';
 
 import jquery from "jquery"
@@ -22,7 +24,7 @@ import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryStri
 import { rotateImage, downScaleImage } from '../lib/wnImage';
 import { productIdDelimiter } from "../lib/productID";
 
-import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom } from "../reduxStore/pageSlice";
+import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk} from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 
 let Excalidraw = null;
@@ -651,6 +653,27 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const getEditorConfigHook = () => {
         return getEditorConfig();
     }
+
+    const saveAsJSON = () => {
+        const elements = ExcalidrawRef.current.getSceneElements();
+            if (!elements || !elements.length) {
+                return;
+            }
+        let appState = ExcalidrawRef.current.getAppState();
+        appState = {
+            ...appState,
+            forBSafes: true,
+            forBSafesImageMaxWidthOrHeight: 120
+        }
+        const serialized = Excalidraw.serializeAsJSON(ExcalidrawRef.current.getSceneElements(), appState, ExcalidrawRef.current.getFiles(), 'local');
+        const encoded = forge.util.encodeUtf8(serialized);
+        const attachment = {
+            fileName: "test.draw",
+            fileSize: encoded.length,
+            data: encoded
+        }
+        dispatch(saveAFileThunk({attachment}));
+    }
     return (
         <>
             {scriptsLoaded ?
@@ -743,6 +766,9 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                                 <Excalidraw.MainMenu.DefaultItems.LoadScene />
                                                 <Excalidraw.MainMenu.DefaultItems.Export />
                                                 <Excalidraw.MainMenu.DefaultItems.SaveAsImage />
+                                                <Excalidraw.MainMenu.Item onSelect={saveAsJSON}>
+                                                    Save As JSON
+                                                </Excalidraw.MainMenu.Item>
                                                 <Excalidraw.MainMenu.DefaultItems.Help />
                                                 <Excalidraw.MainMenu.DefaultItems.ClearCanvas />
                                                 <Excalidraw.MainMenu.DefaultItems.ToggleTheme />
