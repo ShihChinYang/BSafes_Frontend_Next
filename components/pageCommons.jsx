@@ -21,7 +21,7 @@ import Comments from "./comments";
 
 import BSafesStyle from '../styles/BSafes.module.css'
 
-import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered } from "../reduxStore/pageSlice";
+import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, getPageTemplateThunk } from "../reduxStore/pageSlice";
 import { debugLog } from '../lib/helper';
 import { productIdDelimiter } from "../lib/productID";
 
@@ -40,6 +40,7 @@ export default function PageCommons() {
     const abort = useSelector(state => state.page.abort);
     const pageItemId = useSelector(state => state.page.id);
     const getPageContentDone = useSelector(state => state.page.getPageContentDone);
+    const pageTemplate = useSelector(state => state.page.pageTemplate);
     const itemCopy = useSelector(state => state.page.itemCopy);
     const oldVersion = useSelector(state => state.page.oldVersion);
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
@@ -698,9 +699,20 @@ export default function PageCommons() {
 
     useEffect(() => {
         if (getPageContentDone) {
-            alert();
+            if (!itemCopy || !itemCopy.content) {
+                dispatch(getPageTemplateThunk({ url: "https://pagetemplate.bsafes.com/A002.draw" }))
+            }
         }
     }, [getPageContentDone])
+
+    useEffect(() => {
+        if (pageTemplate) {
+            if (pageTemplate.startsWith('{\n  "type": "excalidraw"')) {
+                const drawingTemplate = JSON.parse(pageTemplate);
+                debugLog(debugOn, "Loading page template");
+            }
+        }
+    }, [pageTemplate]);
 
     useEffect(() => {
         setcontentEditorContentWithImagesAndVideos(contentEditorContent);

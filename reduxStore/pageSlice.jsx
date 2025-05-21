@@ -92,6 +92,7 @@ const initialState = {
     adjacentPagesDownloadQueue: [],
     pageCommonControlsBottom: 0,
     getPageContentDone: false,
+    pageTemplate: null,
 }
 
 const dataFetchedFunc = (state, action) => {
@@ -1015,6 +1016,9 @@ const pageSlice = createSlice({
         },
         setGetPageContentDone: (state, action) => {
             state.getPageContentDone = action.payload;
+        },
+        setPageTemplate: (state, action) => {
+            state.pageTemplate = action.payload;
         }
     }
 })
@@ -1114,6 +1118,7 @@ export const {
     adjacentPageDownloaded,
     setPageCommonControlsBottom,
     setGetPageContentDone,
+    setPageTemplate
 } = pageSlice.actions;
 
 
@@ -1131,7 +1136,7 @@ const newActivity = async (dispatch, type, activity) => {
     }
 }
 
-const XHRDownload = (itemId, dispatch, signedURL, downloadingFunction, baseProgress = 0, progressRatio = 1, indexInQueue = -1) => {
+const XHRDownload = (itemId, dispatch, signedURL, downloadingFunction = null, baseProgress = 0, progressRatio = 1, indexInQueue = -1) => {
     return new Promise(async (resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', signedURL, true);
@@ -2047,6 +2052,24 @@ export const decryptPageItemThunk = (data) => async (dispatch, getState) => {
                 startDownloadingImages();
             }
             resolve();
+        });
+    });
+}
+
+export const getPageTemplateThunk = (data) => async (dispatch, getState) => {
+    newActivity(dispatch, pageActivity.GetPageTemplate, () => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await XHRDownload(null, dispatch, data.url);
+                const buffer = Buffer.from(response, 'binary');
+                const tempateString = forge.util.decodeUtf8(buffer.toString('binary'));
+                dispatch(setPageTemplate(tempateString));
+                debugLog(debugOn, "getPageTemplateThunk done: ");
+                resolve();
+            } catch (error) {
+                debugLog(debugOn, "getPageTemplateThunk failed: ", error);
+                reject();
+            }
         });
     });
 }
