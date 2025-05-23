@@ -93,6 +93,7 @@ const initialState = {
     pageCommonControlsBottom: 0,
     getPageContentDone: false,
     pageTemplate: null,
+    templateLoaded: false,
 }
 
 const dataFetchedFunc = (state, action) => {
@@ -1019,7 +1020,15 @@ const pageSlice = createSlice({
         },
         setPageTemplate: (state, action) => {
             state.pageTemplate = action.payload;
-        }
+        },
+        loadPageTemplate: (state, action) => {
+            state.content = action.payload.template;
+            state.contentType = action.payload.type;
+            state.templateLoaded = true;
+        },
+        setDrawingTemplateImage: (state, action) => {
+            state.content.src = action.payload.src;
+        },
     }
 })
 
@@ -1118,7 +1127,9 @@ export const {
     adjacentPageDownloaded,
     setPageCommonControlsBottom,
     setGetPageContentDone,
-    setPageTemplate
+    setPageTemplate,
+    loadPageTemplate,
+    setDrawingTemplateImage,
 } = pageSlice.actions;
 
 

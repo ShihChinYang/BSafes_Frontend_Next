@@ -24,7 +24,7 @@ import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryStri
 import { rotateImage, downScaleImage } from '../lib/wnImage';
 import { productIdDelimiter } from "../lib/productID";
 
-import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk} from "../reduxStore/pageSlice";
+import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage} from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 
 let Excalidraw = null;
@@ -33,7 +33,7 @@ let Excalidraw = null;
  * 
  * @param {Object} props - The properties object.
  * @param {string} props.editorId - Unique identifier for the editor.
- * @param {"Writing" | "ReadOnly" | "Saving"} props.mode - The mode of the editor.
+ * @param {"Writing" | "ReadOnly" | "Saving" | "GeneratingDrawingImage"} props.mode - The mode of the editor.
  * @param {string} props.content - Initial content of the editor.
  * @param {function(string, string): void} props.onContentChanged - Callback when content changes.
  * @param {function(string, string): void} props.onPenClicked - Callback when the pen is clicked.
@@ -51,7 +51,7 @@ let Excalidraw = null;
  */
 
 
-export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null }) {
+export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null, drawingImageDone = null }) {
     const debugOn = false;
     const dispatch = useDispatch();
 
@@ -69,6 +69,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const itemIV = useSelector(state => state.page.itemIV);
     const draft = useSelector(state => state.page.draft);
     const contentType = useSelector(state => state.page.contentType) || 'WritingPage';
+    const templateLoaded = useSelector(state => state.page.templateLoaded);
 
     debugLog(debugOn, `editor key: ${froalaKey}`);
 
@@ -79,7 +80,6 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const [monitorExcalidrawInterval, setMonitorExcalidrawInterval] = useState(null);
     const [bottomBarRectBottom, setBottomBarRectBottom] = useState(0);
     const [needToUpdatePageCommonControls, setNeedToUpdatePageCommonControls] = useState(false);
-
     debugLog(debugOn, "Rendering editor, id,  mode: ", `${editorId} ${mode}`);
 
     let productId = "";
@@ -298,7 +298,28 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
         }
     }
 
-    const readOnly = () => {
+    const generateDrawingTemplateImage = () => {
+            const templateJSON = JSON.parse(content?.metadata?.ExcalidrawSerializedJSON);
+            Excalidraw.exportToCanvas({
+                elements: templateJSON.elements,
+                appState: {
+                    ...templateJSON.appState,
+                    exportWithDarkMode: false,
+                    exportBackground: true,
+                    exportScale: 2
+                },
+                files: templateJSON.files,
+                maxWidthOrHeight: 2048
+            }).then(canvas => {
+                canvas.toBlob(blob => {
+                    dispatch(setDrawingTemplateImage({src:window.URL.createObjectURL(blob)}))
+                    blob.name = 'excalidraw.png';
+                    drawingImageDone();
+                })
+            })
+    }
+
+    const readOnly = async () => {
         if (editorOn) {
             if ((editorId !== 'content') || (contentType === "WritingPage")) {
                 $(editorRef.current).froalaEditor('destroy');
@@ -321,6 +342,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     }
 
     useEffect(() => {
+        if(!scriptsLoaded) return;
         switch (mode) {
             case "ReadOnly":
                 readOnly();
@@ -334,10 +356,13 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             case "Saving":
                 saving();
                 break;
+            case "GeneratingDrawingImage":
+                generateDrawingTemplateImage();
+                break;
             default:
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mode])
+    }, [mode, scriptsLoaded])
 
     useEffect(() => {
         if (itemId && itemKey) {
@@ -755,7 +780,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     }
                     {editorId === 'content' && contentType === 'DrawingPage' &&
                         <>
-                            {(mode == 'Writing' || mode === 'Saving') ?
+                            {(mode == 'Writing' || mode === 'Saving' || mode === "GeneratingDrawingImage") ?
                                 <div style={{ position: "fixed", zIndex: "100", top: "0", left: "0", height: "100%", width: "100%" }}>
                                     <Excalidraw.Excalidraw excalidrawAPI={(excalidrawApi) => {
                                         ExcalidrawRef.current = excalidrawApi;

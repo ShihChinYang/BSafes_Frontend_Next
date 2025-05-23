@@ -21,7 +21,7 @@ import Comments from "./comments";
 
 import BSafesStyle from '../styles/BSafes.module.css'
 
-import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, getPageTemplateThunk } from "../reduxStore/pageSlice";
+import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, getPageTemplateThunk, loadPageTemplate } from "../reduxStore/pageSlice";
 import { debugLog } from '../lib/helper';
 import { productIdDelimiter } from "../lib/productID";
 
@@ -41,6 +41,7 @@ export default function PageCommons() {
     const pageItemId = useSelector(state => state.page.id);
     const getPageContentDone = useSelector(state => state.page.getPageContentDone);
     const pageTemplate = useSelector(state => state.page.pageTemplate);
+    const templateLoaded = useSelector(state => state.page.templateLoaded);
     const itemCopy = useSelector(state => state.page.itemCopy);
     const oldVersion = useSelector(state => state.page.oldVersion);
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
@@ -427,15 +428,25 @@ export default function PageCommons() {
     const handleCancel = () => {
         debugLog(debugOn, "handleCancel");
         dispatch(setS3SignedUrlForContentUpload(null));
+        if (editingEditorId === "content" && contentType === "DrawingPage" && templateLoaded) {
+            setEditingEditorMode("GeneratingDrawingImage");
+        } else {
+            setEditingEditorMode("ReadOnly");
+            setEditingEditorId(null);
+            if (!draft && !contentEditorContent) {
+                dispatch(setContentType(""))
+            }
+            if (draftLoaded) {
+                dispatch(loadOriginalContentThunk());
+            }
+            dispatch(setDraftLoaded(false));
+            setReadyForSaving(false);
+        }
+    }
+
+    const handleDrawingImageDone = () => {
         setEditingEditorMode("ReadOnly");
         setEditingEditorId(null);
-        if (!draft && !contentEditorContent) {
-            dispatch(setContentType(""))
-        }
-        if (draftLoaded) {
-            dispatch(loadOriginalContentThunk());
-        }
-        dispatch(setDraftLoaded(false));
         setReadyForSaving(false);
     }
 
@@ -708,11 +719,17 @@ export default function PageCommons() {
     useEffect(() => {
         if (pageTemplate) {
             if (pageTemplate.startsWith('{\n  "type": "excalidraw"')) {
-                const drawingTemplate = JSON.parse(pageTemplate);
                 debugLog(debugOn, "Loading page template");
+                dispatch(loadPageTemplate({ template: { metadata: { ExcalidrawSerializedJSON: pageTemplate } }, type: "DrawingPage" }));
             }
         }
     }, [pageTemplate]);
+
+    useEffect(() => {
+        if (templateLoaded) {
+            handleWrite();
+        }
+    }, [templateLoaded])
 
     useEffect(() => {
         setcontentEditorContentWithImagesAndVideos(contentEditorContent);
@@ -962,7 +979,7 @@ export default function PageCommons() {
                 }
                 <Row className="justify-content-center">
                     <Col className={`contenEditorRow`} xs="12" sm="10" style={{ minHeight: "280px" }}>
-                        <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} />
+                        <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
                     </Col>
                 </Row>
                 <br />
