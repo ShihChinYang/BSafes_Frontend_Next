@@ -1,3 +1,14 @@
+/*--- Classic ---*/
+._TagsLable {
+    margin-top:2px;
+    font-size: 2.0em;
+}
+._TagsInput {
+    margin-top:6px;
+    margin-bottom:32px;
+    font-size:18px;
+}
+/*--- End of Classic ---*/
 /*--- A001 ---*/
 .A001_Cover {
     position: relative;
@@ -49,9 +60,13 @@
     margin: auto;
     margin-top: 20px;
     margin-bottom: 20px;
-    padding-left: 15px;
-    padding-right: 15px;
     padding-bottom: 48px;
+}
+.A002_TagsLable {
+    font-size: inherit;
+}
+.A002_TagsInput {
+    margin-top:2px;
 }
 .A002_TopControlPanel {
     background-color: black;

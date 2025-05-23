@@ -1022,12 +1022,19 @@ const pageSlice = createSlice({
             state.pageTemplate = action.payload;
         },
         loadPageTemplate: (state, action) => {
-            state.content = action.payload.template;
+            state.content = {
+                ...state.content,
+                ...action.payload.template,
+            }
             state.contentType = action.payload.type;
             state.templateLoaded = true;
         },
         setDrawingTemplateImage: (state, action) => {
             state.content.src = action.payload.src;
+        },
+        clearPageTemplate: (state, action) => {
+            state.pageTemplate = "";
+            state.templateLoaded = false;
         },
     }
 })
@@ -1130,6 +1137,7 @@ export const {
     setPageTemplate,
     loadPageTemplate,
     setDrawingTemplateImage,
+    clearPageTemplate,
 } = pageSlice.actions;
 
 
@@ -3312,6 +3320,8 @@ export const saveContentThunk = (data) => async (dispatch, getState) => {
 
                         await createANewPage(dispatch, getState, state, newPageData, updatedState);
                         dispatch(clearDraft());
+                        dispatch(setDraftLoaded(false));
+                        dispatch(clearPageTemplate());
                         requestAppleReview();
                         resolve();
                     } catch (error) {

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from 'next/router';
 
-import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
@@ -18,6 +17,8 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import TagsInput from 'react-tagsinput-special'
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
+
 import FeatureNotAvailableForDemoToast from "./featureNotAvailabeForDemoToast";
 
 import { clearItemVersions, getItemVersionsHistoryThunk, saveTagsThunk } from "../reduxStore/pageSlice";
@@ -102,9 +103,9 @@ export default function ItemTopRows() {
                             </Tooltip>
                         }
                     ><Button variant="link" className="text-dark p-0 pull-right"><i className="fa fa-question" aria-hidden="true"></i></Button></OverlayTrigger>
-                    <label className="mx-1 pull-right"><span><i className="fa fa-tags" aria-hidden="true"></i></span></label>
+                    <label className="mx-1 pull-right"><span><i className={`fa fa-tags ${BSafesProductsStyle[`${productId}_TagsLable`]}`} aria-hidden="true"></i></span></label>
                 </Col>
-                <Col xs="6">
+                <Col xs="6" className={`${BSafesProductsStyle[`${productId}_TagsInput`]}`}>
                     {oldVersion ?
                         <TagsInput value={tags} onChange={handleChange} disabled />
                         :

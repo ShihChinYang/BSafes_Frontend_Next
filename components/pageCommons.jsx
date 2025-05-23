@@ -21,7 +21,7 @@ import Comments from "./comments";
 
 import BSafesStyle from '../styles/BSafes.module.css'
 
-import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, getPageTemplateThunk, loadPageTemplate } from "../reduxStore/pageSlice";
+import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, getPageTemplateThunk, loadPageTemplate, clearPageTemplate } from "../reduxStore/pageSlice";
 import { debugLog } from '../lib/helper';
 import { productIdDelimiter } from "../lib/productID";
 
@@ -211,19 +211,21 @@ export default function PageCommons() {
     }
 
     function beforeWritingContent() {
-        const spinners = document.querySelectorAll('.bsafesImageSpinner');
-        spinners.forEach((spinner) => {
-            spinner.remove();
-        });
+        if (contentType === "WritingPage") {
+            const spinners = document.querySelectorAll('.bsafesImageSpinner');
+            spinners.forEach((spinner) => {
+                spinner.remove();
+            });
 
-        const playVideos = document.querySelectorAll('.bsafesPlayVideo');
-        playVideos.forEach((playVideo) => {
-            playVideo.remove();
-        });
+            const playVideos = document.querySelectorAll('.bsafesPlayVideo');
+            playVideos.forEach((playVideo) => {
+                playVideo.remove();
+            });
 
-        let contentByDOM = document.querySelector('.contenEditorRow').querySelector('.inner-html');
-        if (contentByDOM)
-            setcontentEditorContentWithImagesAndVideos(contentByDOM.innerHTML);
+            let contentByDOM = document.querySelector('.contenEditorRow').querySelector('.inner-html');
+            if (contentByDOM)
+                setcontentEditorContentWithImagesAndVideos(contentByDOM.innerHTML);
+        }
         dispatch(getS3SignedUrlForContentUploadThunk());
     }
 
@@ -298,8 +300,9 @@ export default function PageCommons() {
             } else {
                 setEditingEditorMode("ReadOnly");
                 setEditingEditorId(null);
+                dispatch(clearPageTemplate());
+                dispatch(setDraftLoaded(false));
             }
-            dispatch(setDraftLoaded(false));
         } else if (editingEditorId === "title") {
             if (content !== titleEditorContent) {
                 dispatch(saveTitleThunk(content, workspaceKey, workspaceSearchKey, workspaceSearchIV));
@@ -448,6 +451,7 @@ export default function PageCommons() {
         setEditingEditorMode("ReadOnly");
         setEditingEditorId(null);
         setReadyForSaving(false);
+        dispatch(loadPageTemplate({ template: { metadata: { ExcalidrawSerializedJSON: pageTemplate } }, type: "DrawingPage" }));
     }
 
     const handleVideoButton = (e) => {
@@ -977,11 +981,17 @@ export default function PageCommons() {
                         }
                     </>
                 }
-                <Row className="justify-content-center">
-                    <Col className={`contenEditorRow`} xs="12" sm="10" style={{ minHeight: "280px" }}>
-                        <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
-                    </Col>
-                </Row>
+                {contentType !== 'DrawingPage' ?
+                    <Row className="justify-content-center">
+                        <Col className={`contenEditorRow`} xs="12" sm="10" style={{ minHeight: "280px" }}>
+                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
+                        </Col>
+                    </Row>
+                    :
+                    <>
+                        <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
+                    </>
+                }
                 <br />
                 <br />
                 <hr />

@@ -69,7 +69,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const itemIV = useSelector(state => state.page.itemIV);
     const draft = useSelector(state => state.page.draft);
     const contentType = useSelector(state => state.page.contentType) || 'WritingPage';
-    const templateLoaded = useSelector(state => state.page.templateLoaded);
+    const pageTemplate = useSelector(state => state.page.pageTemplate);
 
     debugLog(debugOn, `editor key: ${froalaKey}`);
 
@@ -299,7 +299,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     }
 
     const generateDrawingTemplateImage = () => {
-            const templateJSON = JSON.parse(content?.metadata?.ExcalidrawSerializedJSON);
+            const templateJSON = JSON.parse(pageTemplate);
             Excalidraw.exportToCanvas({
                 elements: templateJSON.elements,
                 appState: {
@@ -803,10 +803,10 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                     </Excalidraw.Excalidraw>
                                 </div>
                                 :
-                                <Row className={`${BSafesStyle.editorRow} w-100`} style={{ height: '60vh' }}>
+                                <>
                                     {content &&
-                                        <Image onClick={handleDrawingClicked} style={{ objectFit: 'scale-down', maxHeight: '100%', maxWidth: '100%' }} alt="Image broken" src={content.src} fluid />}
-                                </Row>
+                                        <Image onClick={handleDrawingClicked} style={{display: "block", margin:"auto", objectFit: 'scale-down', maxHeight: '100%', maxWidth: '100%' }} alt="Image broken" src={content.src} fluid />}
+                                </>
                             }
                         </>
                     }
