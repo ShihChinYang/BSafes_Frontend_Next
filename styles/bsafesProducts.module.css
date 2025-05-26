@@ -74,5 +74,9 @@
     max-width: 360px;
     min-height: 61px;
 }
+.A002_RowXMargins {
+    margin-left: 1em;
+    margin-right:1em;
+}
 
 /*--- End of A002 ---*/

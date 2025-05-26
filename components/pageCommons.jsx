@@ -20,10 +20,11 @@ import AttachmentPanel from "./attachmentPanel";
 import Comments from "./comments";
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 
 import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, getPageTemplateThunk, loadPageTemplate, clearPageTemplate } from "../reduxStore/pageSlice";
 import { debugLog } from '../lib/helper';
-import { productIdDelimiter } from "../lib/productID";
+import { products, productIdDelimiter } from "../lib/productID";
 
 export default function PageCommons() {
     const debugOn = true;
@@ -88,6 +89,10 @@ export default function PageCommons() {
     let productId = "";
     if (pageItemId && pageItemId.split(":")[1].startsWith(productIdDelimiter)) {
         productId = pageItemId.split(productIdDelimiter)[1];
+    }
+    let product = {};
+    if (productId) {
+        product = products[productId];
     }
 
     const onVideoClicked = (queueId) => {
@@ -963,21 +968,28 @@ export default function PageCommons() {
                                 </Col>
                             </Row>
                             :
-                            <hr style={{ margin: "0px" }} />
+                            <hr className="my-0" />
+
                         }
-                        <Row className="justify-content-center">
-                            <Col sm="10" >
+                        {product.fixedSize ?
+                            <div className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
                                 <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion)} />
-                            </Col>
-                        </Row>
+                            </div>
+                            :
+                            <Row className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
+                                <Col sm="10" >
+                                    <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion)} />
+                                </Col>
+                            </Row>
+                        }
                         {productId === "" ?
-                            <Row className="justify-content-center">
+                            <Row className="justify-content-center mx-2">
                                 <Col sm="10">
                                     <hr />
                                 </Col>
                             </Row>
                             :
-                            <hr style={{ margin: "0px" }} />
+                            <hr className="my-0 mx-2" />
                         }
                     </>
                 }
@@ -996,78 +1008,78 @@ export default function PageCommons() {
                 <br />
                 <hr />
                 {!turningPage && !(contentType === 'DrawingPage' && contentEditorMode === "Writing") &&
-                    <div className={BSafesStyle.pageCommonsExtension}>
+                    <div className={`${BSafesStyle.pageCommonsExtension}`}>
                         {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
                             <div className="videos">
                                 <input ref={videoFilesInputRef} onChange={handleVideoFiles} type="file" accept="video/*" multiple className="d-none editControl" id="videos" />
-                                <Row>
+                                <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
                                     <Col id="videos" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.videosDragDropZoneActive : BSafesStyle.videosDragDropZone}`}>
                                         <Button id="videos" onClick={handleVideoButton} variant="link" className="text-dark btn btn-labeled">
                                             <h4><i id="videos" className="fa fa-video-camera fa-lg" aria-hidden="true"></i></h4>
                                         </Button>
                                     </Col>
-                                </Row>
+                                </div>
                             </div>
                         }
-                        <Row className="justify-content-center">
+                        <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center` : "row justify-content-center"}>
                             <Col xs="12" md="8" >
                                 {videoPanels}
                             </Col>
-                        </Row>
+                        </div>
                         <br />
                         {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
                             <div className="images">
                                 <input ref={imageFilesInputRef} onChange={handleImageFiles} type="file" multiple accept="image/*" className="d-none editControl" id="images" />
-                                <Row>
+                                <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
                                     <Col id="images" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${imagesDragActive ? BSafesStyle.imagesDragDropZoneActive : BSafesStyle.imagesDragDropZone}`}>
                                         <Button id="images" onClick={handleImageButton} variant="link" className="text-dark btn btn-labeled">
                                             <h4><i id="images" className="fa fa-picture-o fa-lg" aria-hidden="true"></i></h4>
                                         </Button>
                                     </Col>
-                                </Row>
+                                </div>
                             </div>
                         }
-                        <Row className="justify-content-center">
+                        <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center` : "row justify-content-center"}>
                             <Col xs="12" sm="10" lg="8" >
                                 {imagePanels}
                             </Col>
-                        </Row>
+                        </div>
                         <br />
                         {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
                             <div className="audios">
                                 <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/mp3, audio/wav" multiple className="d-none editControl" id="audios" />
-                                <Row>
+                                <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
                                     <Col id="audios" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.audiosDragDropZoneActive : BSafesStyle.audiosDragDropZone}`}>
                                         <Button id="audios" onClick={handleAudioButton} variant="link" className="text-dark btn btn-labeled">
                                             <h4><i id="audios" className="fa fa-volume-up fa-lg" aria-hidden="true"></i></h4>
                                         </Button>
                                     </Col>
-                                </Row>
+                                </div>
                             </div>
                         }
-                        <Row className="justify-content-center">
+                        <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center` : "row justify-content-center"}>
                             <Col xs="12" md="8" >
                                 {audioPanels}
                             </Col>
-                        </Row>
+                        </div>
                         <br />
                         {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
                             <div className="attachments">
                                 <input ref={attachmentsInputRef} onChange={handleAttachments} type="file" multiple className="d-none editControl" id="attachments" />
-                                <Row>
+                                <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
                                     <Col id="attachments" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${attachmentsDragActive ? BSafesStyle.attachmentsDragDropZoneActive : BSafesStyle.attachmentsDragDropZone}`}>
                                         <Button id="attachments" onClick={handleAttachmentButton} variant="link" className="text-dark btn btn-labeled">
                                             <h4><i id="attachments" className="fa fa-paperclip fa-lg" aria-hidden="true"></i></h4>
                                         </Button>
                                     </Col>
-                                </Row>
+                                </div>
                             </div>
                         }
-                        <Row className="justify-content-center">
+                        <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center` : "row justify-content-center"}>
                             <Col xs="12" md="8" >
                                 {attachmentPanels}
                             </Col>
-                        </Row>
+                        </div>
                         <br />
                         {photoSwipeGallery()}
                     </div>}

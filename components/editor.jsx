@@ -22,9 +22,9 @@ import { debugLog, PostCall, convertUint8ArrayToBinaryString, getBrowserInfo, ar
 import { putS3Object } from "../lib/s3Helper";
 import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryString, encryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync } from "../lib/crypto";
 import { rotateImage, downScaleImage } from '../lib/wnImage';
-import { productIdDelimiter } from "../lib/productID";
+import { products, productIdDelimiter } from "../lib/productID";
 
-import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage} from "../reduxStore/pageSlice";
+import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage } from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 
 let Excalidraw = null;
@@ -85,6 +85,10 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     let productId = "";
     if (itemId && itemId.split(":")[1].startsWith(`${productIdDelimiter}`)) {
         productId = itemId.split(productIdDelimiter)[1];
+    }
+    let product = {};
+    if (productId) {
+        product = products[productId];
     }
 
     const updatePageCommonControlsBottom = () => {
@@ -229,7 +233,11 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             loadExcalidrawState();
         }
         monitorExcalidrawCallback.current = () => {
-            const targetDiv = document.getElementsByClassName("App-bottom-bar")[0].getElementsByClassName("Island")[0];
+            const appBottomBar = document.getElementsByClassName("App-bottom-bar");
+            if (!appBottomBar || !appBottomBar.length) return;
+            const Island = appBottomBar[0].getElementsByClassName("Island");
+            if (!Island || !Island.length) return;
+            const targetDiv = Island[0];
             const rect = targetDiv.getBoundingClientRect();
             debugLog(debugOn, "monitor excalidraw interval: ", `${bottomBarRectBottomRef.current}, ${rect.bottom}`);
             if (rect.bottom !== bottomBarRectBottomRef.current) {
@@ -299,24 +307,24 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     }
 
     const generateDrawingTemplateImage = () => {
-            const templateJSON = JSON.parse(pageTemplate);
-            Excalidraw.exportToCanvas({
-                elements: templateJSON.elements,
-                appState: {
-                    ...templateJSON.appState,
-                    exportWithDarkMode: false,
-                    exportBackground: true,
-                    exportScale: 2
-                },
-                files: templateJSON.files,
-                maxWidthOrHeight: 2048
-            }).then(canvas => {
-                canvas.toBlob(blob => {
-                    dispatch(setDrawingTemplateImage({src:window.URL.createObjectURL(blob)}))
-                    blob.name = 'excalidraw.png';
-                    drawingImageDone();
-                })
+        const templateJSON = JSON.parse(pageTemplate);
+        Excalidraw.exportToCanvas({
+            elements: templateJSON.elements,
+            appState: {
+                ...templateJSON.appState,
+                exportWithDarkMode: false,
+                exportBackground: true,
+                exportScale: 2
+            },
+            files: templateJSON.files,
+            maxWidthOrHeight: 2048
+        }).then(canvas => {
+            canvas.toBlob(blob => {
+                dispatch(setDrawingTemplateImage({ src: window.URL.createObjectURL(blob) }))
+                blob.name = 'excalidraw.png';
+                drawingImageDone();
             })
+        })
     }
 
     const readOnly = async () => {
@@ -342,7 +350,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     }
 
     useEffect(() => {
-        if(!scriptsLoaded) return;
+        if (!scriptsLoaded) return;
         switch (mode) {
             case "ReadOnly":
                 readOnly();
@@ -681,9 +689,9 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     const saveAsJSON = () => {
         const elements = ExcalidrawRef.current.getSceneElements();
-            if (!elements || !elements.length) {
-                return;
-            }
+        if (!elements || !elements.length) {
+            return;
+        }
         let appState = ExcalidrawRef.current.getAppState();
         appState = {
             ...appState,
@@ -697,7 +705,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             fileSize: encoded.length,
             data: encoded
         }
-        dispatch(saveAFileThunk({attachment}));
+        dispatch(saveAFileThunk({ attachment }));
     }
     return (
         <>
@@ -805,7 +813,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                 :
                                 <>
                                     {content &&
-                                        <Image onClick={handleDrawingClicked} style={{display: "block", margin:"auto", objectFit: 'scale-down', maxHeight: '100%', maxWidth: '100%' }} alt="Image broken" src={content.src} fluid />}
+                                        <Image onClick={handleDrawingClicked} style={{ display: "block", margin: "auto", objectFit: 'scale-down', maxHeight: '100%', maxWidth: '100%' }} alt="Image broken" src={content.src} fluid />}
                                 </>
                             }
                         </>
