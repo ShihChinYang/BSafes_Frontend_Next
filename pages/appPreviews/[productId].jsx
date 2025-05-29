@@ -15,50 +15,54 @@ export default () => {
       modules: [Navigation, Pagination],
       slidesPerView: "auto",
       spaceBetween: 30,
-      slidesPerView: 1,
+      loop: true,
+      speed: 1000,
+      effect: "fade",
+      fadeEffect: {
+        crossFade: true,
+      },
       pagination: { clickable: true },
+      navigation: {
+        nextEl: ".exclusive-next-btn",
+        prevEl: ".exclusive-prev-btn",
+      },
     }
   }, [])
 
   return (
     <div>
-      <Container>
-        <br/>
-        <Row>
-          <Col sm={{offset:1, span:10}} md={{offset:2, span:8}} lg={{offset:3, span:6}}>
-            <Swiper {...slideSettings} className="swiper exclusive-slider">
-              <div className="swiper-wrapper">
-                <SwiperSlide key="1" className="swiper-slide">
-                  <div className={BSafesStyle.appPreviewImageWrapper}>
-                    <img src="/assets/img/inner-page/shop-details-tab-img1.png" alt="" />
+      <div className="bsafesStore">
+        <div className={BSafesStyle.appPreview}>
+          <Container>
+            <Row>
+              <Col sm={{ offset: 1, span: 10 }} md={{ offset: 2, span: 8 }} lg={{ offset: 4, span: 4 }}>
+                <Swiper key={1} {...slideSettings} className="swiper exclusive-slider">
+                  <div className="swiper-wrapper">
+                    <SwiperSlide key={11} className="swiper-slide">
+                      <div className={BSafesStyle.appPreviewImageWrapper}>
+                        <img src="https://placehold.co/360X480" alt="" />
+                      </div>
+                    </SwiperSlide>
+                    <SwiperSlide key={12} className="swiper-slide">
+                      <div className={BSafesStyle.appPreviewImageWrapper}>
+                        <img src="https://placehold.co/360X480" alt="" />
+                      </div>
+                    </SwiperSlide>
                   </div>
-                </SwiperSlide>
-              </div>
-              <div className="swiper-wrapper">
-                <SwiperSlide key="2" className="swiper-slide">
-                  <div className={BSafesStyle.appPreviewImageWrapper}>
-                    <img src="/assets/img/inner-page/shop-details-tab-img2.png" alt="" />
+                  <div className="slider-btn">
+                    <div className={`${BSafesStyle.appPreviewPrevBtn} exclusive-prev-btn`}>
+                      <i className="bi bi-chevron-left" />
+                    </div>
+                    <div className={`${BSafesStyle.appPreviewNextBtn} exclusive-next-btn`}>
+                      <i className="bi bi-chevron-right" />
+                    </div>
                   </div>
-                </SwiperSlide>
-              </div>
-              <div className="swiper-wrapper">
-                <SwiperSlide key="3" className="swiper-slide">
-                  <div className={BSafesStyle.appPreviewImageWrapper}>
-                    <img src="/assets/img/inner-page/shop-details-tab-img3.png" alt="" />
-                  </div>
-                </SwiperSlide>
-              </div>
-              <div className="swiper-wrapper">
-                <SwiperSlide key="5" className="swiper-slide">
-                  <div className={BSafesStyle.appPreviewImageWrapper}>
-                    <img src="/assets/img/inner-page/shop-details-tab-img4.png" alt="" />
-                  </div>
-                </SwiperSlide>
-              </div>
-            </Swiper>
-          </Col>
-        </Row>
-      </Container>
+                </Swiper>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      </div>
     </div>
   );
 };

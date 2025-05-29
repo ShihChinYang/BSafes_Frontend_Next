@@ -5,8 +5,6 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import BSafesStyle from '../../styles/BSafes.module.css'
-
 export default () => {
 
   const slideSettings = useMemo(() => {
@@ -14,52 +12,57 @@ export default () => {
       modules: [Navigation, Pagination],
       slidesPerView: "auto",
       spaceBetween: 30,
-      slidesPerView: 1,
-      pagination: { clickable: true },
-      onSwiper: (swiper) => console.log(swiper),
-      onSlideChange: () => console.log('slide change'),
+      loop: true,
+      speed: 1000,
+      effect: "fade",
+      fadeEffect: {
+        crossFade: true,
+      },
+      navigation: {
+        nextEl: ".exclusive-next-btn",
+        prevEl: ".exclusive-prev-btn",
+      },
     }
   }, [])
 
   return (
     <div>
-      <Container>
-        <br/>
-        <Row>
-          <Col>
-            <Swiper {...slideSettings} className="swiper exclusive-slider">
-              <div className="swiper-wrapper">
-                <SwiperSlide className="swiper-slide">
-                  <div className={BSafesStyle.appPreviewImageWrapper}>
-                    <img src="/assets/img/inner-page/shop-details-tab-img1.png" alt="" />
+      <div className="bsafesStore">
+        <div className="shop-details-top-section mt-40 mb-110">
+          <Container>
+            <Row>
+            <Col sm={{offset:1, span:10}} md={{offset:2, span:8}} lg={{offset:4, span:4}}>
+                <div className="shop-details-img style-2">
+                  <div>
+                    <Swiper key={1} {...slideSettings} className="swiper exclusive-slider">
+                      <div className="swiper-wrapper">
+                        <SwiperSlide key={11} className="swiper-slide">
+                          <div className="shop-details-tab-img">
+                            <img src="https://placehold.co/480X600" alt="" />
+                          </div>
+                        </SwiperSlide>
+                        <SwiperSlide key={12} className="swiper-slide">
+                          <div className="shop-details-tab-img">
+                            <img src="https://placehold.co/480X600" alt="" />
+                          </div>
+                        </SwiperSlide>
+                      </div>
+                      <div className="slider-btn">
+                        <div className="exclusive-prev-btn">
+                          <i className="bi bi-chevron-left" />
+                        </div>
+                        <div className="exclusive-next-btn">
+                          <i className="bi bi-chevron-right" />
+                        </div>
+                      </div>
+                    </Swiper>
                   </div>
-                </SwiperSlide>
-              </div>
-              <div className="swiper-wrapper">
-                <SwiperSlide className="swiper-slide">
-                  <div className={BSafesStyle.appPreviewImageWrapper}>
-                    <img src="/assets/img/inner-page/shop-details-tab-img2.png" alt="" />
-                  </div>
-                </SwiperSlide>
-              </div>
-              <div className="swiper-wrapper">
-                <SwiperSlide className="swiper-slide">
-                  <div className={BSafesStyle.appPreviewImageWrapper}>
-                    <img src="/assets/img/inner-page/shop-details-tab-img3.png" alt="" />
-                  </div>
-                </SwiperSlide>
-              </div>
-              <div className="swiper-wrapper">
-                <SwiperSlide className="swiper-slide">
-                  <div className={BSafesStyle.appPreviewImageWrapper}>
-                    <img src="/assets/img/inner-page/shop-details-tab-img4.png" alt="" />
-                  </div>
-                </SwiperSlide>
-              </div>
-            </Swiper>
-          </Col>
-        </Row>
-      </Container>
+                </div>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      </div>ƒ
     </div>
   );
 };

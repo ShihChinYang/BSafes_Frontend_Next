@@ -1,13 +1,7 @@
 import React, { useMemo } from "react";
 import Link from "next/link";
-import SwiperCore, {
-    Autoplay,
-    EffectFade,
-    Navigation,
-    Pagination,
-} from "swiper";
+import { Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from "swiper/react";
-SwiperCore.use([Pagination, Autoplay, EffectFade, Navigation]);
 import GiftSection from '../../components/beautico/components/common/GiftSection'
 import ProductViewModal from '../../components/beautico/components/common/ProductViewModal'
 import { useCountdownTimer } from "../../components/beautico/hooks/useCountdownTimer";
@@ -19,6 +13,7 @@ const Slider = () => {
     const { days, hours, minutes, seconds } = useCountdownTimer(endTime)
     const slideSettings = useMemo(() => {
         return {
+            modules: [Navigation, Pagination],
             slidesPerView: "auto",
             spaceBetween: 30,
             loop: true,

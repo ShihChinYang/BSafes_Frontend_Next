@@ -167,7 +167,7 @@
 .teamsBackground {
   position: relative;
   min-height: 100vh;
-  background-color: #FDFEFE ;
+  background-color: #FDFEFE;
   /*background-image: url("/images/noisy-net.png");*/
 }
 
@@ -367,10 +367,11 @@
   max-width: 1024px;
   min-height: 600px;
   padding-bottom: 48px;
-  margin:auto
+  margin: auto
 }
 
 @media only screen and (min-width: 400px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -385,6 +386,7 @@
 }
 
 @media only screen and (min-width: 560px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -399,6 +401,7 @@
 }
 
 @media only screen and (min-width: 992px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -413,6 +416,7 @@
 }
 
 @media only screen and (min-width: 1200px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -565,6 +569,7 @@
 .diaryItem {
   background-color: #FEF5E7;
 }
+
 .diaryControlPanelBody {
   padding-bottom: 10px;
 }
@@ -590,6 +595,7 @@
 .pageItem {
   background-color: #fff;
 }
+
 .pagePanel {
   /*background-color:faf5f1*/
   background-color: #fff;
@@ -601,7 +607,7 @@
 }
 
 .pageBackground {
-  min-height: 100vh ;
+  min-height: 100vh;
   background-color: rgb(161, 158, 158);
   padding-bottom: 30px;
 }
@@ -669,6 +675,7 @@
 .pageCommonsExtension {
   background-color: #fff;
 }
+
 /* End of Page */
 
 /*--****** Editor *******/
@@ -688,6 +695,7 @@
 .contentEditorRowBak {
   min-height: 250px;
 }
+
 @media only screen and (min-width: 400px) {
   .contentEditorRowBak {
     min-height: 350px;
@@ -707,6 +715,7 @@
 }
 
 @media only screen and (min-width: 1200px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -719,6 +728,7 @@
     padding-bottom: 48px;
   }
 }
+
 /* End of Editor */
 
 /*--****** Image Panel *******/
@@ -1800,9 +1810,11 @@
   .bannerTextH1 {
     font-size: 4rem;
   }
+
   .bannerTextH3 {
     font-size: 2.6rem;
   }
+
   .descriptionText {
     font-size: 1.3rem;
   }
@@ -1839,6 +1851,11 @@
 /* End of Support */
 
 /*--****** App Specifics *******/
+.appPreview {
+  position: relative;
+  margin-top: 40px;
+}
+
 .appPreviewImageWrapper {
   text-align: center;
 }
@@ -1849,4 +1866,31 @@
   height: 100%;
   object-fit: contain;
 }
+
+.appPreviewPrevBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 10px;
+  z-index: 1;
+}
+
+.appPreviewNextBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  z-index: 1;
+}
+
 /* End of App Specifics */
+
+/*--****** Image Grids *******/
+.imageGrid img {
+  margin: 6px 0 6px 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* End of Image Grids */
