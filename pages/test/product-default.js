@@ -43,6 +43,26 @@ const ProductDefaultPage = () => {
                         <img src="/assets/img/inner-page/shop-details-tab-img4.png" alt="" />
                       </div>
                     </div>
+                    <div style={{ overflow: 'hidden' }} className="tab-pane fade show active" id="v-pills-img5" role="tabpanel">
+                      <div className="shop-details-tab-img product-img--main" data-scale="1.4" data-image="/assets/img/inner-page/shop-details-tab-img1.png">
+                        <img src="/assets/img/inner-page/shop-details-tab-img1.png" alt="" />
+                      </div>
+                    </div>
+                    <div style={{ overflow: 'hidden' }} className="tab-pane fade" id="v-pills-img6" role="tabpanel">
+                      <div className="shop-details-tab-img product-img--main" data-scale="1.4" data-image="/assets/img/inner-page/shop-details-tab-img2.png">
+                        <img src="/assets/img/inner-page/shop-details-tab-img2.png" alt="" />
+                      </div>
+                    </div>
+                    <div style={{ overflow: 'hidden' }} className="tab-pane fade" id="v-pills-img7" role="tabpanel" aria-labelledby="v-pills-img3-tab">
+                      <div className="shop-details-tab-img product-img--main" data-scale="1.4" data-image="/assets/img/inner-page/shop-details-tab-img3.png">
+                        <img src="/assets/img/inner-page/shop-details-tab-img3.png" alt="" />
+                      </div>
+                    </div>
+                    <div style={{ overflow: 'hidden' }} className="tab-pane fade" id="v-pills-img8" role="tabpanel" aria-labelledby="v-pills-img4-tab">
+                      <div className="shop-details-tab-img product-img--main" data-scale="1.4" data-image="/assets/img/inner-page/shop-details-tab-img4.png">
+                        <img src="/assets/img/inner-page/shop-details-tab-img4.png" alt="" />
+                      </div>
+                    </div>
                   </div>
                   <div className="nav nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                     <button className="nav-link active" id="v-pills-img1-tab" data-bs-toggle="pill" data-bs-target="#v-pills-img1" type="button" role="tab" aria-controls="v-pills-img1" aria-selected="true">
@@ -55,6 +75,18 @@ const ProductDefaultPage = () => {
                       <img src="/assets/img/inner-page/shop-details-nav-img3.png" alt="" />
                     </button>
                     <button className="nav-link" id="v-pills-img4-tab" data-bs-toggle="pill" data-bs-target="#v-pills-img4" type="button" role="tab" aria-controls="v-pills-img4" aria-selected="false">
+                      <img src="/assets/img/inner-page/shop-details-nav-img4.png" alt="" />
+                    </button>
+                    <button className="nav-link" id="v-pills-img5-tab" data-bs-toggle="pill" data-bs-target="#v-pills-img5" type="button" role="tab" aria-controls="v-pills-img1" aria-selected="true">
+                      <img src="/assets/img/inner-page/shop-details-nav-img1.png" alt="" />
+                    </button>
+                    <button className="nav-link" id="v-pills-img2-tab" data-bs-toggle="pill" data-bs-target="#v-pills-img6" type="button" role="tab" aria-controls="v-pills-img2" aria-selected="false">
+                      <img src="/assets/img/inner-page/shop-details-nav-img2.png" alt="" />
+                    </button>
+                    <button className="nav-link" id="v-pills-img3-tab" data-bs-toggle="pill" data-bs-target="#v-pills-img7" type="button" role="tab" aria-controls="v-pills-img3" aria-selected="false">
+                      <img src="/assets/img/inner-page/shop-details-nav-img3.png" alt="" />
+                    </button>
+                    <button className="nav-link" id="v-pills-img4-tab" data-bs-toggle="pill" data-bs-target="#v-pills-img8" type="button" role="tab" aria-controls="v-pills-img4" aria-selected="false">
                       <img src="/assets/img/inner-page/shop-details-nav-img4.png" alt="" />
                     </button>
                   </div>

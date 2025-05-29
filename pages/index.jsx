@@ -564,7 +564,7 @@ export default function Home() {
                     <br />
                 </Container>
             </div>
-            <Footer />
+            <Footer className={monteserrat.className}/>
             <br />
         </ContentPageLayout>
     )

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from 'next/router';
 
-import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
@@ -18,11 +17,15 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import TagsInput from 'react-tagsinput-special'
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
+
 import FeatureNotAvailableForDemoToast from "./featureNotAvailabeForDemoToast";
 
 import { clearItemVersions, getItemVersionsHistoryThunk, saveTagsThunk } from "../reduxStore/pageSlice";
 
 import { getItemLink } from "../lib/bSafesCommonUI";
+import { productIdDelimiter } from "../lib/productID";
+
 export default function ItemTopRows() {
     const dispatch = useDispatch();
     const router = useRouter();
@@ -32,6 +35,7 @@ export default function ItemTopRows() {
     const workspaceSearchKey = useSelector(state => state.container.searchKey);
     const workspaceSearchIV = useSelector(state => state.container.searchIV);
 
+    const itemId = useSelector(state => state.page.id);
     const oldVersion = useSelector(state => state.page.oldVersion);
     const activity = useSelector(state => state.page.activity);
     const tagsState = useSelector(state => state.page.tags);
@@ -41,7 +45,12 @@ export default function ItemTopRows() {
     const [showTagsConfirmButton, setShowTagsConfirmButton] = useState(false);
     const [versionsHistoryModalOpened, setVersionsHistoryModalOpened] = useState(false);
     const [showFeatureNotAvailableForDemoToast, setShowFeatureNotAvailableForDemoToast] = useState(false);
-    
+
+    let productId = "";
+    if (itemId && itemId.split(":")[1].startsWith(`${productIdDelimiter}`)) {
+        productId = itemId.split(productIdDelimiter)[1];
+    }
+
     const handleChange = (tags) => {
         setTags(tags);
         if (!showTagsConfirmButton) setShowTagsConfirmButton(true);
@@ -83,9 +92,27 @@ export default function ItemTopRows() {
     }, [activity]);
 
     return (
-        <Container>
+        <>
             <Row>
-                <Col>
+                <Col xs="2" className="px-0 pt-2">
+                    <OverlayTrigger
+                        placement='top'
+                        overlay={
+                            <Tooltip id={`tooltip-top`}>
+                                <TagHelp />
+                            </Tooltip>
+                        }
+                    ><Button variant="link" className="text-dark p-0 pull-right"><i className="fa fa-question" aria-hidden="true"></i></Button></OverlayTrigger>
+                    <label className="mx-1 pull-right"><span><i className={`fa fa-tags ${BSafesProductsStyle[`${productId}_TagsLable`]}`} aria-hidden="true"></i></span></label>
+                </Col>
+                <Col xs="6" className={`${BSafesProductsStyle[`${productId}_TagsInput`]}`}>
+                    {oldVersion ?
+                        <TagsInput value={tags} onChange={handleChange} disabled />
+                        :
+                        <TagsInput value={tags} onChange={handleChange} />
+                    }
+                </Col>
+                <Col xs="4">
                     <div className="pull-right">
                         <span>{itemCopy && `v.${itemCopy.version}`}</span><Button variant="link" className="text-dark" onClick={openVersionsHistoryModal}  ><i className="fa fa-history" aria-hidden="true"></i></Button>
                         {false && <Button variant="link" className="text-dark" >
@@ -94,19 +121,8 @@ export default function ItemTopRows() {
                     </div>
                 </Col>
             </Row>
-
-            <Row>
-                <Col xs="2" sm="1" className="px-0">
-                    <OverlayTrigger
-                        placement='top'
-                        overlay={
-                            <Tooltip id={`tooltip-top`}>
-                                <TagHelp />
-                            </Tooltip>
-                        }
-                    ><Button variant="link" className="text-dark pull-right p-0"><i className="fa fa-question" aria-hidden="true"></i></Button></OverlayTrigger><label className="pull-right py-2"><span><i className="fa fa-tags fa-lg" aria-hidden="true"></i></span></label>
-                </Col>
-                <Col xs="10">
+            <Row hidden>
+                <Col xs={{ offset: "0", span: "12" }} sm={{ offset: "1", span: "10" }}>
                     {oldVersion ?
                         <TagsInput value={tags} onChange={handleChange} disabled />
                         :
@@ -120,9 +136,9 @@ export default function ItemTopRows() {
                     <Button variant="link" className="pull-right" onClick={handleSave}><i className={`fa fa-check fa-lg ${BSafesStyle.greenText}`} aria-hidden="true"></i></Button>
                 </Col>
             </Row>}
-            <FeatureNotAvailableForDemoToast show={showFeatureNotAvailableForDemoToast} message="The Versions feature is not available for demo!" handleClose={()=>{setShowFeatureNotAvailableForDemoToast(false)}}/>
+            <FeatureNotAvailableForDemoToast show={showFeatureNotAvailableForDemoToast} message="The Versions feature is not available for demo!" handleClose={() => { setShowFeatureNotAvailableForDemoToast(false) }} />
             <VersionsHistoryModal onLinkChanged={handleLinkChanged} versionsHistoryModalOpened={versionsHistoryModalOpened} closeVersionsHistoryModal={() => setVersionsHistoryModalOpened(false)} />
-        </Container>
+        </>
     )
 }
 

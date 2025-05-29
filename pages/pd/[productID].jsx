@@ -6,15 +6,17 @@ import { debugLog } from "../../lib/helper";
 
 export default function PRODUCT() {
     const debugOn = true;
-    
+
     const router = useRouter();
     const productID = router.query.productID;
 
-    useEffect(()=> {
-        debugLog(debugOn, `ProductID: ${productID}`);
-        let productLink = products[productID];
-        if( productLink){
-            router.push(productLink)
+    useEffect(() => {
+        if (productID) {
+            debugLog(debugOn, `ProductID: ${productID}`);
+            let productLink = products[productID].demoUrl;
+            if (productLink) {
+                router.push(productLink)
+            }
         }
     }, [productID])
 

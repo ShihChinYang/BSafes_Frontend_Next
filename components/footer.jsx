@@ -7,6 +7,7 @@ import Col from 'react-bootstrap/Col'
 
 import { Montserrat } from 'next/font/google'
 
+
 export const monteserrat = Montserrat({
     subsets: ['latin'],
     display: 'swap',
@@ -17,7 +18,7 @@ import BSafesStyle from '../styles/BSafes.module.css'
 export default function Footer() {
     return (
         <div style={{ backgroundColor: 'white', borderTop: 'solid' }}>
-            <Container className={monteserrat.className}>
+            <Container>
                 <br />
                 <Row>
                     <Col className='text-center'>

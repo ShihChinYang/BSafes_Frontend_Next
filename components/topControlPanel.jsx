@@ -12,9 +12,12 @@ import Form from 'react-bootstrap/Form'
 import Dropdown from 'react-bootstrap/Dropdown'
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 import NewItemModal from "./newItemModal";
 
 import { debugLog } from "../lib/helper";
+import { productIdDelimiter } from "../lib/productID";
+
 import { createANewItemThunk, clearNewItem, selectItem, clearReoloadAPage, setItemTrashed } from "../reduxStore/containerSlice";
 import { getItemLink, isItemAContainer } from "../lib/bSafesCommonUI";
 
@@ -51,6 +54,20 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     const workspaceSearchIV = useSelector(state => state.container.searchIV);
     const reloadAPage = useSelector(state => state.container.reloadAPage);
     const itemTrashed = useSelector(state => state.container.itemTrashed);
+
+    let productId = "";
+    if (pageItemId && pageItemId.split(":")[1].startsWith(productIdDelimiter)) {
+        productId = pageItemId.split(productIdDelimiter)[1];
+    }
+    let controlPanelStyle = "";
+    let searchPanelStyle = "";
+    if(productId === "") {
+        controlPanelStyle = BSafesStyle.containerControlPanel;
+        searchPanelStyle = BSafesStyle.containerSearchPanel;
+    } else {
+        controlPanelStyle = BSafesProductsStyle[`${productId}_TopControlPanel`];
+        searchPanelStyle = BSafesProductsStyle[`${productId}_TopSearchPanel`];
+    }
 
     function plusButton({ children, onClick }, ref) {
         return (
@@ -99,7 +116,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     }
 
     const onShowSearchBarClicked = (e) => {
-            setShowSearchBar(true);
+        setShowSearchBar(true);
     }
 
     const onSearchValueChanged = (e) => {
@@ -170,10 +187,10 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
         <>
             <Row>
                 <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
-                    <Card className={`${BSafesStyle.containerControlPanel}`}>
+                    <Card className={controlPanelStyle}>
                         <Card.Body className=''>
                             <Row>
-                                <Col xs={4}>
+                                <Col xs={5}>
                                     {((pageActivity === 0) && (containerActivity === 0)) && (workspaceId && workspaceId.startsWith("d:") && (containerInWorkspace === workspaceId || (pageItemId && pageItemId.startsWith("p:")))) && <Button onClick={onHomeClicked} variant='link' size='sm' className='text-white'><i className="fa fa-home fa-lg" aria-hidden="true"></i></Button>}
                                     {((pageActivity === 0) && (containerActivity === 0)) && !containerInWorkspace && <Button variant='link' size='sm' className='text-white'><i className="fa fa-square fa-lg" aria-hidden="true"></i></Button>}
                                     {((pageActivity === 0) && (containerActivity === 0)) && containerInWorkspace && (containerInWorkspace.startsWith('u') || containerInWorkspace.startsWith('t')) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-square fa-lg" aria-hidden="true"></i></Button>}
@@ -187,7 +204,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
                                             (containerInWorkspace.startsWith('b') && !router.asPath.includes('\/contents\/'))
                                         ))) && <Button variant='link' size='sm' className='text-white' onClick={onContentsClicked}><i className="fa fa-list-ul fa-lg" aria-hidden="true"></i></Button>}
                                 </Col>
-                                <Col xs={8}>
+                                <Col xs={7}>
                                     {(pageNumber || (containerInWorkspace && containerInWorkspace.startsWith('n'))) &&
                                         <Form.Group className='pull-right'>
                                             <Form.Control ref={pageNumberInputRef} type="text" defaultValue={pageNumber ? pageNumber : ''} className={`${BSafesStyle.pageNavigationPart} ${BSafesStyle.pageNumberInput} pt-0 pb-0`} />
@@ -244,7 +261,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
                     <br />
                     <Row>
                         <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
-                            <Card className={`${BSafesStyle.containerSearchPanel}`}>
+                            <Card className={searchPanelStyle}>
 
                                 <Form onSubmit={onSearchEntered} className={BSafesStyle.searchBar}>
                                     <InputGroup>

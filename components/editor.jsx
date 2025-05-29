@@ -9,19 +9,22 @@ import Image from 'react-bootstrap/Image';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 
+const forge = require('node-forge');
+
 import { Blocks } from 'react-loader-spinner';
 
 import jquery from "jquery"
 
 import BSafesStyle from '../styles/BSafes.module.css'
 
-import { getEditorConfig } from "../lib/bSafesCommonUI";
+import { getEditorConfig, newResultItem } from "../lib/bSafesCommonUI";
 import { debugLog, PostCall, convertUint8ArrayToBinaryString, getBrowserInfo, arraryBufferToStr } from "../lib/helper";
 import { putS3Object } from "../lib/s3Helper";
 import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryString, encryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync } from "../lib/crypto";
 import { rotateImage, downScaleImage } from '../lib/wnImage';
+import { products, productIdDelimiter } from "../lib/productID";
 
-import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered } from "../reduxStore/pageSlice";
+import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage } from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 
 let Excalidraw = null;
@@ -31,7 +34,7 @@ let FontsConfig = null;
  * 
  * @param {Object} props - The properties object.
  * @param {string} props.editorId - Unique identifier for the editor.
- * @param {"Writing" | "ReadOnly" | "Saving"} props.mode - The mode of the editor.
+ * @param {"Writing" | "ReadOnly" | "Saving" | "GeneratingDrawingImage"} props.mode - The mode of the editor.
  * @param {string} props.content - Initial content of the editor.
  * @param {function(string, string): void} props.onContentChanged - Callback when content changes.
  * @param {function(string, string): void} props.onPenClicked - Callback when the pen is clicked.
@@ -47,11 +50,16 @@ let FontsConfig = null;
  * @param {boolean} [props.showWriteIcon=false] - Whether to show the writing icon.
  * @param {function(Object) | null} [props.onDrawingClicked=null] - Callback when the drawing icon is clicked.
  */
-export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null }) {
+
+
+export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null, drawingImageDone = null }) {
     const debugOn = false;
     const dispatch = useDispatch();
 
     const editorRef = useRef(null);
+    const monitorExcalidrawCallback = useRef();
+    const bottomBarRectBottomRef = useRef();
+
     const ExcalidrawRef = useRef(null);
     const [draftInterval, setDraftInterval] = useState(null);
     const [intervalState, setIntervalState] = useState(null);
@@ -62,14 +70,44 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const itemIV = useSelector(state => state.page.itemIV);
     const draft = useSelector(state => state.page.draft);
     const contentType = useSelector(state => state.page.contentType) || 'WritingPage';
+    const pageTemplate = useSelector(state => state.page.pageTemplate);
 
     debugLog(debugOn, `editor key: ${froalaKey}`);
 
     const [editorOn, setEditorOn] = useState(false);
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
     const [originalContent, setOriginalContent] = useState(null);
-
+    const [viewportWidth, setViewportWidth] = useState(0);
+    const [monitorExcalidrawInterval, setMonitorExcalidrawInterval] = useState(null);
+    const [bottomBarRectBottom, setBottomBarRectBottom] = useState(0);
+    const [needToUpdatePageCommonControls, setNeedToUpdatePageCommonControls] = useState(false);
     debugLog(debugOn, "Rendering editor, id,  mode: ", `${editorId} ${mode}`);
+
+    let productId = "";
+    if (itemId && itemId.split(":")[1].startsWith(`${productIdDelimiter}`)) {
+        productId = itemId.split(productIdDelimiter)[1];
+    }
+    let product = {};
+    if (productId) {
+        product = products[productId];
+    }
+
+    const updatePageCommonControlsBottom = () => {
+        if (!window || !document || !ExcalidrawRef.current) return;
+        if (window.innerWidth !== viewportWidth) {
+            const elements = ExcalidrawRef.current.getSceneElements();
+            ExcalidrawRef.current.scrollToContent(elements[0], {
+                fitToContent: true
+            });
+            setViewportWidth(window.innerWidth);
+        }
+        debugLog(debugOn, "updatePageCommonControlsBottom, window.innerHeight", window.innerHeight);
+        const targetDiv = document.getElementsByClassName("App-bottom-bar")[0].getElementsByClassName("Island")[0];
+        const rect = targetDiv.getBoundingClientRect();
+        debugLog(debugOn, "updatePageCommonControlsBottom, rect.bottom", rect.bottom);
+        const pageCommonControlsBottom = window.innerHeight - rect.bottom + rect.height + 4;
+        dispatch(setPageCommonControlsBottom(pageCommonControlsBottom));
+    }
 
     const writing = () => {
         if (!scriptsLoaded) return;
@@ -183,7 +221,9 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     if (res.files)
                         ExcalidrawRef.current.addFiles(Object.values(res.files));
                     loadExcalidrawState();
-                    ExcalidrawRef.current.scrollToContent();
+                    ExcalidrawRef.current.scrollToContent(savedJSON.elements[0], {
+                        fitToContent: true,
+                    });
                 }
             }
             setTimeout(() => {
@@ -193,6 +233,23 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
         else {
             loadExcalidrawState();
         }
+        monitorExcalidrawCallback.current = () => {
+            const appBottomBar = document.getElementsByClassName("App-bottom-bar");
+            if (!appBottomBar || !appBottomBar.length) return;
+            const Island = appBottomBar[0].getElementsByClassName("Island");
+            if (!Island || !Island.length) return;
+            const targetDiv = Island[0];
+            const rect = targetDiv.getBoundingClientRect();
+            debugLog(debugOn, "monitor excalidraw interval: ", `${bottomBarRectBottomRef.current}, ${rect.bottom}`);
+            if (rect.bottom !== bottomBarRectBottomRef.current) {
+                setBottomBarRectBottom(rect.bottom);
+                bottomBarRectBottomRef.current = rect.bottom;
+            }
+        }
+        const thisInterval = setInterval(() => {
+            monitorExcalidrawCallback.current();
+        }, 500);
+        setMonitorExcalidrawInterval(thisInterval);
     }
 
     const getDrawingContent = () => {
@@ -217,6 +274,8 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             if (!elements || !elements.length) {
                 return;
             }
+            const serialized = Excalidraw.serializeAsJSON(ExcalidrawRef.current.getSceneElements(), ExcalidrawRef.current.getAppState(), ExcalidrawRef.current.getFiles(), 'local');
+            //elements.splice(1,1);
             const appState = ExcalidrawRef.current.getAppState();
             Excalidraw.exportToCanvas({
                 elements,
@@ -231,7 +290,6 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             }).then(canvas => {
                 canvas.toBlob(blob => {
                     blob.name = 'excalidraw.png';
-                    const serialized = Excalidraw.serializeAsJSON(ExcalidrawRef.current.getSceneElements(), ExcalidrawRef.current.getAppState(), ExcalidrawRef.current.getFiles(), 'local');
                     blob.src = window.URL.createObjectURL(blob);
                     blob.metadata = {
                         ExcalidrawExportedImage: true,
@@ -249,9 +307,30 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
         }
     }
 
-    const readOnly = () => {
+    const generateDrawingTemplateImage = () => {
+        const templateJSON = JSON.parse(pageTemplate);
+        Excalidraw.exportToCanvas({
+            elements: templateJSON.elements,
+            appState: {
+                ...templateJSON.appState,
+                exportWithDarkMode: false,
+                exportBackground: true,
+                exportScale: 2
+            },
+            files: templateJSON.files,
+            maxWidthOrHeight: 2048
+        }).then(canvas => {
+            canvas.toBlob(blob => {
+                dispatch(setDrawingTemplateImage({ src: window.URL.createObjectURL(blob) }))
+                blob.name = 'excalidraw.png';
+                drawingImageDone();
+            })
+        })
+    }
+
+    const readOnly = async () => {
         if (editorOn) {
-            if (contentType === "WritingPage") {
+            if ((editorId !== 'content') || (contentType === "WritingPage")) {
                 $(editorRef.current).froalaEditor('destroy');
                 $(editorRef.current).html(content);
                 editorRef.current.style.overflowX = 'auto';
@@ -264,10 +343,15 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             setOriginalContent(null);
             setEditorOn(false);
             if (readOnlyModeReady) readOnlyModeReady();
+            if (monitorExcalidrawInterval) {
+                clearInterval(monitorExcalidrawInterval);
+                setMonitorExcalidrawInterval(null);
+            }
         }
     }
 
     useEffect(() => {
+        if (!scriptsLoaded) return;
         switch (mode) {
             case "ReadOnly":
                 readOnly();
@@ -281,10 +365,13 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             case "Saving":
                 saving();
                 break;
+            case "GeneratingDrawingImage":
+                generateDrawingTemplateImage();
+                break;
             default:
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mode])
+    }, [mode, scriptsLoaded])
 
     useEffect(() => {
         if (itemId && itemKey) {
@@ -406,6 +493,21 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             default:
         }
     }, [intervalState])
+
+    useEffect(() => {
+        if (bottomBarRectBottom) {
+            debugLog(debugOn, "bottomBarRectBottom changed");
+            setNeedToUpdatePageCommonControls(true);
+        }
+    }, [bottomBarRectBottom])
+
+    useEffect(() => {
+        if (needToUpdatePageCommonControls) {
+            debugLog(debugOn, "needToUpdatePageCommonControls")
+            updatePageCommonControlsBottom();
+            setNeedToUpdatePageCommonControls(false);
+        }
+    }, [needToUpdatePageCommonControls]);
 
     const handlePenClicked = (purpose) => {
         onPenClicked(editorId, purpose);
@@ -602,6 +704,27 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const getEditorConfigHook = () => {
         return getEditorConfig();
     }
+
+    const saveAsJSON = () => {
+        const elements = ExcalidrawRef.current.getSceneElements();
+        if (!elements || !elements.length) {
+            return;
+        }
+        let appState = ExcalidrawRef.current.getAppState();
+        appState = {
+            ...appState,
+            forBSafes: true,
+            forBSafesImageMaxWidthOrHeight: 120
+        }
+        const serialized = Excalidraw.serializeAsJSON(ExcalidrawRef.current.getSceneElements(), appState, ExcalidrawRef.current.getFiles(), 'local');
+        const encoded = forge.util.encodeUtf8(serialized);
+        const attachment = {
+            fileName: "test.draw",
+            fileSize: encoded.length,
+            data: encoded
+        }
+        dispatch(saveAFileThunk({ attachment }));
+    }
     return (
         <>
             {scriptsLoaded ?
@@ -610,11 +733,11 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                         <>
                             <Row>
                                 <Col xs={6}>
-                                    {(editorId === 'title' && content === '<h2></h2>') && <h6 className='m-0 text-secondary'>Title</h6>}
+                                    {(productId === "") && (editorId === 'title' && (!content || (content === '<h2></h2>'))) && <h6 className='m-0 text-secondary'>Title</h6>}
                                     {(editorId === 'content' && content === null) && <h6 className='m-0 text-secondary'>Write {showDrawIcon ? `or Draw` : ``}</h6>}
                                 </Col>
                                 <Col xs={6}>
-                                    {showWriteIcon && <OverlayTrigger
+                                    {(editorId === "content" || (productId === "")) && showWriteIcon && <OverlayTrigger
                                         placement="top"
                                         delay={{ show: 250, hide: 400 }}
                                         overlay={(props) => (
@@ -651,7 +774,31 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                         </>
 
                     }
-                    {((contentType !== 'DrawingPage' || editorId === 'title') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
+                    {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
+                        <div style={{ position: "relative" }}>
+                            <div style={{ paddingTop: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
+                                {!content &&
+                                    <h6 className='m-0 text-secondary'>Title</h6>
+                                }
+                                <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
+                                </div>
+                            </div>
+                            {showPen && editable && productId !== "" && showWriteIcon &&
+                                <OverlayTrigger
+                                    placement="top"
+                                    delay={{ show: 250, hide: 400 }}
+                                    overlay={(props) => (
+                                        <Tooltip id="button-tooltip" {...props}>
+                                            Write
+                                        </Tooltip>
+                                    )}
+                                >
+                                    <Button variant="link" style={{ position: "absolute", top: "0px", right: "-12px", width: "24px", zIndex: "100" }} className="text-dark p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button>
+                                </OverlayTrigger>
+                            }
+                        </div>
+                    }
+                    {(editorId !== 'title' && (editorId !== 'content' || contentType === 'WritingPage') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                             <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
                             </div>
@@ -659,7 +806,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     }
                     {editorId === 'content' && contentType === 'DrawingPage' &&
                         <>
-                            {(mode == 'Writing' || mode === 'Saving') ?
+                            {(mode == 'Writing' || mode === 'Saving' || mode === "GeneratingDrawingImage") ?
                                 <div style={{ position: "fixed", zIndex: "100", top: "0", left: "0", height: "100%", width: "100%" }}>
                                     <Excalidraw.Excalidraw excalidrawAPI={(excalidrawApi) => {
                                         if (!ExcalidrawRef.current) {
@@ -675,6 +822,9 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                                 <Excalidraw.MainMenu.DefaultItems.LoadScene />
                                                 <Excalidraw.MainMenu.DefaultItems.Export />
                                                 <Excalidraw.MainMenu.DefaultItems.SaveAsImage />
+                                                <Excalidraw.MainMenu.Item onSelect={saveAsJSON}>
+                                                    Save As JSON
+                                                </Excalidraw.MainMenu.Item>
                                                 <Excalidraw.MainMenu.DefaultItems.Help />
                                                 <Excalidraw.MainMenu.DefaultItems.ClearCanvas />
                                                 <Excalidraw.MainMenu.DefaultItems.ToggleTheme />
@@ -684,10 +834,10 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                     </Excalidraw.Excalidraw>
                                 </div>
                                 :
-                                <Row className={`${BSafesStyle.editorRow} w-100`} style={{ height: '60vh' }}>
+                                <>
                                     {content &&
-                                        <Image onClick={handleDrawingClicked} style={{ objectFit: 'scale-down', maxHeight: '100%', maxWidth: '100%' }} alt="Image broken" src={content.src} fluid />}
-                                </Row>
+                                        <Image onClick={handleDrawingClicked} style={{ display: "block", margin: "auto", objectFit: 'scale-down', maxHeight: '100%', maxWidth: '100%' }} alt="Image broken" src={content.src} fluid />}
+                                </>
                             }
                         </>
                     }

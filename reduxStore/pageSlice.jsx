@@ -89,6 +89,11 @@ const initialState = {
     originalContent: null,
     contentType: '',
     contentEditorMode: 'ReadOnly',
+    adjacentPagesDownloadQueue: [],
+    pageCommonControlsBottom: 0,
+    getPageContentDone: false,
+    pageTemplate: null,
+    templateLoaded: false,
 }
 
 const dataFetchedFunc = (state, action) => {
@@ -958,7 +963,7 @@ const pageSlice = createSlice({
         clearDraft: (state, action) => {
             state.draft = null;
             state.draftContentType = null;
-            const {draftId, draftContentTypeId} = formDraftId(state.id);
+            const { draftId, draftContentTypeId } = formDraftId(state.id);
             localStorage.removeItem(draftId);
             localStorage.removeItem(draftContentTypeId);
         },
@@ -973,7 +978,7 @@ const pageSlice = createSlice({
             state.draftLoaded = true;
             state.draft = null;
             state.draftContentType = null;
-            const {draftId, draftContentTypeId} = formDraftId(state.id);
+            const { draftId, draftContentTypeId } = formDraftId(state.id);
             localStorage.removeItem(draftContentTypeId);
             localStorage.removeItem(draftId);
             state.contentImagesDownloadQueue = [];
@@ -999,11 +1004,141 @@ const pageSlice = createSlice({
         },
         setContentEditorMode: (state, action) => {
             state.contentEditorMode = action.payload;
-        }
+        },
+        addAdjacentPagesToDownloadQueue: (state, action) => {
+            state.adjacentPagesDownloadQueue = action.payload.concat(state.adjacentPagesDownloadQueue);
+        },
+        adjacentPageDownloaded: (state, action) => {
+            if (action.payload === state.adjacentPagesDownloadQueue.at(-1))
+                state.adjacentPagesDownloadQueue.pop();
+        },
+        setPageCommonControlsBottom: (state, action) => {
+            state.pageCommonControlsBottom = action.payload;
+        },
+        setGetPageContentDone: (state, action) => {
+            state.getPageContentDone = action.payload;
+        },
+        setPageTemplate: (state, action) => {
+            state.pageTemplate = action.payload;
+        },
+        loadPageTemplate: (state, action) => {
+            state.content = {
+                ...state.content,
+                ...action.payload.template,
+            }
+            state.contentType = action.payload.type;
+            state.templateLoaded = true;
+        },
+        setDrawingTemplateImage: (state, action) => {
+            state.content.src = action.payload.src;
+        },
+        clearPageTemplate: (state, action) => {
+            state.pageTemplate = "";
+            state.templateLoaded = false;
+        },
     }
 })
 
-export const { cleanPageSlice, resetPageActivity, activityStart, activityDone, activityError, clearPage, initPage, setIOSActivity, setChangingPage, abort, setActiveRequest, setNavigationMode, setPageItemId, setPageStyle, setPageNumber, dataFetched, setOldVersion, contentDecrypted, setInitialContentRendered, itemPathLoaded, decryptPageItem, containerDataFetched, setContainerData, newItemKey, newItemCreated, newVersionCreated, clearItemVersions, itemVersionsFetched, downloadingContentImage, contentImageDownloaded, contentImageDownloadFailed, setContentImagesAllDownloaded, updateContentImagesDisplayIndex, downloadContentVideo, downloadingContentVideo, contentVideoDownloaded, contentVideoFromServiceWorker, playingContentVideo, addUploadImages, uploadingImage, imageUploaded, downloadingImage, imageDownloaded, imageDownloadFailed, addUploadAttachments, setAbortController, uploadingAttachment, stopUploadingAnAttachment, attachmentUploaded, uploadAChunkFailed, addDownloadAttachment, stopDownloadingAnAttachment, downloadingAttachment, setXHR, attachmentDownloaded, setAttachmentSelectedForDownload, writerClosed, setupWriterFailed, downloadAChunkFailed, setImageWordsMode, setCommentEditorMode, pageCommentsFetched, newCommentAdded, commentUpdated, setS3SignedUrlForContentUpload, setDraft, clearDraft, loadDraft, setDraftLoaded, loadOriginalContent, addUploadVideos, uploadingVideo, videoUploaded, setVideoWordsMode, downloadVideo, downloadingVideo, videoFromServiceWorker, updateVideoChunksMap, playingVideo, addUploadAudios, uploadingAudio, audioUploaded, setAudioWordsMode, downloadAudio, downloadingAudio, audioFromServiceWorker, updateAudioChunksMap, playingAudio, setContentType, setContentEditorMode } = pageSlice.actions;
+export const {
+    cleanPageSlice,
+    resetPageActivity,
+    activityStart,
+    activityDone,
+    activityError,
+    clearPage,
+    initPage,
+    setIOSActivity,
+    setChangingPage,
+    abort,
+    setActiveRequest,
+    setNavigationMode,
+    setPageItemId,
+    setPageStyle,
+    setPageNumber,
+    dataFetched,
+    setOldVersion,
+    contentDecrypted,
+    setInitialContentRendered,
+    itemPathLoaded,
+    decryptPageItem,
+    containerDataFetched,
+    setContainerData,
+    newItemKey,
+    newItemCreated,
+    newVersionCreated,
+    clearItemVersions,
+    itemVersionsFetched,
+    downloadingContentImage,
+    contentImageDownloaded,
+    contentImageDownloadFailed,
+    setContentImagesAllDownloaded,
+    updateContentImagesDisplayIndex,
+    downloadContentVideo,
+    downloadingContentVideo,
+    contentVideoDownloaded,
+    contentVideoFromServiceWorker,
+    playingContentVideo,
+    addUploadImages,
+    uploadingImage,
+    imageUploaded,
+    downloadingImage,
+    imageDownloaded,
+    imageDownloadFailed,
+    addUploadAttachments,
+    setAbortController,
+    uploadingAttachment,
+    stopUploadingAnAttachment,
+    attachmentUploaded,
+    uploadAChunkFailed,
+    addDownloadAttachment,
+    stopDownloadingAnAttachment,
+    downloadingAttachment,
+    setXHR,
+    attachmentDownloaded,
+    setAttachmentSelectedForDownload,
+    writerClosed,
+    setupWriterFailed,
+    downloadAChunkFailed,
+    setImageWordsMode,
+    setCommentEditorMode,
+    pageCommentsFetched,
+    newCommentAdded,
+    commentUpdated,
+    setS3SignedUrlForContentUpload,
+    setDraft,
+    clearDraft,
+    loadDraft,
+    setDraftLoaded,
+    loadOriginalContent,
+    addUploadVideos,
+    uploadingVideo,
+    videoUploaded,
+    setVideoWordsMode,
+    downloadVideo,
+    downloadingVideo,
+    videoFromServiceWorker,
+    updateVideoChunksMap,
+    playingVideo,
+    addUploadAudios,
+    uploadingAudio,
+    audioUploaded,
+    setAudioWordsMode,
+    downloadAudio,
+    downloadingAudio,
+    audioFromServiceWorker,
+    updateAudioChunksMap,
+    playingAudio,
+    setContentType,
+    setContentEditorMode,
+    addAdjacentPagesToDownloadQueue,
+    adjacentPageDownloaded,
+    setPageCommonControlsBottom,
+    setGetPageContentDone,
+    setPageTemplate,
+    loadPageTemplate,
+    setDrawingTemplateImage,
+    clearPageTemplate,
+} = pageSlice.actions;
 
 
 const newActivity = async (dispatch, type, activity) => {
@@ -1020,7 +1155,7 @@ const newActivity = async (dispatch, type, activity) => {
     }
 }
 
-const XHRDownload = (itemId, dispatch, signedURL, downloadingFunction, baseProgress = 0, progressRatio = 1, indexInQueue = -1) => {
+const XHRDownload = (itemId, dispatch, signedURL, downloadingFunction = null, baseProgress = 0, progressRatio = 1, indexInQueue = -1) => {
     return new Promise(async (resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', signedURL, true);
@@ -1192,12 +1327,38 @@ const prepareADemoPageItem = (workspace, type, data) => {
     return item;
 }
 
+const addItemToServiceWorkerDB = async (id, item) => {
+    const params = {
+        table: 'itemVersions',
+        key: id,
+        data: item
+    }
+    return writeDataToServiceWorkerDBTable(params);
+}
+
+const getItemFromServiceWorkerDB = (itemId) => {
+    const params = {
+        table: 'itemVersions',
+        key: itemId
+    }
+    return readDataFromServiceWorkerDBTable(params);
+}
+
 const getDemoItemFromServiceWorkerDB = (itemId) => {
     const params = {
         table: 'itemVersions',
         key: itemId
     }
     return readDataFromServiceWorkerDBTable(params);
+}
+
+const putS3ObjectToServiceWorkerDB = (s3Key, data) => {
+    const params = {
+        table: 's3Objects',
+        key: s3Key,
+        data
+    }
+    return writeDataToServiceWorkerDBTable(params);
 }
 
 const getS3ObjectFromServiceWorkerDB = (s3Key) => {
@@ -1325,6 +1486,7 @@ export const putS3ObjectInServiceWorkerDB = (s3Key, data, onProgress) => {
 
 export const getPageItemThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, pageActivity.GetPageItem, () => {
+        const navigationInSameContainer = getState().container.navigationInSameContainer;
 
         if (data.itemId.startsWith('np')) {
             dispatch(setPageNumber(parseInt(data.itemId.split(':').pop())));
@@ -1411,7 +1573,71 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
 
                 })
             }
-            if (!isDemoMode()) {
+            async function processResultItem(result) {
+                dispatch(dataFetched({ item: result.item }));
+                if (result.item.content && result.item.content.startsWith('s3Object/')) {
+                    dispatch(setContentType('WritingPage'));
+                    const s3Key = forge.util.decode64(result.item.content.substring(9));
+                    const response = await getS3ObjectFromServiceWorkerDB(s3Key);
+                    let downloadedBinaryString = null;
+                    if (response.status === 'ok' && response.object) {
+                        downloadedBinaryString = response.object;
+                    } else {
+                        const signedContentUrl = result.item.signedContentUrl;
+                        const response = await XHRDownload(null, dispatch, signedContentUrl, null);
+                        const buffer = Buffer.from(response, 'binary');
+                        downloadedBinaryString = buffer.toString('binary');
+                        await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
+                    }
+                    debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                    await itemKeyReady();
+                    const decryptedContent = decryptBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
+                    debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
+                    const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
+                    dispatch(contentDecrypted({ item: { id: data.itemId, content: decodedContent } }));
+                    state = getState().page;
+                    startDownloadingContentImages(data.itemId, dispatch, getState);
+                    resolve();
+                } else if (result.item.content && result.item.content.startsWith('s3DrawingObject/')) {
+                    dispatch(setContentType('DrawingPage'));
+                    const s3Key = forge.util.decode64(result.item.content.substring(16));
+                    const response = await getS3ObjectFromServiceWorkerDB(s3Key);
+                    let downloadedBinaryString = null;
+                    if (response.status === 'ok' && response.object) {
+                        downloadedBinaryString = response.object;
+                    } else {
+                        const signedContentUrl = result.item.signedContentUrl;
+                        const response = await XHRDownload(null, dispatch, signedContentUrl, null);
+                        const buffer = Buffer.from(response, 'binary');
+                        downloadedBinaryString = buffer.toString('binary');
+                        await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
+                    }
+                    debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                    await itemKeyReady();
+                    const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
+                    debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
+                    const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
+                    const decodedContent = (forge.util.decodeUtf8(decryptedImageStr));
+                    const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decodedContent);
+                    const blob = new Blob([decryptedImageDataInUint8Array], {
+                        type: 'image/*'
+                    });
+                    const link = window.URL.createObjectURL(blob);
+                    blob.src = link;
+                    blob.metadata = {
+                        ExcalidrawExportedImage: true,
+                        ExcalidrawSerializedJSON: forge.util.decodeUtf8(embeddJSON)
+                    };
+                    dispatch(contentDecrypted({ item: { id: data.itemId, content: blob } }));
+                    resolve();
+                } else if (result.item.content) {
+                    dispatch(setContentType('WritingPage'));
+                    resolve();
+                } else {
+                    resolve();
+                }
+            }
+            function getItemFromServer() {
                 debugLog(debugOn, "/memberAPI/getPageItem: ", data.itemId);
                 PostCall({
                     api: '/memberAPI/getPageItem',
@@ -1427,55 +1653,11 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             return;
                         }
                         if (result.item) {
-                            dispatch(dataFetched({ item: result.item }));
-                            if (result.item.content && result.item.content.startsWith('s3Object/')) {
-                                dispatch(setContentType('WritingPage'));
-                                const signedContentUrl = result.item.signedContentUrl;
-                                const response = await XHRDownload(null, dispatch, signedContentUrl, null);
-                                const buffer = Buffer.from(response, 'binary');
-                                const downloadedBinaryString = buffer.toString('binary');
-                                debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                                await itemKeyReady();
-                                const decryptedContent = decryptBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
-                                debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
-                                const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
-                                dispatch(contentDecrypted({ item: { id: data.itemId, content: decodedContent } }));
-                                state = getState().page;
-                                startDownloadingContentImages(data.itemId, dispatch, getState);
-                                resolve();
-                            } else if (result.item.content && result.item.content.startsWith('s3DrawingObject/')) {
-                                dispatch(setContentType('DrawingPage'));
-                                const signedContentUrl = result.item.signedContentUrl;
-                                const response = await XHRDownload(null, dispatch, signedContentUrl, null);
-
-                                const buffer = Buffer.from(response, 'binary');
-                                const downloadedBinaryString = buffer.toString('binary');
-                                debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-
-                                await itemKeyReady();
-                                const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
-                                debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
-                                const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
-                                const decodedContent = (forge.util.decodeUtf8(decryptedImageStr));
-                                const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decodedContent);
-                                const blob = new Blob([decryptedImageDataInUint8Array], {
-                                    type: 'image/*'
-                                });
-                                const link = window.URL.createObjectURL(blob);
-                                blob.src = link;
-                                blob.metadata = {
-                                    ExcalidrawExportedImage: true,
-                                    ExcalidrawSerializedJSON: forge.util.decodeUtf8(embeddJSON)
-                                };
-                                dispatch(contentDecrypted({ item: { id: data.itemId, content: blob } }));
-                                resolve();
-                            } else if (result.item.content) {
-                                dispatch(setContentType('WritingPage'));
-                                resolve();
-                            } else {
-                                resolve();
-                            }
+                            await processResultItem(result);
+                            await addItemToServiceWorkerDB(data.itemId, result.item);
+                            dispatch(setGetPageContentDone(true));
                         } else {
+                            dispatch(setGetPageContentDone(true));
                             if (data.navigationInSameContainer) {
                                 debugLog(debugOn, "setNavigationMode ...");
                                 dispatch(setNavigationMode(true));
@@ -1505,7 +1687,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         const draftContentType = localStorage.getItem(draftContentTypeId);
                         //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
                         if (draft) {
-                            dispatch(setDraft({draft, draftContentType}));
+                            dispatch(setDraft({ draft, draftContentType }));
                         }
 
                     } else {
@@ -1516,7 +1698,164 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     debugLog(debugOn, "woo... failed to get a page item:", error)
                     reject("Failed to get a page item.");
                 })
+            }
+
+            async function downloadAdjacentPages() {
+
+                function downloadAPage(itemId) {
+                    function downloadS3Object(s3Key) {
+                        return new Promise(async (resolve, reject) => {
+                            const response = await getS3ObjectFromServiceWorkerDB(s3Key);
+                            if (!(response.status === 'ok' && response.object)) {
+                                const signedURL = await preS3Download(itemId, s3Key);
+                                const response = await XHRDownload(null, dispatch, signedURL, null);
+                                const buffer = Buffer.from(response, 'binary');
+                                const downloadedBinaryString = buffer.toString('binary');
+                                await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
+                            }
+                            resolve();
+                        });
+                    }
+
+                    return new Promise(async (resolve, reject) => {
+                        let item = null;
+
+                        async function getContentObject(item) {
+                            if (item) {
+                                let s3Key = null;
+                                if (item.content && item.content.startsWith('s3Object/')) {
+                                    s3Key = forge.util.decode64(item.content.substring(9));
+                                } else if (item.content && item.content.startsWith('s3DrawingObject/')) {
+                                    s3Key = forge.util.decode64(item.content.substring(16));
+                                }
+                                if (s3Key) {
+                                    await downloadS3Object(s3Key);
+                                }
+                            }
+                        }
+                        const result = await getItemFromServiceWorkerDB(itemId);
+                        if ((result.status === 'ok') && result.item) {
+                            await getContentObject(result.item);
+                            resolve();
+                        } else {
+                            PostCall({
+                                api: '/memberAPI/getPageItem',
+                                body: {
+                                    itemId,
+                                    adjacentPage: true
+                                }
+                            }).then(async result => {
+                                debugLog(debugOn, result);
+                                if (result.status === 'ok' && result.item) {
+                                    await addItemToServiceWorkerDB(itemId, result.item);
+                                    await getContentObject(result.item);
+                                }
+                                resolve();
+                            })
+                        }
+                    })
+                }
+
+                let adjacentPages = [];
+                if (data.itemId.startsWith('np')) {
+                    const idParts = data.itemId.split(":");
+                    const thisPageNumber = parseInt(idParts.at(-1));
+                    idParts.splice(-1);
+                    const pageIdPrefix = idParts.join(":");
+                    let startPage = thisPageNumber - 2;
+                    if (startPage < 1) startPage = 1;
+                    if (thisPageNumber > 2) {
+                        adjacentPages = [
+                            `${pageIdPrefix}:${thisPageNumber + 3}`,
+                            `${pageIdPrefix}:${thisPageNumber - 2}`,
+                            `${pageIdPrefix}:${thisPageNumber + 2}`,
+                            `${pageIdPrefix}:${thisPageNumber - 1}`,
+                            `${pageIdPrefix}:${thisPageNumber + 1}`,
+                        ]
+                    } else if (thisPageNumber > 1) {
+                        adjacentPages = [
+                            `${pageIdPrefix}:${thisPageNumber + 4}`,
+                            `${pageIdPrefix}:${thisPageNumber + 3}`,
+                            `${pageIdPrefix}:${thisPageNumber + 2}`,
+                            `${pageIdPrefix}:${thisPageNumber - 1}`,
+                            `${pageIdPrefix}:${thisPageNumber + 1}`,
+                        ]
+                    } else {
+                        adjacentPages = [
+                            `${pageIdPrefix}:${thisPageNumber + 5}`,
+                            `${pageIdPrefix}:${thisPageNumber + 4}`,
+                            `${pageIdPrefix}:${thisPageNumber + 3}`,
+                            `${pageIdPrefix}:${thisPageNumber + 2}`,
+                            `${pageIdPrefix}:${thisPageNumber + 1}`,
+                        ]
+                    }
+                } else if (data.itemId.startsWith('dp')) {
+                    const idParts = data.itemId.split(":");
+                    const thisPageDateStr = idParts.at(-1);
+                    const dateParts = thisPageDateStr.split("-");
+                    idParts.splice(-1);
+                    const pageIdPrefix = idParts.join(":");
+                    const thisPageDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+                    const thisPageTime = thisPageDate.getTime();
+                    const aDay = 24 * 60 * 60 * 1000;
+                    function getADateString(distance) {
+                        const theTime = thisPageTime + distance * aDay;
+                        const theDate = new Date(theTime);
+                        const theYear = theDate.getFullYear();
+                        const theMonth = theDate.getMonth() + 1;
+                        const theDay = theDate.getDate();
+                        const theDateString = `${theYear}-${theMonth < 10 ? "0" : ""}${theMonth}-${theDay < 10 ? "0" : ""}${theDay}`
+                        return theDateString;
+                    }
+                    adjacentPages = [
+                        `${pageIdPrefix}:${getADateString(3)}`,
+                        `${pageIdPrefix}:${getADateString(-2)}`,
+                        `${pageIdPrefix}:${getADateString(2)}`,
+                        `${pageIdPrefix}:${getADateString(-1)}`,
+                        `${pageIdPrefix}:${getADateString(1)}`,
+                    ]
+                }
+                let queue = getState().page.adjacentPagesDownloadQueue;
+                let queueLength = queue.length;
+                let itemId;
+                dispatch(addAdjacentPagesToDownloadQueue(adjacentPages))
+                if (queueLength === 0) {
+                    queue = getState().page.adjacentPagesDownloadQueue;
+                    queueLength = queue.length;
+                    while (queueLength > 0) {
+                        itemId = queue.at(-1)
+                        await downloadAPage(itemId);
+                        dispatch(adjacentPageDownloaded(itemId));
+                        queue = getState().page.adjacentPagesDownloadQueue;
+                        queueLength = queue.length;
+                    }
+                }
+            }
+
+            if (!isDemoMode()) {
+                if (navigationInSameContainer) {
+                    const result = await getItemFromServiceWorkerDB(data.itemId);
+                    if ((result.status === 'ok') && result.item) {
+                        await processResultItem(result);
+                        PostCall({
+                            api: '/memberAPI/updateLastAccessedPage',
+                            body: payload
+                        }).then(async result => {
+                            debugLog(debugOn, result);
+                        }).catch(error => {
+                            debugLog(debugOn, "woo... failed to updateLastAccessedPage", error)
+                        })
+                    } else {
+                        getItemFromServer();
+                    }
+                } else {
+                    getItemFromServer();
+                }
                 await getItemPath(data.itemId, dispatch, getState);
+                if (data.itemId.startsWith("np") || data.itemId.startsWith("dp")) {
+                    await downloadAdjacentPages();
+                }
+
             } else {
                 const result = await getDemoItemFromServiceWorkerDB(data.itemId);
                 state = getState().page;
@@ -1574,11 +1913,12 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             resolve();
                         }
                     }
-
                     if (result.item) {
                         const item = result.item;
                         await decryptADemoItem(item);
+                        dispatch(setGetPageContentDone(true));
                     } else {
+                        dispatch(setGetPageContentDone(true));
                         if (data.itemId.startsWith('p:') || data.itemId.startsWith('n:') || data.itemId.startsWith('d:')) {
                             const workspace = getState().container.workspace;
                             const workspaceKey = getState().container.workspaceKey;
@@ -1620,7 +1960,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     const draftContentType = localStorage.getItem(draftContentTypeId);
                     //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
                     if (draft) {
-                        dispatch(setDraft({draft, draftContentType}));
+                        dispatch(setDraft({ draft, draftContentType }));
                     }
                 } else {
                     debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
@@ -1731,6 +2071,24 @@ export const decryptPageItemThunk = (data) => async (dispatch, getState) => {
                 startDownloadingImages();
             }
             resolve();
+        });
+    });
+}
+
+export const getPageTemplateThunk = (data) => async (dispatch, getState) => {
+    newActivity(dispatch, pageActivity.GetPageTemplate, () => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await XHRDownload(null, dispatch, data.url);
+                const buffer = Buffer.from(response, 'binary');
+                const tempateString = forge.util.decodeUtf8(buffer.toString('binary'));
+                dispatch(setPageTemplate(tempateString));
+                debugLog(debugOn, "getPageTemplateThunk done: ");
+                resolve();
+            } catch (error) {
+                debugLog(debugOn, "getPageTemplateThunk failed: ", error);
+                reject();
+            }
         });
     });
 }
@@ -2300,10 +2658,16 @@ async function createNewItemVersion(itemCopy, dispatch) {
                     itemVersion: JSON.stringify(itemCopy)
                 },
                 dispatch
-            }).then(data => {
+            }).then(async data => {
                 debugLog(debugOn, data);
                 if (data.status === 'ok') {
                     debugLog(debugOn, `createNewItemVersion succeeded`);
+                    const params = {
+                        table: 'itemVersions',
+                        key: itemCopy.id,
+                        data: itemCopy
+                    }
+                    await writeDataToServiceWorkerDBTable(params);
                     resolve(data)
                 } else {
                     debugLog(debugOn, `createNewItemVersion failed: `, data.error)
@@ -2357,11 +2721,17 @@ function createANotebookPage(data, dispatch) {
                 api: '/memberAPI/createANotebookPage',
                 body: data,
                 dispatch
-            }).then(result => {
+            }).then(async result => {
                 debugLog(debugOn, result);
 
                 if (result.status === 'ok') {
                     if (result.item) {
+                        const params = {
+                            table: 'itemVersions',
+                            key: result.item.id,
+                            data: result.item
+                        }
+                        await writeDataToServiceWorkerDBTable(params);
                         resolve(result.item);
                     } else {
                         debugLog(debugOn, "woo... failed to create a notebook page!", data.error);
@@ -2400,11 +2770,17 @@ function createADiaryPage(data, dispatch) {
                 api: '/memberAPI/createADiaryPage',
                 body: data,
                 dispatch
-            }).then(result => {
+            }).then(async result => {
                 debugLog(debugOn, result);
 
                 if (result.status === 'ok') {
                     if (result.item) {
+                        const params = {
+                            table: 'itemVersions',
+                            key: result.item.id,
+                            data: result.item
+                        }
+                        await writeDataToServiceWorkerDBTable(params);
                         resolve(result.item);
                     } else {
                         debugLog(debugOn, "woo... failed to create a diary page!", data.error);
@@ -2818,7 +3194,7 @@ export const saveDraftThunk = (data) => async (dispatch, getState) => {
             const { draftId, draftContentTypeId } = formDraftId(state.id);
             localStorage.setItem(draftId, encodedContent);
             localStorage.setItem(draftContentTypeId, state.contentType);
-            dispatch(setDraft({draft:encodedContent, draftContentType:state.contentType}));
+            dispatch(setDraft({ draft: encodedContent, draftContentType: state.contentType }));
             resolve();
         } catch (error) {
             alert('error');
@@ -2878,6 +3254,12 @@ export const saveContentThunk = (data) => async (dispatch, getState) => {
                             }
                             dispatch(setS3SignedUrlForContentUpload(null));
                             await putS3Object(s3Key, signedURL, data, config, dispatch);
+                            const params = {
+                                table: 's3Objects',
+                                key: s3Key,
+                                data
+                            }
+                            await writeDataToServiceWorkerDBTable(params);
                             resolve();
                         } catch (error) {
                             debugLog(debugOn, "uploadContentToS3 failed: ", error);
@@ -2938,6 +3320,8 @@ export const saveContentThunk = (data) => async (dispatch, getState) => {
 
                         await createANewPage(dispatch, getState, state, newPageData, updatedState);
                         dispatch(clearDraft());
+                        dispatch(setDraftLoaded(false));
+                        dispatch(clearPageTemplate());
                         requestAppleReview();
                         resolve();
                     } catch (error) {
@@ -4300,6 +4684,147 @@ export const uploadAttachmentsThunk = (data) => async (dispatch, getState) => {
                 resolve();
             }
         });
+    });
+}
+
+export const saveAFileThunk = (data) => async (dispatch, getState) => {
+    return new Promise(async (resolve, reject) => {
+        const attachment = data.attachment;
+        let messageChannel, fileInUint8Array, fileInUint8ArrayIndex, i, numberOfChunks;
+        const isUsingServiceWorker = usingServiceWorker();
+        async function setupWriter() {
+            function talkToServiceWorker() {
+                return new Promise(async (resolve, reject) => {
+                    navigator.serviceWorker.getRegistration("/downloadFile/").then((registration) => {
+                        if (registration) {
+                            messageChannel = new MessageChannel();
+                            registration.active.postMessage({
+                                type: 'INIT_PORT',
+                                fileName: attachment.fileName,
+                                fileSize: attachment.fileSize,
+                                browserInfo: getBrowserInfo()
+                            }, [messageChannel.port2]);
+                            messageChannel.port1.onmessage = (event) => {
+                                // Print the result
+                                debugLog(debugOn, event.data);
+                                if (event.data) {
+                                    switch (event.data.type) {
+                                        case 'STREAM_OPENED':
+                                            const iframe = document.createElement('iframe');
+                                            iframe.hidden = true;
+                                            iframe.src = '/downloadFile/' + event.data.stream.id;
+                                            document.body.appendChild(iframe);
+                                            debugLog(debugOn, "STREAM_OPENED");
+                                            resolve();
+                                            break;
+                                        case 'STREAM_CLOSED':
+                                            messageChannel.port1.onmessage = null
+                                            messageChannel.port1.close();
+                                            messageChannel.port2.close();
+                                            messageChannel = null;
+                                            dispatch(writerClosed());
+                                            break;
+                                        default:
+                                    }
+                                }
+                            };
+                        } else {
+                            debugLog(debugOn, "s");
+                            reject("serviceWorker.getRegistration error")
+                        }
+                    });
+                }).catch((error) => {
+                    debugLog(debugOn, "serviceWorker.getRegistration error: ", error);
+                    reject("serviceWorker.getRegistration error.");
+                });
+            }
+            if (!isUsingServiceWorker) {
+                fileInUint8Array = new Uint8Array(attachment.fileSize);
+                fileInUint8ArrayIndex = 0;
+                return true;
+            } else {
+                try {
+                    await talkToServiceWorker();
+                    return true;
+                } catch (error) {
+                    debugLog(debugOn, "setupWriter failed: ", error)
+                    return false;
+                }
+            }
+        }
+        function reconnectWriter() {
+            if (!isUsingServiceWorker) {
+                if (process.env.NEXT_PUBLIC_platform !== 'android') {
+                    fileInUint8Array = state.writer.fileInUint8Array;
+                    fileInUint8ArrayIndex = state.writer.fileInUint8ArrayIndex;
+                }
+            } else {
+                messageChannel = state.writer;
+            }
+        }
+        function closeWriter() {
+            if (!isUsingServiceWorker) {
+                dispatch(writerClosed());
+            } else {
+                messageChannel.port1.postMessage({
+                    type: 'END_OF_FILE'
+                });
+            }
+        }
+        function writeAChunkToFile(chunk) {
+            return new Promise(async (resolve, reject) => {
+                if (!isUsingServiceWorker) {
+                    if (process.env.NEXT_PUBLIC_platform !== 'android') {
+                        for (let offset = 0; offset < chunk.length; offset++) {
+                            if (fileInUint8ArrayIndex + offset < fileInUint8Array.length) {
+                                fileInUint8Array[fileInUint8ArrayIndex + offset] = chunk.charCodeAt(offset);
+                            } else {
+                                reject("writeAChunkToFile error: fileInUint8Array overflow");
+                                return;
+                            }
+                        }
+                        fileInUint8ArrayIndex += chunk.length;
+                    } else {
+                        if (process.env.NEXT_PUBLIC_platform === 'android') {
+                            if (Android) {
+                                console.log("Android.addAChunkToFile ...")
+                                Android.addAChunkToFile(0, numberOfChunks, chunk, attachment.uriString)
+                            }
+                        }
+                    }
+                    resolve();
+                } else {
+                    messageChannel.port1.postMessage({
+                        type: 'BINARY',
+                        chunk
+                    });
+                    resolve();
+                }
+            })
+        }
+        numberOfChunks = 1;
+        try {
+            if (!(await setupWriter())) {
+                dispatch(setupWriterFailed());
+                reject("Failed to setup the writer.");
+                return;
+            };
+            writeAChunkToFile(attachment.data);
+            if ((process.env.NEXT_PUBLIC_platform !== 'android') && !isUsingServiceWorker) {
+                let blob = new Blob([fileInUint8Array], {
+                    type: attachment.fileType
+                });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = attachment.fileName;
+                link.click();
+            }
+            closeWriter();
+            resolve();
+        } catch (error) {
+            debugLog(debugOn, "saveAFileThunk failed: ", error);
+            reject("downloadDecryptAndAssemble error.");
+        }
     });
 }
 

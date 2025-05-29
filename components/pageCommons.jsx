@@ -20,24 +20,29 @@ import AttachmentPanel from "./attachmentPanel";
 import Comments from "./comments";
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 
-import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered } from "../reduxStore/pageSlice";
+import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, getPageTemplateThunk, loadPageTemplate, clearPageTemplate } from "../reduxStore/pageSlice";
 import { debugLog } from '../lib/helper';
+import { products, productIdDelimiter } from "../lib/productID";
 
 export default function PageCommons() {
     const debugOn = true;
     const dispatch = useDispatch();
 
     const editorScriptsLoaded = useSelector(state => state.scripts.editorScriptsLoaded);
-    const navigationInSameContainer = useSelector(state => state.container.navigationInSameContainer);
     const workspaceKey = useSelector(state => state.container.workspaceKey);
     const workspaceSearchKey = useSelector(state => state.container.searchKey);
     const workspaceSearchIV = useSelector(state => state.container.searchIV);
+    const turningPage = useSelector(state => state.container.turningPage);
 
     const activity = useSelector(state => state.page.activity);
 
     const abort = useSelector(state => state.page.abort);
     const pageItemId = useSelector(state => state.page.id);
+    const getPageContentDone = useSelector(state => state.page.getPageContentDone);
+    const pageTemplate = useSelector(state => state.page.pageTemplate);
+    const templateLoaded = useSelector(state => state.page.templateLoaded);
     const itemCopy = useSelector(state => state.page.itemCopy);
     const oldVersion = useSelector(state => state.page.oldVersion);
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
@@ -80,6 +85,15 @@ export default function PageCommons() {
 
     const attachmentsInputRef = useRef(null);
     const [attachmentsDragActive, setAttachmentsDragActive] = useState(false);
+
+    let productId = "";
+    if (pageItemId && pageItemId.split(":")[1].startsWith(productIdDelimiter)) {
+        productId = pageItemId.split(productIdDelimiter)[1];
+    }
+    let product = {};
+    if (productId) {
+        product = products[productId];
+    }
 
     const onVideoClicked = (queueId) => {
         debugLog(debugOn, "onVideoClicked: ", queueId);
@@ -202,19 +216,21 @@ export default function PageCommons() {
     }
 
     function beforeWritingContent() {
-        const spinners = document.querySelectorAll('.bsafesImageSpinner');
-        spinners.forEach((spinner) => {
-            spinner.remove();
-        });
+        if (contentType === "WritingPage") {
+            const spinners = document.querySelectorAll('.bsafesImageSpinner');
+            spinners.forEach((spinner) => {
+                spinner.remove();
+            });
 
-        const playVideos = document.querySelectorAll('.bsafesPlayVideo');
-        playVideos.forEach((playVideo) => {
-            playVideo.remove();
-        });
+            const playVideos = document.querySelectorAll('.bsafesPlayVideo');
+            playVideos.forEach((playVideo) => {
+                playVideo.remove();
+            });
 
-        let contentByDOM = document.querySelector('.contenEditorRow').querySelector('.inner-html');
-        if (contentByDOM)
-            setcontentEditorContentWithImagesAndVideos(contentByDOM.innerHTML);
+            let contentByDOM = document.querySelector('.contenEditorRow').querySelector('.inner-html');
+            if (contentByDOM)
+                setcontentEditorContentWithImagesAndVideos(contentByDOM.innerHTML);
+        }
         dispatch(getS3SignedUrlForContentUploadThunk());
     }
 
@@ -225,7 +241,7 @@ export default function PageCommons() {
 
     const handleDraftClicked = () => {
         dispatch(loadDraftThunk());
-        if ( editorScriptsLoaded) {
+        if (editorScriptsLoaded) {
             dispatch(setInitialContentRendered(true));
         }
     }
@@ -235,7 +251,7 @@ export default function PageCommons() {
     }
 
     function afterContentReadOnly() {
-        if (navigationInSameContainer && editorScriptsLoaded) {
+        if (editorScriptsLoaded) {
             dispatch(setInitialContentRendered(true));
         }
     }
@@ -281,14 +297,16 @@ export default function PageCommons() {
         debugLog(debugOn, `editor-id: ${editorId} content: ${content}`);
 
         if (editingEditorId === "content") {
-            if (contentType === "DrawingPage" || content !== contentEditorContent) {
-                if(contentType === "WritingPage"){
+            if (contentType === "DrawingPage" || draftLoaded || content !== contentEditorContent) {
+                if (contentType === "WritingPage") {
                     setcontentEditorContentWithImagesAndVideos(content);
                 }
                 dispatch(saveContentThunk({ content, workspaceKey }));
             } else {
                 setEditingEditorMode("ReadOnly");
                 setEditingEditorId(null);
+                dispatch(clearPageTemplate());
+                dispatch(setDraftLoaded(false));
             }
         } else if (editingEditorId === "title") {
             if (content !== titleEditorContent) {
@@ -412,23 +430,33 @@ export default function PageCommons() {
     const handleSave = () => {
         debugLog(debugOn, "handleSave");
         setEditingEditorMode("Saving");
-        dispatch(setDraftLoaded(false));
         setReadyForSaving(false);
     }
 
     const handleCancel = () => {
         debugLog(debugOn, "handleCancel");
         dispatch(setS3SignedUrlForContentUpload(null));
+        if (editingEditorId === "content" && contentType === "DrawingPage" && templateLoaded) {
+            setEditingEditorMode("GeneratingDrawingImage");
+        } else {
+            setEditingEditorMode("ReadOnly");
+            setEditingEditorId(null);
+            if (!draft && !contentEditorContent) {
+                dispatch(setContentType(""))
+            }
+            if (draftLoaded) {
+                dispatch(loadOriginalContentThunk());
+            }
+            dispatch(setDraftLoaded(false));
+            setReadyForSaving(false);
+        }
+    }
+
+    const handleDrawingImageDone = () => {
         setEditingEditorMode("ReadOnly");
         setEditingEditorId(null);
-        if (!draft && !contentEditorContent) {
-            dispatch(setContentType(""))
-        }
-        if (draftLoaded) {
-            dispatch(loadOriginalContentThunk());
-        }
-        dispatch(setDraftLoaded(false));
         setReadyForSaving(false);
+        dispatch(loadPageTemplate({ template: { metadata: { ExcalidrawSerializedJSON: pageTemplate } }, type: "DrawingPage" }));
     }
 
     const handleVideoButton = (e) => {
@@ -690,6 +718,29 @@ export default function PageCommons() {
     }, [activity]);
 
     useEffect(() => {
+        if (getPageContentDone) {
+            if (!itemCopy || !itemCopy.content) {
+                dispatch(getPageTemplateThunk({ url: "https://pagetemplate.bsafes.com/A002.draw" }))
+            }
+        }
+    }, [getPageContentDone])
+
+    useEffect(() => {
+        if (pageTemplate) {
+            if (pageTemplate.startsWith('{\n  "type": "excalidraw"')) {
+                debugLog(debugOn, "Loading page template");
+                dispatch(loadPageTemplate({ template: { metadata: { ExcalidrawSerializedJSON: pageTemplate } }, type: "DrawingPage" }));
+            }
+        }
+    }, [pageTemplate]);
+
+    useEffect(() => {
+        if (templateLoaded) {
+            handleWrite();
+        }
+    }, [templateLoaded])
+
+    useEffect(() => {
         setcontentEditorContentWithImagesAndVideos(contentEditorContent);
         if (contentEditorContent === null) return;
         afterContentReadOnly();
@@ -910,105 +961,128 @@ export default function PageCommons() {
             <div className="pageCommons">
                 {!(contentType === 'DrawingPage' && contentEditorMode === "Writing") &&
                     <>
-                        <Row className="justify-content-center">
-                            <Col sm="10">
-                                <hr />
-                            </Col>
-                        </Row>
-                        <Row className="justify-content-center">
-                            <Col sm="10" >
+                        {productId === "" ?
+                            <Row className="justify-content-center">
+                                <Col sm="10">
+                                    <hr />
+                                </Col>
+                            </Row>
+                            :
+                            <hr className="my-0" />
+
+                        }
+                        {product.fixedSize ?
+                            <div className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
                                 <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion)} />
-                            </Col>
-                        </Row>
-                        <Row className="justify-content-center">
-                            <Col sm="10">
-                                <hr />
-                            </Col>
-                        </Row>
+                            </div>
+                            :
+                            <Row className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
+                                <Col sm="10" >
+                                    <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion)} />
+                                </Col>
+                            </Row>
+                        }
+                        {productId === "" ?
+                            <Row className="justify-content-center mx-2">
+                                <Col sm="10">
+                                    <hr />
+                                </Col>
+                            </Row>
+                            :
+                            <hr className="my-0 mx-2" />
+                        }
                     </>
                 }
-                <Row className="justify-content-center">
-                    <Col className={`contenEditorRow`} xs="12" sm="10" >
-                        <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} />
-                    </Col>
-                </Row>
+                {contentType !== 'DrawingPage' ?
+                    <Row className="justify-content-center">
+                        <Col className={`contenEditorRow`} xs="12" sm="10" style={{ minHeight: "280px" }}>
+                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
+                        </Col>
+                    </Row>
+                    :
+                    <>
+                        <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
+                    </>
+                }
                 <br />
                 <br />
-                {!(contentType === 'DrawingPage' && contentEditorMode === "Writing") && <>
-                    {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
-                        <div className="videos">
-                            <input ref={videoFilesInputRef} onChange={handleVideoFiles} type="file" accept="video/*" multiple className="d-none editControl" id="videos" />
-                            <Row>
-                                <Col id="videos" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.videosDragDropZoneActive : BSafesStyle.videosDragDropZone}`}>
-                                    <Button id="videos" onClick={handleVideoButton} variant="link" className="text-dark btn btn-labeled">
-                                        <h4><i id="videos" className="fa fa-video-camera fa-lg" aria-hidden="true"></i></h4>
-                                    </Button>
-                                </Col>
-                            </Row>
+                <hr />
+                {!turningPage && !(contentType === 'DrawingPage' && contentEditorMode === "Writing") &&
+                    <div className={`${BSafesStyle.pageCommonsExtension}`}>
+                        {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
+                            <div className="videos">
+                                <input ref={videoFilesInputRef} onChange={handleVideoFiles} type="file" accept="video/*" multiple className="d-none editControl" id="videos" />
+                                <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
+                                    <Col id="videos" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.videosDragDropZoneActive : BSafesStyle.videosDragDropZone}`}>
+                                        <Button id="videos" onClick={handleVideoButton} variant="link" className="text-dark btn btn-labeled">
+                                            <h4><i id="videos" className="fa fa-video-camera fa-lg" aria-hidden="true"></i></h4>
+                                        </Button>
+                                    </Col>
+                                </div>
+                            </div>
+                        }
+                        <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center` : "row justify-content-center"}>
+                            <Col xs="12" md="8" >
+                                {videoPanels}
+                            </Col>
                         </div>
-                    }
-                    <Row className="justify-content-center">
-                        <Col xs="12" md="8" >
-                            {videoPanels}
-                        </Col>
-                    </Row>
-                    <br />
-                    {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
-                        <div className="images">
-                            <input ref={imageFilesInputRef} onChange={handleImageFiles} type="file" multiple accept="image/*" className="d-none editControl" id="images" />
-                            <Row>
-                                <Col id="images" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${imagesDragActive ? BSafesStyle.imagesDragDropZoneActive : BSafesStyle.imagesDragDropZone}`}>
-                                    <Button id="images" onClick={handleImageButton} variant="link" className="text-dark btn btn-labeled">
-                                        <h4><i id="images" className="fa fa-picture-o fa-lg" aria-hidden="true"></i></h4>
-                                    </Button>
-                                </Col>
-                            </Row>
+                        <br />
+                        {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
+                            <div className="images">
+                                <input ref={imageFilesInputRef} onChange={handleImageFiles} type="file" multiple accept="image/*" className="d-none editControl" id="images" />
+                                <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
+                                    <Col id="images" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${imagesDragActive ? BSafesStyle.imagesDragDropZoneActive : BSafesStyle.imagesDragDropZone}`}>
+                                        <Button id="images" onClick={handleImageButton} variant="link" className="text-dark btn btn-labeled">
+                                            <h4><i id="images" className="fa fa-picture-o fa-lg" aria-hidden="true"></i></h4>
+                                        </Button>
+                                    </Col>
+                                </div>
+                            </div>
+                        }
+                        <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center` : "row justify-content-center"}>
+                            <Col xs="12" sm="10" lg="8" >
+                                {imagePanels}
+                            </Col>
                         </div>
-                    }
-                    <Row className="justify-content-center">
-                        <Col xs="12" sm="10" lg="8" >
-                            {imagePanels}
-                        </Col>
-                    </Row>
-                    <br />
-                    {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
-                        <div className="audios">
-                            <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/mp3, audio/wav" multiple className="d-none editControl" id="audios" />
-                            <Row>
-                                <Col id="audios" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.audiosDragDropZoneActive : BSafesStyle.audiosDragDropZone}`}>
-                                    <Button id="audios" onClick={handleAudioButton} variant="link" className="text-dark btn btn-labeled">
-                                        <h4><i id="audios" className="fa fa-volume-up fa-lg" aria-hidden="true"></i></h4>
-                                    </Button>
-                                </Col>
-                            </Row>
+                        <br />
+                        {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
+                            <div className="audios">
+                                <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/mp3, audio/wav" multiple className="d-none editControl" id="audios" />
+                                <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
+                                    <Col id="audios" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.audiosDragDropZoneActive : BSafesStyle.audiosDragDropZone}`}>
+                                        <Button id="audios" onClick={handleAudioButton} variant="link" className="text-dark btn btn-labeled">
+                                            <h4><i id="audios" className="fa fa-volume-up fa-lg" aria-hidden="true"></i></h4>
+                                        </Button>
+                                    </Col>
+                                </div>
+                            </div>
+                        }
+                        <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center` : "row justify-content-center"}>
+                            <Col xs="12" md="8" >
+                                {audioPanels}
+                            </Col>
                         </div>
-                    }
-                    <Row className="justify-content-center">
-                        <Col xs="12" md="8" >
-                            {audioPanels}
-                        </Col>
-                    </Row>
-                    <br />
-                    {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
-                        <div className="attachments">
-                            <input ref={attachmentsInputRef} onChange={handleAttachments} type="file" multiple className="d-none editControl" id="attachments" />
-                            <Row>
-                                <Col id="attachments" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${attachmentsDragActive ? BSafesStyle.attachmentsDragDropZoneActive : BSafesStyle.attachmentsDragDropZone}`}>
-                                    <Button id="attachments" onClick={handleAttachmentButton} variant="link" className="text-dark btn btn-labeled">
-                                        <h4><i id="attachments" className="fa fa-paperclip fa-lg" aria-hidden="true"></i></h4>
-                                    </Button>
-                                </Col>
-                            </Row>
+                        <br />
+                        {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
+                            <div className="attachments">
+                                <input ref={attachmentsInputRef} onChange={handleAttachments} type="file" multiple className="d-none editControl" id="attachments" />
+                                <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
+                                    <Col id="attachments" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${attachmentsDragActive ? BSafesStyle.attachmentsDragDropZoneActive : BSafesStyle.attachmentsDragDropZone}`}>
+                                        <Button id="attachments" onClick={handleAttachmentButton} variant="link" className="text-dark btn btn-labeled">
+                                            <h4><i id="attachments" className="fa fa-paperclip fa-lg" aria-hidden="true"></i></h4>
+                                        </Button>
+                                    </Col>
+                                </div>
+                            </div>
+                        }
+                        <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center` : "row justify-content-center"}>
+                            <Col xs="12" md="8" >
+                                {attachmentPanels}
+                            </Col>
                         </div>
-                    }
-                    <Row className="justify-content-center">
-                        <Col xs="12" md="8" >
-                            {attachmentPanels}
-                        </Col>
-                    </Row>
-                    <br />
-                    {photoSwipeGallery()}
-                </>}
+                        <br />
+                        {photoSwipeGallery()}
+                    </div>}
                 {false && itemCopy && <Comments handleContentChanged={handleContentChanged} handlePenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion)} />}
                 {true &&
                     <PageCommonControls isEditing={editingEditorId} onWrite={handleWrite} readyForSaving={(S3SignedUrlForContentUpload !== null) || readyForSaving} onSave={handleSave} onCancel={handleCancel} canEdit={(!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed)} />

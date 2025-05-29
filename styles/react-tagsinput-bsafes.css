@@ -1,8 +1,8 @@
 .react-tagsinput {
     background-color: rgba(255, 255. 255, 0.0);
     overflow: hidden;
-    padding-left: 5px;
-    padding-top: 5px;
+    padding-left: 0px;
+    padding-top: 0px;
   }
   
   .react-tagsinput--focused {
@@ -16,11 +16,10 @@
     color: #000000;
     display: inline-block;
     font-family: sans-serif;
-    font-size: 18px;
     font-weight: 400;
-    margin-bottom: 5px;
-    margin-right: 5px;
-    padding: 5px;
+    margin-bottom: 2px;
+    margin-right: 2px;
+    padding: 2px;
   }
   
   .react-tagsinput-remove {
@@ -37,7 +36,6 @@
     border: 0;
     color: #777;
     font-family: sans-serif;
-    font-size: 18px;
     font-weight: 400;
     margin-bottom: 6px;
     margin-top: 1px;

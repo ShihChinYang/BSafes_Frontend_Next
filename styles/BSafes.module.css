@@ -33,7 +33,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .screenBottomLeft {
@@ -41,7 +41,7 @@
   top: 95%;
   left: 10%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .inputBox {
@@ -167,7 +167,7 @@
 .teamsBackground {
   position: relative;
   min-height: 100vh;
-  background-color: #FDFEFE ;
+  background-color: #FDFEFE;
   /*background-image: url("/images/noisy-net.png");*/
 }
 
@@ -182,16 +182,16 @@
 }
 
 .btnFloating {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   color: #FFF;
   box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.5), 3px 3px 3px rgba(0, 0, 0, 0.25);
   position: fixed;
   display: inline-block;
   cursor: default;
-  padding-top: 8px;
-  z-index: 15000;
+  padding-top: 4px;
+  z-index: 150;
 }
 
 .btnFloatingAdd {
@@ -200,24 +200,35 @@
 }
 
 .btnFloatingWrite {
+  width: 64px;
+  height: 64px;
   background: #03A9F4;
   bottom: 12px;
   right: 24px;
-  padding-left: 10px;
+  padding-top: 13px;
+  padding-left: 15px;
 }
 
 .btnFloatingSave {
   background: #229954;
-  bottom: 72px;
-  right: 24px;
-  padding-left: 10px;
+  bottom: 12px;
+  right: 60px;
+  padding-left: 9px;
 }
 
 .btnFloatingCancel {
   background: #F39C12;
   bottom: 12px;
   right: 24px;
-  padding-left: 14px;
+  padding-left: 10px;
+}
+
+.btnFloatingForWriting {
+  bottom: 24px;
+}
+
+.btnFloatingForDrawing {
+  bottom: 68px;
 }
 
 /* End of custom buttons */
@@ -230,7 +241,7 @@
   width: 100%;
   height: 54px;
   margin: 0px;
-  z-index: 100;
+  z-index: 1800;
 }
 
 .toolbarButton {
@@ -241,6 +252,10 @@
   background: transparent;
 }
 
+.itemsToolbarModal {
+  z-index: 2000;
+}
+
 .itemsMovingProgress {
   position: fixed;
   width: 100px;
@@ -248,7 +263,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1000;
+  z-index: 2010;
 }
 
 /* End of items toolbar */
@@ -352,10 +367,11 @@
   max-width: 1024px;
   min-height: 600px;
   padding-bottom: 48px;
-  margin:auto
+  margin: auto
 }
 
 @media only screen and (min-width: 400px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -370,6 +386,7 @@
 }
 
 @media only screen and (min-width: 560px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -384,6 +401,7 @@
 }
 
 @media only screen and (min-width: 992px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -398,6 +416,7 @@
 }
 
 @media only screen and (min-width: 1200px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -441,7 +460,7 @@
   position: relative;
   background-color: transparent;
   display: inline-block;
-  z-index: 1000;
+  z-index: 80;
   color: black;
 }
 
@@ -450,7 +469,7 @@
   top: 45%;
   background-color: transparent;
   display: inline-block;
-  z-index: 1000;
+  z-index: 80;
   color: black;
 }
 
@@ -550,6 +569,7 @@
 .diaryItem {
   background-color: #FEF5E7;
 }
+
 .diaryControlPanelBody {
   padding-bottom: 10px;
 }
@@ -575,6 +595,7 @@
 .pageItem {
   background-color: #fff;
 }
+
 .pagePanel {
   /*background-color:faf5f1*/
   background-color: #fff;
@@ -586,6 +607,7 @@
 }
 
 .pageBackground {
+  min-height: 100vh;
   background-color: rgb(161, 158, 158);
   padding-bottom: 30px;
 }
@@ -650,6 +672,10 @@
   padding-top: 0px;
 }
 
+.pageCommonsExtension {
+  background-color: #fff;
+}
+
 /* End of Page */
 
 /*--****** Editor *******/
@@ -669,6 +695,7 @@
 .contentEditorRowBak {
   min-height: 250px;
 }
+
 @media only screen and (min-width: 400px) {
   .contentEditorRowBak {
     min-height: 350px;
@@ -688,6 +715,7 @@
 }
 
 @media only screen and (min-width: 1200px) {
+
   .pagePanel,
   .containerCoverPanel,
   .containerContentsPanel,
@@ -700,6 +728,7 @@
     padding-bottom: 48px;
   }
 }
+
 /* End of Editor */
 
 /*--****** Image Panel *******/
@@ -1781,9 +1810,11 @@
   .bannerTextH1 {
     font-size: 4rem;
   }
+
   .bannerTextH3 {
     font-size: 2.6rem;
   }
+
   .descriptionText {
     font-size: 1.3rem;
   }
@@ -1818,3 +1849,48 @@
 }
 
 /* End of Support */
+
+/*--****** App Specifics *******/
+.appPreview {
+  position: relative;
+  margin-top: 40px;
+}
+
+.appPreviewImageWrapper {
+  text-align: center;
+}
+
+.appPreviewImageWrapper img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.appPreviewPrevBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 10px;
+  z-index: 1;
+}
+
+.appPreviewNextBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  z-index: 1;
+}
+
+/* End of App Specifics */
+
+/*--****** Image Grids *******/
+.imageGrid img {
+  margin: 6px 0 6px 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* End of Image Grids */
