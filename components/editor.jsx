@@ -28,6 +28,7 @@ import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, se
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 
 let Excalidraw = null;
+let FontsConfig = null;
 /**
  * Editor Component
  * 
@@ -389,6 +390,23 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             await ic.Photoswipe;
             await ic.Others;
             Excalidraw = (await ic.Excalidraw)[0];
+            try {
+                await new Promise((done) => {
+                    const FontsConfigImport = import('../resolved_fonts.json')
+                    FontsConfigImport.then((loadResult) => {
+                        FontsConfig = loadResult.default
+                        done()
+                    }).catch((err) => {
+
+                    })
+                    // FontsConfig = (await ic.FontsConfig)[0].default;
+
+                })
+
+            } catch (error) {
+                console.log({ error });
+
+            }
             setScriptsLoaded(true);
             if (editorId === "content") {
                 dispatch(setEditorScriptsLoaded(true));
@@ -791,7 +809,12 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                             {(mode == 'Writing' || mode === 'Saving' || mode === "GeneratingDrawingImage") ?
                                 <div style={{ position: "fixed", zIndex: "100", top: "0", left: "0", height: "100%", width: "100%" }}>
                                     <Excalidraw.Excalidraw excalidrawAPI={(excalidrawApi) => {
-                                        ExcalidrawRef.current = excalidrawApi;
+                                        if (!ExcalidrawRef.current) {
+                                            ExcalidrawRef.current = excalidrawApi;
+                                            FontsConfig.forEach(font => {
+                                                excalidrawApi.registerCustomFont(font.name, ...font.descripters);
+                                            })
+                                        }
                                     }}
                                     >
                                         <Excalidraw.MainMenu>
