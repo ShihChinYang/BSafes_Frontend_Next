@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@excalidraw/excalidraw": "^0.18.0",
+    "@excalidraw/excalidraw": "file:excalidraw.tgz",
     "@fontsource-variable/dancing-script": "^5.0.19",
     "@fontsource-variable/edu-sa-beginner": "^5.0.13",
     "@fontsource-variable/montserrat": "^5.0.20",
@@ -30,6 +30,7 @@
     "boxicons": "^2.1.4",
     "capacitor-plugin-safe-area": "^2.0.6",
     "codemirror": "^5.65.17",
+    "css": "^3.0.0",
     "date-fns": "^2.29.3",
     "dompurify": "^3.2.4",
     "font-awesome": "github:FortAwesome/Font-Awesome#v4.4.0",
