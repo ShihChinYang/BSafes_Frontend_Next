@@ -8,7 +8,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 
 import BSafesStyle from '../../styles/BSafes.module.css'
 
-export default () => {
+export default function AppPreivews() {
 
   const slideSettings = useMemo(() => {
     return {

@@ -5,7 +5,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-export default () => {
+export default function TestSwiper() {
 
   const slideSettings = useMemo(() => {
     return {

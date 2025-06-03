@@ -719,7 +719,7 @@ export default function PageCommons() {
 
     useEffect(() => {
         if (getPageContentDone) {
-            if (!itemCopy || !itemCopy.content) {
+            if (productId !=="" && (!itemCopy || !itemCopy.content)) {
                 dispatch(getPageTemplateThunk({ url: "https://pagetemplate.bsafes.com/A002.draw" }))
             }
         }

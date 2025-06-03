@@ -211,7 +211,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             const savedJSON = JSON.parse(content?.metadata?.ExcalidrawSerializedJSON);
             const res = Excalidraw.restore(savedJSON);
             function restoreExcalidraw(params) {
-                if (!ExcalidrawRef.current) {
+                if (!scriptsLoaded || !ExcalidrawRef.current) {
                     debugLog(debugOn, 'excalidrawApi not defined, rechecking');
                     setTimeout(() => {
                         restoreExcalidraw(params);
@@ -811,6 +811,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                                 excalidrawApi.registerCustomFont(font.name, ...font.descripters);
                                             })
                                         }
+                                        ExcalidrawRef.current = excalidrawApi;
                                     }}
                                     >
                                         <Excalidraw.MainMenu>
