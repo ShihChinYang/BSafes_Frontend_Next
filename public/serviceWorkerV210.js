@@ -19,6 +19,7 @@ const notebookTokensStoreName = "notebookTokensStore";
 const diaryPagesStoreName = "diaryPagesStore";
 const itemVersionsStoreName = "itemVersions";
 const s3ObjectsStoreName = "s3Objects";
+const draftStoreName = "draftStore"
 
 const myIndexedDB = self.indexedDB;
 
@@ -62,6 +63,8 @@ function openDB() {
         db.createObjectStore(itemVersionsStoreName, { keyPath: "itemId" });
       if( !db.objectStoreNames.contains(s3ObjectsStoreName))
         db.createObjectStore(s3ObjectsStoreName, { keyPath: "s3Key" });
+      if( !db.objectStoreNames.contains(draftStoreName))
+        db.createObjectStore(draftStoreName, { keyPath: "itemId" });
       transaction.oncomplete = (e) => {
         resolve(db);
       }
@@ -645,33 +648,6 @@ function getDiaryContents(itemId, month) {
   })
 }
 
-function addAnItemVersionToDB(itemId, item) {
-  return new Promise((resolve) => {
-    const data = {
-      itemId,
-      item
-    }
-    const request = streamDB
-      .transaction(itemVersionsStoreName, "readwrite")
-      .objectStore(itemVersionsStoreName)
-      .add(data);
-
-    request.onsuccess = (e) => {
-      console.log("item added: ", e.target.result);
-      resolve();
-    }
-
-    request.onerror = (e) => {
-      console.log("addAnItemVersionToDB failed: ", e.target.error);
-      if (e.target.error.name == "ConstraintError") {
-        resolve();
-      } else {
-        reject();
-      }
-    }
-  })
-}
-
 function updateAnItemVersion(itemId, item) {
   return new Promise(async (resolve, reject) => {
     const data = {
@@ -787,6 +763,74 @@ function getAS3ObjectFromDB(s3Key) {
 
     request.onerror = (e) => {
       console.log("getAS3ObjectFromDB failed: ", e.target.error);
+      resolve(null);
+    }
+  })
+}
+
+function updateADraft(itemId, data) {
+  return new Promise(async (resolve, reject) => {
+    const draft = {
+      itemId,
+      data
+    }
+    const request = streamDB
+      .transaction(draftStoreName, "readwrite")
+      .objectStore(draftStoreName)
+      .put(draft);
+
+    request.onsuccess = (e) => {
+      console.log("updateADraft succeeded ", e.target.result);
+      resolve();
+    }
+
+    request.onerror = (e) => {
+      console.log("updateADraft failed: ", e.target.error);
+      if (e.target.error.name == "ConstraintError") {
+        resolve();
+      } else {
+        reject();
+      }
+    }
+  });
+}
+
+function deleteADraftInDB(itemId) {
+  return new Promise((resolve, reject) => {
+    const request = streamDB
+      .transaction(draftStoreName, "readwrite")
+      .objectStore(draftStoreName)
+      .delete(itemId)
+      
+    request.onsuccess = (e) => {
+        console.log("Draft deleted: ", itemId);
+        resolve();
+      }
+
+    request.onerror = (e) => {
+        console.log("deleteADraftInDB failed: ", e.target.error);
+        if (e.target.error.name == "ConstraintError") {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+  })
+}
+
+function getADraftFromDB(itemId) {
+  return new Promise((resolve) => {
+    const request = streamDB
+      .transaction(draftStoreName)
+      .objectStore(draftStoreName)
+      .get(itemId);
+
+    request.onsuccess = (e) => {
+      resolve(e.target.result);
+    }
+
+    request.onerror = (e) => {
+      console.log("getADraftFromDB failed: ", e.target.error);
       resolve(null);
     }
   })
@@ -1208,6 +1252,19 @@ self.addEventListener("message", async (event) => {
             port = event.ports[0];
             port.postMessage({ type: "DATA", data });
             break;
+          case draftStoreName:
+            try {
+              const draft = await getADraftFromDB(event.data.itemId);
+              data = { status: 'ok' }
+              if (draft) {
+                data.data = draft.data;
+              }
+            } catch (error) {
+              data = { status: 'error', error }
+            }
+            port = event.ports[0];
+            port.postMessage({ type: "DATA", data });
+            break;
         }
         break;
       case 'WRITE_TO_DB_TABLE':
@@ -1246,6 +1303,31 @@ self.addEventListener("message", async (event) => {
             }
             port = event.ports[0];
             port.postMessage({ type: "WRITE_RESULT", data });
+            break;
+          case draftStoreName:
+            try {
+              await updateADraft(event.data.itemId, event.data.data);
+              data = { status: 'ok' }
+            } catch (error) {
+              data = { status: 'error', error }
+            }
+            port = event.ports[0];
+            port.postMessage({ type: "WRITE_RESULT", data });
+            break;
+        }
+        break;
+      case 'DELETE_AN_ITEM':
+        switch (event.data.table) {
+          case draftStoreName:
+            try {
+              await deleteADraftInDB(event.data.itemId);
+              data = { status: 'ok' }
+            } catch (error) {
+              data = { status: 'error', error }
+            }
+            port = event.ports[0];
+            port.postMessage({ type: "DELETE_RESULT", data });
+            break;
             break;
         }
         break;

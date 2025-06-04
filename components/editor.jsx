@@ -751,7 +751,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                             </Tooltip>
                                         )}
                                     ><Button variant="link" className="text-dark p-0 mx-3" onClick={handlePenClicked.bind(null, 'excalidraw')}><i className="fa fa-paint-brush" aria-hidden="true"></i></Button></OverlayTrigger> </span>}
-                                    {(editorId === 'content' && draft !== null) &&
+                                    {(editorId === 'content' && draft) &&
                                         <ButtonGroup className='pull-right mx-3' size="sm">
                                             <Button variant="outline-danger" className='m-0' onClick={onDraftClicked}>Draft</Button>
                                             <Button variant="danger" onClick={onDraftDelete}>X</Button>

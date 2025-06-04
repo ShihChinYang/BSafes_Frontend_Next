@@ -22,7 +22,7 @@ import Comments from "./comments";
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 
-import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraft, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, getPageTemplateThunk, loadPageTemplate, clearPageTemplate } from "../reduxStore/pageSlice";
+import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraftThunk, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, getPageTemplateThunk, loadPageTemplate, clearPageTemplate } from "../reduxStore/pageSlice";
 import { debugLog } from '../lib/helper';
 import { products, productIdDelimiter } from "../lib/productID";
 
@@ -247,7 +247,7 @@ export default function PageCommons() {
     }
 
     const handleDraftDelete = () => {
-        dispatch(clearDraft());
+        dispatch(clearDraftThunk());
     }
 
     function afterContentReadOnly() {

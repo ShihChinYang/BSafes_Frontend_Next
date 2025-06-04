@@ -12,7 +12,7 @@ import { getBookIdFromPage, timeToString, formatTimeDisplay, getEditorConfig } f
 import { preS3Download, preS3ChunkUpload, preS3ChunkDownload, putS3Object } from '../lib/s3Helper';
 import { downScaleImage } from '../lib/wnImage';
 import { isDemoMode } from '../lib/demoHelper';
-import { readDataFromServiceWorkerDBTable, writeDataToServiceWorkerDBTable, writeDataToServiceWorkerDB } from '../lib/serviceWorkerDBHelper';
+import { readDataFromServiceWorkerDBTable, writeDataToServiceWorkerDBTable, deleteAnItemInServiceWorkerDBTable, writeDataToServiceWorkerDB } from '../lib/serviceWorkerDBHelper';
 
 const embeddJSONSeperator = '=#=#=embeddJSON=';
 const MAX_NUMBER_OF_MEDIA_FILES = 32;
@@ -83,7 +83,7 @@ const initialState = {
     newCommentEditorMode: 'ReadOnly',
     comments: [],
     S3SignedUrlForContentUpload: null,
-    draft: null,
+    draft: false,
     draftContentType: null,
     draftLoaded: false,
     originalContent: null,
@@ -957,30 +957,30 @@ const pageSlice = createSlice({
             state.S3SignedUrlForContentUpload = action.payload;
         },
         setDraft: (state, action) => {
-            state.draft = action.payload.draft;
+            state.draft = true;
             state.draftContentType = action.payload.draftContentType;
         },
         clearDraft: (state, action) => {
-            state.draft = null;
+            state.draft = false;
             state.draftContentType = null;
             const { draftId, draftContentTypeId } = formDraftId(state.id);
-            localStorage.removeItem(draftId);
+            //localStorage.removeItem(draftId);
             localStorage.removeItem(draftContentTypeId);
         },
         loadDraft: (state, action) => {
             state.originalContent = state.content;
             if (state.draftContentType === "DrawingPage") {
-                state.content = JSON.parse(forge.util.decodeUtf8(state.draft));
+                state.content = JSON.parse(forge.util.decodeUtf8(action.payload));
             } else {
                 state.content = forge.util.decodeUtf8(state.draft);
             }
             state.contentType = state.draftContentType;
             state.draftLoaded = true;
-            state.draft = null;
+            state.draft = false;
             state.draftContentType = null;
             const { draftId, draftContentTypeId } = formDraftId(state.id);
             localStorage.removeItem(draftContentTypeId);
-            localStorage.removeItem(draftId);
+            //localStorage.removeItem(draftId);
             state.contentImagesDownloadQueue = [];
             state.contentImagedDownloadIndex = 0;
             state.contentImagesAllDownloaded = false;
@@ -1683,13 +1683,16 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             }
                         }
                         const { draftId, draftContentTypeId } = formDraftId(data.itemId);
-                        const draft = localStorage.getItem(draftId);
-                        const draftContentType = localStorage.getItem(draftContentTypeId);
-                        //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
-                        if (draft) {
-                            dispatch(setDraft({ draft, draftContentType }));
+                        //const draft = localStorage.getItem(draftId);
+                        const response = await readDraftInDB(draftId);
+                        if (response.status === 'ok') {
+                            const draft = response.data;
+                            const draftContentType = localStorage.getItem(draftContentTypeId);
+                            //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
+                            if (draft) {
+                                dispatch(setDraft({ draft, draftContentType }));
+                            }
                         }
-
                     } else {
                         debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
                         reject("Failed to get a page item.");
@@ -1956,11 +1959,15 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         }
                     }
                     const { draftId, draftContentTypeId } = formDraftId(data.itemId);
-                    const draft = localStorage.getItem(draftId);
-                    const draftContentType = localStorage.getItem(draftContentTypeId);
-                    //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
-                    if (draft) {
-                        dispatch(setDraft({ draft, draftContentType }));
+                    //const draft = localStorage.getItem(draftId);
+                    const response = await readDraftInDB(draftId);
+                    if (response.status === 'ok') {
+                        const draft = response.data;
+                        const draftContentType = localStorage.getItem(draftContentTypeId);
+                        //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
+                        if (draft) {
+                            dispatch(setDraft({ draft, draftContentType }));
+                        }
                     }
                 } else {
                     debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
@@ -3181,6 +3188,36 @@ function formDraftId(pageId) {
     };
 }
 
+const saveDraftInDB = async (itemId, data) => {
+    const params = {
+        table: 'draftStore',
+        itemId,
+        data
+    }
+    const result = await writeDataToServiceWorkerDBTable(params);
+    if (result.status === 'ok') {
+        return itemId;
+    } else {
+        return null;
+    }
+}
+
+const readDraftInDB = async (itemId) => {
+    const params = {
+        table: 'draftStore',
+        itemId
+    }
+    return readDataFromServiceWorkerDBTable(params);
+}
+
+const deleteDraftInDB = async (itemId) => {
+    const params = {
+        table: 'draftStore',
+        itemId
+    }
+    return deleteAnItemInServiceWorkerDBTable(params);
+}
+
 export const saveDraftThunk = (data) => async (dispatch, getState) => {
     return new Promise(async (resolve, reject) => {
         const state = getState().page;
@@ -3192,7 +3229,8 @@ export const saveDraftThunk = (data) => async (dispatch, getState) => {
         try {
             const encodedContent = forge.util.encodeUtf8(result.content);
             const { draftId, draftContentTypeId } = formDraftId(state.id);
-            localStorage.setItem(draftId, encodedContent);
+            //localStorage.setItem(draftId, encodedContent);
+            await saveDraftInDB(draftId, encodedContent);
             localStorage.setItem(draftContentTypeId, state.contentType);
             dispatch(setDraft({ draft: encodedContent, draftContentType: state.contentType }));
             resolve();
@@ -3204,7 +3242,39 @@ export const saveDraftThunk = (data) => async (dispatch, getState) => {
 }
 
 export const loadDraftThunk = (data) => async (dispatch, getState) => {
-    dispatch(loadDraft());
+    return new Promise(async (resolve, reject) => {
+        const state = getState().page;
+        const { draftId, draftContentTypeId } = formDraftId(state.id);
+        try {
+            const result = await readDraftInDB(draftId);
+            if (result.status === 'ok') {
+                const draft = result.data;
+                dispatch(loadDraft(draft));
+                await deleteDraftInDB(draftId);
+                resolve()
+            } else {
+                throw new Error("Failed to read an image data from service worker DB!");
+            }
+        } catch (error) {
+            debugLog(debugOn, "loadDraftThunk failed: ", error);
+            reject();
+        }
+    });
+}
+
+export const clearDraftThunk = (data) => async (dispatch, getState) => {
+    return new Promise(async (resolve, reject) => {
+        const state = getState().page;
+        const { draftId, draftContentTypeId } = formDraftId(state.id);
+        try {
+            await deleteDraftInDB(draftId);
+            dispatch(clearDraft());
+            resolve()
+        } catch (error) {
+            debugLog(debugOn, "loadDraftThunk failed: ", error);
+            reject();
+        }
+    });
 }
 
 export const startDownloadingContentImagesForDraftThunk = (data) => async (dispatch, getState) => {
