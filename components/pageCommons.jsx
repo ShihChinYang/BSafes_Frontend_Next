@@ -445,6 +445,8 @@ export default function PageCommons() {
                 dispatch(setContentType(""))
             }
             if (draftLoaded) {
+                dispatch(setContentType(""));
+                dispatch(clearDraftThunk());
                 dispatch(loadOriginalContentThunk());
             }
             dispatch(setDraftLoaded(false));
@@ -993,16 +995,12 @@ export default function PageCommons() {
                         }
                     </>
                 }
-                {contentType !== 'DrawingPage' ?
-                    <Row className="justify-content-center">
-                        <Col className={`contenEditorRow`} xs="12" sm="10" style={{ minHeight: "280px" }}>
+                {true &&
+                    <div className={`justify-content-center ${contentType !=="DrawingPage"?"row":""}`}>
+                        <div className={`contenEditorRow ${contentType !=="DrawingPage"?"col-sm-10 col-12":""}`} style={{ minHeight: "280px" }}>
                             <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
-                        </Col>
-                    </Row>
-                    :
-                    <>
-                        <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
-                    </>
+                        </div>
+                    </div>
                 }
                 <br />
                 <br />
