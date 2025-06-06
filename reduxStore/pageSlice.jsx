@@ -1573,8 +1573,24 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
 
                 })
             }
+
             async function processResultItem(result) {
                 dispatch(dataFetched({ item: result.item }));
+                
+                const getCurrentItemKey = () => {
+                    let itemKey, itemIV;
+                    let workspaceKey = getState().container.workspaceKey;
+                    if (result.item.envelopeIV && result.item.ivEnvelope && result.item.ivEnvelopeIV) { // legacy CBC-mode
+                        itemKey = decryptBinaryString(forge.util.decode64(result.item.keyEnvelope), workspaceKey, forge.util.decode64(result.item.envelopeIV));
+                        itemIV = decryptBinaryString(forge.util.decode64(result.item.ivEnvelope), workspaceKey, forge.util.decode64(result.item.ivEnvelopeIV));
+                    } else {
+                        const decoded = forge.util.decode64(result.item.keyEnvelope);
+                        itemKey = decryptBinaryString(decoded, workspaceKey);
+                        itemIV = null;
+                    }
+                    return {itemKey, itemIV}
+                }
+
                 if (result.item.content && result.item.content.startsWith('s3Object/')) {
                     dispatch(setContentType('WritingPage'));
                     const s3Key = forge.util.decode64(result.item.content.substring(9));
@@ -1591,7 +1607,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     }
                     debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
                     await itemKeyReady();
-                    const decryptedContent = decryptBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
+                    const keyData = getCurrentItemKey();
+                    const decryptedContent = decryptBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
                     debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
                     const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
                     dispatch(contentDecrypted({ item: { id: data.itemId, content: decodedContent } }));
@@ -1614,7 +1631,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     }
                     debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
                     await itemKeyReady();
-                    const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
+                    const keyData = getCurrentItemKey();
+                    const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
                     debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
                     const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
                     const decodedContent = (forge.util.decodeUtf8(decryptedImageStr));
