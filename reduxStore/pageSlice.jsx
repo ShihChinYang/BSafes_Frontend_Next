@@ -972,7 +972,7 @@ const pageSlice = createSlice({
             if (state.draftContentType === "DrawingPage") {
                 state.content = JSON.parse(forge.util.decodeUtf8(action.payload));
             } else {
-                state.content = forge.util.decodeUtf8(state.draft);
+                state.content = forge.util.decodeUtf8(action.payload);
             }
             state.contentType = state.draftContentType;
             state.draftLoaded = true;
