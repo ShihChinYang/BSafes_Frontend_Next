@@ -105,16 +105,17 @@ export default function ItemTopRows() {
                     ><Button variant="link" className="text-dark p-0 pull-right"><i className="fa fa-question" aria-hidden="true"></i></Button></OverlayTrigger>
                     <label className="mx-1 pull-right"><span><i className={`fa fa-tags ${BSafesProductsStyle[`${productId}_TagsLable`]}`} aria-hidden="true"></i></span></label>
                 </Col>
-                <Col xs="6" className={`${BSafesProductsStyle[`${productId}_TagsInput`]}`}>
+                <Col xs="8" className={`${BSafesProductsStyle[`${productId}_TagsInput`]}`}>
                     {oldVersion ?
                         <TagsInput value={tags} onChange={handleChange} disabled />
                         :
                         <TagsInput value={tags} onChange={handleChange} />
                     }
                 </Col>
-                <Col xs="4">
+                <Col xs="2">
                     <div className="pull-right">
-                        <span>{itemCopy && `v.${itemCopy.version}`}</span><Button variant="link" className="text-dark" onClick={openVersionsHistoryModal}  ><i className="fa fa-history" aria-hidden="true"></i></Button>
+                        <Button variant="link" className="pt-2 pb-1 px-1 text-dark" onClick={openVersionsHistoryModal}  ><i className="fa fa-history" aria-hidden="true"></i></Button>
+                        <p><span>{true && itemCopy && `v.${itemCopy.version}`}</span></p>
                         {false && <Button variant="link" className="text-dark" >
                             <i className="fa fa-share-square-o" aria-hidden="true"></i>
                         </Button>}
