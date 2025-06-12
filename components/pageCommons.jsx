@@ -37,6 +37,7 @@ export default function PageCommons() {
     const turningPage = useSelector(state => state.container.turningPage);
 
     const activity = useSelector(state => state.page.activity);
+    const checkingLatest = useSelector(state => state.page.checkingLatest);
 
     const abort = useSelector(state => state.page.abort);
     const pageItemId = useSelector(state => state.page.id);
@@ -50,6 +51,8 @@ export default function PageCommons() {
     const contentEditorMode = useSelector(state => state.page.contentEditorMode);
     const contentEditorContent = useSelector(state => state.page.content);
     const initialContentRendered = useSelector(state => state.page.initialContentRendered);
+    const contentUploadProgress = useSelector(state => state.page.contentUploadProgress);
+    const contentDownloadProgress = useSelector(state => state.page.contentDownloadProgress);
     const [contentEditorContentWithImagesAndVideos, setcontentEditorContentWithImagesAndVideos] = useState(null);
 
     const [editingEditorId, setEditingEditorId] = useState(null);
@@ -355,15 +358,15 @@ export default function PageCommons() {
     }
 
     const videoPanels = videoPanelsState.map((item, index) =>
-        <VideoPanel key={item.queueId} panelIndex={"video_" + index} panel={item} onVideoClicked={onVideoClicked} editorMode={item.editorMode} onPenClicked={handlePenClicked} onContentChanged={handleContentChanged} editable={!editingEditorId && (activity === 0)} />
+        <VideoPanel key={item.queueId} panelIndex={"video_" + index} panel={item} onVideoClicked={onVideoClicked} editorMode={item.editorMode} onPenClicked={handlePenClicked} onContentChanged={handleContentChanged} editable={!editingEditorId && (activity === 0) && !checkingLatest} />
     )
 
     const audioPanels = audioPanelsState.map((item, index) =>
-        <AudioPanel key={item.queueId} panelIndex={"audio_" + index} panel={item} onAudioClicked={onAudioClicked} editorMode={item.editorMode} onPenClicked={handlePenClicked} onContentChanged={handleContentChanged} editable={!editingEditorId && (activity === 0)} />
+        <AudioPanel key={item.queueId} panelIndex={"audio_" + index} panel={item} onAudioClicked={onAudioClicked} editorMode={item.editorMode} onPenClicked={handlePenClicked} onContentChanged={handleContentChanged} editable={!editingEditorId && (activity === 0) && !checkingLatest} />
     )
 
     const imagePanels = imagePanelsState.map((item, index) =>
-        <ImagePanel key={item.queueId} panelIndex={"image_" + index} panel={item} onImageClicked={onImageClicked} editorMode={item.editorMode} onPenClicked={handlePenClicked} onContentChanged={handleContentChanged} editable={!editingEditorId && (activity === 0)} />
+        <ImagePanel key={item.queueId} panelIndex={"image_" + index} panel={item} onImageClicked={onImageClicked} editorMode={item.editorMode} onPenClicked={handlePenClicked} onContentChanged={handleContentChanged} editable={!editingEditorId && (activity === 0) && !checkingLatest} />
     )
 
     const handleWrite = () => {
@@ -975,12 +978,12 @@ export default function PageCommons() {
                         }
                         {product.fixedSize ?
                             <div className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
-                                <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion)} />
+                                <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />
                             </div>
                             :
                             <Row className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
                                 <Col sm="10" >
-                                    <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion)} />
+                                    <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />
                                 </Col>
                             </Row>
                         }
@@ -998,7 +1001,7 @@ export default function PageCommons() {
                 {true &&
                     <div className={`justify-content-center ${contentType !=="DrawingPage"?"row":""}`}>
                         <div className={`contenEditorRow ${contentType !=="DrawingPage"?"col-sm-10 col-12":""}`} style={{ minHeight: "280px" }}>
-                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
+                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest &&  (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
                         </div>
                     </div>
                 }
@@ -1007,7 +1010,7 @@ export default function PageCommons() {
                 <hr />
                 {!turningPage && !(contentType === 'DrawingPage' && contentEditorMode === "Writing") &&
                     <div className={`${BSafesStyle.pageCommonsExtension}`}>
-                        {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
+                        {(!abort && !editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)) &&
                             <div className="videos">
                                 <input ref={videoFilesInputRef} onChange={handleVideoFiles} type="file" accept="video/*" multiple className="d-none editControl" id="videos" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
@@ -1025,7 +1028,7 @@ export default function PageCommons() {
                             </Col>
                         </div>
                         <br />
-                        {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
+                        {(!abort && !editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)) &&
                             <div className="images">
                                 <input ref={imageFilesInputRef} onChange={handleImageFiles} type="file" multiple accept="image/*" className="d-none editControl" id="images" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
@@ -1043,7 +1046,7 @@ export default function PageCommons() {
                             </Col>
                         </div>
                         <br />
-                        {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
+                        {(!abort && !editingEditorId && (activity === 0) && !checkingLatest &&  (!oldVersion)) &&
                             <div className="audios">
                                 <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/mp3, audio/wav" multiple className="d-none editControl" id="audios" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
@@ -1061,7 +1064,7 @@ export default function PageCommons() {
                             </Col>
                         </div>
                         <br />
-                        {(!abort && !editingEditorId && (activity === 0) && (!oldVersion)) &&
+                        {(!abort && !editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)) &&
                             <div className="attachments">
                                 <input ref={attachmentsInputRef} onChange={handleAttachments} type="file" multiple className="d-none editControl" id="attachments" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
@@ -1081,14 +1084,28 @@ export default function PageCommons() {
                         <br />
                         {photoSwipeGallery()}
                     </div>}
-                {false && itemCopy && <Comments handleContentChanged={handleContentChanged} handlePenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && (!oldVersion)} />}
+                {false && itemCopy && <Comments handleContentChanged={handleContentChanged} handlePenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />}
                 {true &&
-                    <PageCommonControls isEditing={editingEditorId} onWrite={handleWrite} readyForSaving={(S3SignedUrlForContentUpload !== null) || readyForSaving} onSave={handleSave} onCancel={handleCancel} canEdit={(!editingEditorId && (activity === 0) && (!oldVersion) && contentImagesAllDisplayed)} />
+                    <PageCommonControls isEditing={editingEditorId} onWrite={handleWrite} readyForSaving={(S3SignedUrlForContentUpload !== null) || readyForSaving} onSave={handleSave} onCancel={handleCancel} canEdit={(!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion) && contentImagesAllDisplayed)} />
                 }
                 {!contentImagesAllDisplayed &&
                     <div className='fixed-bottom'>
                         <Alert variant='info'>
                             Loading contents, please wait ...
+                        </Alert>
+                    </div>
+                }
+                { contentUploadProgress !==0 &&
+                    <div className='fixed-bottom'>
+                        <Alert variant='info'>
+                            {`Syncing, ${contentUploadProgress} % done.`}
+                        </Alert>
+                    </div>
+                }
+                { contentDownloadProgress!==0 &&
+                    <div className='fixed-bottom'>
+                        <Alert variant='info'>
+                        {`Syncing, ${contentDownloadProgress} % done.`}
                         </Alert>
                     </div>
                 }
