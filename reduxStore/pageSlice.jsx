@@ -3280,7 +3280,7 @@ export const loadDraftThunk = (data) => async (dispatch, getState) => {
     });
 }
 
-export const clearDraftThunk = (data) => async (dispatch, getState) => {
+const clearDraftFunc = (dispatch, getState) => {
     return new Promise(async (resolve, reject) => {
         const state = getState().page;
         const { draftId, draftContentTypeId } = formDraftId(state.id);
@@ -3293,6 +3293,10 @@ export const clearDraftThunk = (data) => async (dispatch, getState) => {
             reject();
         }
     });
+}
+
+export const clearDraftThunk = (data) => async (dispatch, getState) => {
+    return clearDraftFunc(dispatch, getState);
 }
 
 export const startDownloadingContentImagesForDraftThunk = (data) => async (dispatch, getState) => {
@@ -3407,7 +3411,7 @@ export const saveContentThunk = (data) => async (dispatch, getState) => {
                         }
 
                         await createANewPage(dispatch, getState, state, newPageData, updatedState);
-                        dispatch(clearDraft());
+                        await clearDraftFunc(dispatch, getState);
                         dispatch(setDraftLoaded(false));
                         dispatch(clearPageTemplate());
                         requestAppleReview();
@@ -3436,7 +3440,7 @@ export const saveContentThunk = (data) => async (dispatch, getState) => {
                         itemCopy,
                         content
                     }));
-                    dispatch(clearDraft());
+                    await clearDraftFunc(dispatch, getState);
                     requestAppleReview();
                     resolve();
                 }

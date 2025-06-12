@@ -1,2 +1,42 @@
 [
+    {
+        "name": "Caveat",
+        "source_type": "fontsource",
+        "source": "@fontsource-variable/caveat"
+    },
+    {
+        "name": "Kalam",
+        "source_type": "fontsource",
+        "source": "@fontsource/kalam"
+    },
+    {
+        "name": "Playfair Display",
+        "source_type": "fontsource",
+        "source": "@fontsource-variable/playfair-display"
+    },
+    {
+        "name": "Josefin Sans",
+        "source_type": "fontsource",
+        "source": "@fontsource-variable/josefin-sans"
+    },
+    {
+        "name": "Teko",
+        "source_type": "fontsource",
+        "source": "@fontsource-variable/teko"
+    },
+    {
+        "name": "Dancing Script",
+        "source_type": "fontsource",
+        "source": "@fontsource-variable/dancing-script"
+    },
+    {
+        "name": "Arvo",
+        "source_type": "fontsource",
+        "source": "@fontsource/arvo"
+    },
+    {
+        "name": "Cedarville Cursive",
+        "source_type": "fontsource",
+        "source": "@fontsource/cedarville-cursive"
+    }
 ]
