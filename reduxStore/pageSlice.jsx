@@ -967,7 +967,6 @@ const pageSlice = createSlice({
             state.draft = false;
             state.draftContentType = null;
             const { draftId, draftContentTypeId } = formDraftId(state.id);
-            //localStorage.removeItem(draftId);
             localStorage.removeItem(draftContentTypeId);
         },
         loadDraft: (state, action) => {
@@ -983,7 +982,6 @@ const pageSlice = createSlice({
             state.draftContentType = null;
             const { draftId, draftContentTypeId } = formDraftId(state.id);
             localStorage.removeItem(draftContentTypeId);
-            //localStorage.removeItem(draftId);
             state.contentImagesDownloadQueue = [];
             state.contentImagedDownloadIndex = 0;
             state.contentImagesAllDownloaded = false;
@@ -1654,15 +1652,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
                     debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
                     const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
-                    const decodedContent = (forge.util.decodeUtf8(decryptedImageStr));
-                    const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decodedContent);
-                    const blob = new Blob([decryptedImageDataInUint8Array], {
-                        type: 'image/*'
-                    });
-                    const link = window.URL.createObjectURL(blob);
-                    blob.src = link;
+                    const blob = {};
                     blob.metadata = {
-                        ExcalidrawExportedImage: true,
                         ExcalidrawSerializedJSON: forge.util.decodeUtf8(embeddJSON)
                     };
                     dispatch(contentDecrypted({ item: { id: data.itemId, content: blob } }));
@@ -1720,12 +1711,10 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             }
                         }
                         const { draftId, draftContentTypeId } = formDraftId(data.itemId);
-                        //const draft = localStorage.getItem(draftId);
                         const response = await readDraftInDB(draftId);
                         if (response.status === 'ok') {
                             const draft = response.data;
                             const draftContentType = localStorage.getItem(draftContentTypeId);
-                            //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
                             if (draft) {
                                 dispatch(setDraft({ draft, draftContentType }));
                             }
@@ -1964,15 +1953,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                 const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
                                 debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
                                 const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
-                                const decodedContent = (forge.util.decodeUtf8(decryptedImageStr));
-                                const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decodedContent);
-                                const blob = new Blob([decryptedImageDataInUint8Array], {
-                                    type: 'image/*'
-                                });
-                                const link = window.URL.createObjectURL(blob);
-                                blob.src = link;
+                                const blob={};
                                 blob.metadata = {
-                                    ExcalidrawExportedImage: true,
                                     ExcalidrawSerializedJSON: forge.util.decodeUtf8(embeddJSON)
                                 };
                                 dispatch(contentDecrypted({ item: { id: data.itemId, content: blob } }));
@@ -2025,12 +2007,10 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         }
                     }
                     const { draftId, draftContentTypeId } = formDraftId(data.itemId);
-                    //const draft = localStorage.getItem(draftId);
                     const response = await readDraftInDB(draftId);
                     if (response.status === 'ok') {
                         const draft = response.data;
                         const draftContentType = localStorage.getItem(draftContentTypeId);
-                        //const draft = draftContentType === "DrawingPage" ? JSON.parse(_draft) : _draft;
                         if (draft) {
                             dispatch(setDraft({ draft, draftContentType }));
                         }
@@ -3085,21 +3065,8 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
 async function preProcessEditorContentBeforeSaving(content, contentType) {
     if (contentType === "DrawingPage") {
         const ExcalidrawSerializedJSON = content.metadata.ExcalidrawSerializedJSON;
-        const imageDataInBinaryString = await new Promise((resolve) => {
-            /*const img = new Image();
-            img.src = content.src;
-            img.onload = async () => {
-                const result = await downScaleImage(img, null, 720);
-                resolve(result.byteString)
-            }*/
-            const reader = new FileReader();
-            reader.addEventListener('load', async () => {
-                resolve(reader.result);
-            });
-            reader.readAsBinaryString(content);
-        });
         return {
-            content: imageDataInBinaryString + embeddJSONSeperator + ExcalidrawSerializedJSON,
+            content: "NA"+ embeddJSONSeperator + ExcalidrawSerializedJSON,
             s3ObjectsInContent: [],
             s3ObjectsSize: 0
         }
@@ -3295,7 +3262,6 @@ export const saveDraftThunk = (data) => async (dispatch, getState) => {
         try {
             const encodedContent = forge.util.encodeUtf8(result.content);
             const { draftId, draftContentTypeId } = formDraftId(state.id);
-            //localStorage.setItem(draftId, encodedContent);
             await saveDraftInDB(draftId, encodedContent);
             localStorage.setItem(draftContentTypeId, state.contentType);
             dispatch(setDraft({ draft: encodedContent, draftContentType: state.contentType }));
@@ -4633,7 +4599,6 @@ const uploadAnAttachment = (dispatch, getState, state, attachment, workspaceKey)
                                         clearTimeout(timer);
                                         timer = 0;
                                     }
-                                    //setUploadTimeout();
                                     let percentCompleted = 15 + Math.ceil(progressEvent.loaded * 85 / progressEvent.total);
                                     fileUploadProgress = index * (100 / numberOfChunks) + percentCompleted / numberOfChunks;
                                     debugLog(debugOn, `Chunk upload progress: ${progressEvent.loaded}/${progressEvent.total} ${percentCompleted} `);

@@ -12,6 +12,7 @@ import PhotoSwipe from "photoswipe";
 import PhotoSwipeUI_Default from "photoswipe/dist/photoswipe-ui-default";
 
 import Editor from './editor';
+import HiddenExcalidraw from "./hiddenExcalidraw";
 import VideoPanel from "./videoPanel";
 import AudioPanel from "./audioPanel";
 import ImagePanel from "./imagePanel";
@@ -77,6 +78,7 @@ export default function PageCommons() {
     const spinnerRef = useRef(null);
     const pswpRef = useRef(null);
 
+    const [drawingSnapshot, setDrawingSnapshot] = useState(null);
     const videoFilesInputRef = useRef(null);
     const [videosDragActive, setVideosDragActive] = useState(false);
 
@@ -304,6 +306,9 @@ export default function PageCommons() {
                 if (contentType === "WritingPage") {
                     setcontentEditorContentWithImagesAndVideos(content);
                 }
+                if (contentType === "DrawingPage"){
+                    setDrawingSnapshot({name:content.name, src:content.src})
+                }
                 dispatch(saveContentThunk({ content, workspaceKey }));
             } else {
                 setEditingEditorMode("ReadOnly");
@@ -355,6 +360,10 @@ export default function PageCommons() {
             }
             dispatch(saveCommentThunk({ index: editingEditorId, content }));
         }
+    }
+
+    const handleSnapshotCaptured = (blob) => {
+        setDrawingSnapshot(blob);
     }
 
     const videoPanels = videoPanelsState.map((item, index) =>
@@ -577,8 +586,6 @@ export default function PageCommons() {
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             debugLog(debugOn, "handleDrop, at least one file.");
-            // at least one file has been dropped so do something
-            // handleFiles(e.dataTransfer.files);
             if (e.target.id === 'videos') {
                 const videoType = /video.*/;
                 const videos = [];
@@ -705,6 +712,7 @@ export default function PageCommons() {
     }, []);
 
     useEffect(() => {
+        if(!pageItemId) setDrawingSnapshot(null);
         setcontentEditorContentWithImagesAndVideos(null);
     }, [pageItemId])
 
@@ -724,7 +732,7 @@ export default function PageCommons() {
 
     useEffect(() => {
         if (getPageContentDone) {
-            if (productId !=="" && (!itemCopy || !itemCopy.content)) {
+            if (productId !== "" && (!itemCopy || !itemCopy.content)) {
                 dispatch(getPageTemplateThunk({ url: "https://pagetemplate.bsafes.com/A002.draw" }))
             }
         }
@@ -999,9 +1007,9 @@ export default function PageCommons() {
                     </>
                 }
                 {true &&
-                    <div className={`justify-content-center ${contentType !=="DrawingPage"?"row":""}`}>
-                        <div className={`contenEditorRow ${contentType !=="DrawingPage"?"col-sm-10 col-12":""}`} style={{ minHeight: "280px" }}>
-                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest &&  (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} />
+                    <div className={`justify-content-center ${contentType !== "DrawingPage" ? "row" : ""}`}>
+                        <div className={`contenEditorRow ${contentType !== "DrawingPage" ? "col-sm-10 col-12" : ""}`} style={{ minHeight: "280px" }}>
+                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} drawingSnapshot={drawingSnapshot}/>
                         </div>
                     </div>
                 }
@@ -1046,7 +1054,7 @@ export default function PageCommons() {
                             </Col>
                         </div>
                         <br />
-                        {(!abort && !editingEditorId && (activity === 0) && !checkingLatest &&  (!oldVersion)) &&
+                        {(!abort && !editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)) &&
                             <div className="audios">
                                 <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/mp3, audio/wav" multiple className="d-none editControl" id="audios" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
@@ -1095,17 +1103,17 @@ export default function PageCommons() {
                         </Alert>
                     </div>
                 }
-                { contentUploadProgress !==0 &&
+                {contentUploadProgress !== 0 &&
                     <div className='fixed-bottom'>
                         <Alert variant='info'>
                             {`Syncing, ${contentUploadProgress} % done.`}
                         </Alert>
                     </div>
                 }
-                { contentDownloadProgress!==0 &&
+                {contentDownloadProgress !== 0 &&
                     <div className='fixed-bottom'>
                         <Alert variant='info'>
-                        {`Syncing, ${contentDownloadProgress} % done.`}
+                            {`Syncing, ${contentDownloadProgress} % done.`}
                         </Alert>
                     </div>
                 }
@@ -1119,6 +1127,9 @@ export default function PageCommons() {
                         wrapperClass="blocks-wrapper"
                     />
                 </div>
+                {contentType === "DrawingPage" &&
+                    <HiddenExcalidraw content={contentEditorContent} onSnapshotCaptured={handleSnapshotCaptured}/>
+                }
             </div>
         </>
     )

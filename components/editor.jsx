@@ -49,10 +49,11 @@ let FontsConfig = null;
  * @param {boolean} [props.showDrawIcon=false] - Whether to show the drawing icon.
  * @param {boolean} [props.showWriteIcon=false] - Whether to show the writing icon.
  * @param {function(Object) | null} [props.onDrawingClicked=null] - Callback when the drawing icon is clicked.
+ * @param {blob} [props.drawingSnapshot=null] - Snapshot of an Excalidraw drawing.
  */
 
 
-export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null, drawingImageDone = null }) {
+export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null, drawingImageDone = null, drawingSnapshot = null }) {
     const debugOn = false;
     const dispatch = useDispatch();
 
@@ -130,7 +131,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     dispatch(newItemKey({ itemKey: thisItemKey }));
                 }
                 $(editorRef.current).html(content);
-                const fullOptions = ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', 'lineHeight', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo', 'clearFormatting'/*, 'html'*/];
+                const fullOptions = ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', 'lineHeight', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo', 'clearFormatting'];
                 const minimumOptions = ['bold', 'italic', 'color', 'emoticons', 'paragraphFormat', 'fontFamily', 'formatOL', 'formatUL', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo'];
 
                 const isMinimumOption = (window.innerWidth < 480);
@@ -163,12 +164,6 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             default:
                 froalaOptions = {
                     key: froalaKey,
-                    /*
-                    toolbarButtons: ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertFile', 'insertTable', 'undo', 'redo', 'clearFormatting', 'html'],
-                    toolbarButtonsMD: ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo', 'clearFormatting', 'html'],
-                    toolbarButtonsSM: ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo', 'clearFormatting', 'html'],
-                    toolbarButtonsXS: ['bold', 'fontSize', 'color', 'paragraphStyle', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'insertLink', 'insertImage', 'insertVideo', 'undo']
-                    */
                     toolbarButtons: ['bold', 'italic', 'underline', 'strikeThrough', 'undo', 'redo'],
                     toolbarButtonsMD: ['bold', 'italic', 'underline', 'strikeThrough', 'undo', 'redo'],
                     toolbarButtonsSM: ['bold', 'italic', 'underline', 'strikeThrough', 'undo', 'redo'],
@@ -275,29 +270,12 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                 return;
             }
             const serialized = Excalidraw.serializeAsJSON(ExcalidrawRef.current.getSceneElements(), ExcalidrawRef.current.getAppState(), ExcalidrawRef.current.getFiles(), 'local');
-            //elements.splice(1,1);
-            const appState = ExcalidrawRef.current.getAppState();
-            Excalidraw.exportToCanvas({
-                elements,
-                appState: {
-                    ...appState,
-                    exportWithDarkMode: false,
-                    exportBackground: true,
-                    exportScale: 2
-                },
-                files: ExcalidrawRef.current.getFiles(),
-                maxWidthOrHeight: 2048
-            }).then(canvas => {
-                canvas.toBlob(blob => {
-                    blob.name = 'excalidraw.png';
-                    blob.src = window.URL.createObjectURL(blob);
-                    blob.metadata = {
-                        ExcalidrawExportedImage: true,
-                        ExcalidrawSerializedJSON: serialized
-                    };
-                    onContentChanged(editorId, blob);
-                })
-            })
+            const blob = {};
+            blob.name = 'excalidraw.png';
+            blob.metadata = {
+                ExcalidrawSerializedJSON: serialized
+            };
+            onContentChanged(editorId, blob);
         } else {
             let content = $(editorRef.current).froalaEditor('html.get');
             debugLog(debugOn, "editor content: ", content);
@@ -456,7 +434,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     debugLog(debugOn, "Saving draft ...");
                     if (contentType === "WritingPage") {
                         content = $(editorRef.current).froalaEditor('html.get');
-                        //debugLog(debugOn, "editor content: ", content );
+                        debugLog(debugOn, "editor content: ", content );
                         if (content !== originalContent) {
                             debugLog(debugOn, 'Content changed');
                             onDraftSampled(content);
@@ -832,8 +810,8 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                 </div>
                                 :
                                 <>
-                                    {content &&
-                                        <Image onClick={handleDrawingClicked} style={{ display: "block", margin: "auto", objectFit: 'scale-down', maxHeight: '100%', maxWidth: '100%' }} alt="Image broken" src={content.src} fluid />}
+                                    {drawingSnapshot && drawingSnapshot.src &&
+                                        <Image onClick={handleDrawingClicked} style={{ display: "block", margin: "auto", objectFit: 'scale-down', maxHeight: '100%', maxWidth: '100%' }} alt="Image broken" src={drawingSnapshot && drawingSnapshot.src} fluid />}
                                 </>
                             }
                         </>
