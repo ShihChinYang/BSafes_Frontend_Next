@@ -1178,10 +1178,12 @@ const XHRDownload = (itemId, dispatch, getState, signedURL, downloadingFunction 
             if (evt.lengthComputable) {
                 let percentComplete = evt.loaded / evt.total * 90 + 10;
                 percentComplete = baseProgress + percentComplete * progressRatio;
-                const currentPageSignedContentUrl = getState().page.itemCopy?.signedContentUrl;
-                if(signedURL === currentPageSignedContentUrl) {
-                    dispatch(setContentDownloadProgress(Math.ceil(percentComplete)));
-                } 
+                if (getState().page.itemCopy) {
+                    const currentPageSignedContentUrl = getState().page.itemCopy.signedContentUrl;
+                    if (signedURL === currentPageSignedContentUrl) {
+                        dispatch(setContentDownloadProgress(Math.ceil(percentComplete)));
+                    }
+                }
                 debugLog(debugOn, "Download progress: ", `${evt.loaded}/${evt.total} ${percentComplete} %`);
                 if (downloadingFunction) {
                     if (indexInQueue >= 0) {
@@ -1890,8 +1892,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         await processResultItem(result);
                         dispatch(setCheckingLatest(true));
                         const latestItem = await queryItemFromServer(data.itemId);
-                        if( result.item.version !== latestItem.version) {
-                            await processResultItem({item:latestItem});
+                        if (result.item.version !== latestItem.version) {
+                            await processResultItem({ item: latestItem });
                             await addItemToServiceWorkerDB(data.itemId, latestItem);
                         }
                         dispatch(setCheckingLatest(false));
@@ -1953,7 +1955,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                 const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
                                 debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
                                 const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
-                                const blob={};
+                                const blob = {};
                                 blob.metadata = {
                                     ExcalidrawSerializedJSON: forge.util.decodeUtf8(embeddJSON)
                                 };
@@ -3066,7 +3068,7 @@ async function preProcessEditorContentBeforeSaving(content, contentType) {
     if (contentType === "DrawingPage") {
         const ExcalidrawSerializedJSON = content.metadata.ExcalidrawSerializedJSON;
         return {
-            content: "NA"+ embeddJSONSeperator + ExcalidrawSerializedJSON,
+            content: "NA" + embeddJSONSeperator + ExcalidrawSerializedJSON,
             s3ObjectsInContent: [],
             s3ObjectsSize: 0
         }
