@@ -489,7 +489,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     const handleDrawingClicked = () => {
         const img = document.createElement('img');
-        img.src = content.src;
+        img.src = drawingSnapshot.src;
         img.onload = async () => {
             const w = img.width;
             const h = img.height;
@@ -751,7 +751,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div style={{ position: "relative" }}>
                             <div style={{ paddingTop: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
-                                {!content &&
+                                {false && !content &&
                                     <h6 className='m-0 text-secondary'>Title</h6>
                                 }
                                 <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>

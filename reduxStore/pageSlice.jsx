@@ -978,10 +978,10 @@ const pageSlice = createSlice({
             }
             state.contentType = state.draftContentType;
             state.draftLoaded = true;
-            state.draft = false;
-            state.draftContentType = null;
+            //state.draft = false;
+            //state.draftContentType = null;
             const { draftId, draftContentTypeId } = formDraftId(state.id);
-            localStorage.removeItem(draftContentTypeId);
+            //localStorage.removeItem(draftContentTypeId);
             state.contentImagesDownloadQueue = [];
             state.contentImagedDownloadIndex = 0;
             state.contentImagesAllDownloaded = false;
@@ -1150,7 +1150,7 @@ export const {
     clearPageTemplate,
     setCheckingLatest,
     setContentUploadProgress,
-    setContentDownloadProgress
+    setContentDownloadProgress,
 } = pageSlice.actions;
 
 
@@ -1178,7 +1178,7 @@ const XHRDownload = (itemId, dispatch, getState, signedURL, downloadingFunction 
             if (evt.lengthComputable) {
                 let percentComplete = evt.loaded / evt.total * 90 + 10;
                 percentComplete = baseProgress + percentComplete * progressRatio;
-                const currentPageSignedContentUrl = getState().page.itemCopy.signedContentUrl;
+                const currentPageSignedContentUrl = getState().page.itemCopy?.signedContentUrl;
                 if(signedURL === currentPageSignedContentUrl) {
                     dispatch(setContentDownloadProgress(Math.ceil(percentComplete)));
                 } 
@@ -3282,7 +3282,7 @@ export const loadDraftThunk = (data) => async (dispatch, getState) => {
             if (result.status === 'ok') {
                 const draft = result.data;
                 dispatch(loadDraft(draft));
-                await deleteDraftInDB(draftId);
+                //await deleteDraftInDB(draftId);
                 resolve()
             } else {
                 throw new Error("Failed to read an image data from service worker DB!");
@@ -3458,6 +3458,8 @@ export const saveContentThunk = (data) => async (dispatch, getState) => {
                         content
                     }));
                     await clearDraftFunc(dispatch, getState);
+                    dispatch(setDraftLoaded(false));
+                    dispatch(clearPageTemplate());
                     requestAppleReview();
                     resolve();
                 }

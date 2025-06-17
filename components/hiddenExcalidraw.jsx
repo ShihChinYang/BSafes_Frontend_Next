@@ -16,12 +16,9 @@ export default function HiddenExcalidraw({ content, onSnapshotCaptured }) {
     const debugOn = false;
     const dispatch = useDispatch();
 
-    const ExcalidrawRef = useRef(null);
-    const pageTemplate = useSelector(state => state.page.pageTemplate);
-
-    const [editorOn, setEditorOn] = useState(false);
+    const ExcalidrawRef = useRef(null);   
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
-    const [originalContent, setOriginalContent] = useState(null);
+    const draftLoaded = useSelector(state => state.page.draftLoaded);
 
     const drawing = () => {
         const captureSnapshot = () => {
@@ -109,9 +106,9 @@ export default function HiddenExcalidraw({ content, onSnapshotCaptured }) {
     }, []);
 
     useEffect(() => {
-        if (!scriptsLoaded || !content) return;
+        if (draftLoaded || !scriptsLoaded || !content) return;
         drawing();
-    }, [scriptsLoaded, content])
+    }, [draftLoaded, scriptsLoaded, content])
 
     const saveAsJSON = () => {
         const elements = ExcalidrawRef.current.getSceneElements();

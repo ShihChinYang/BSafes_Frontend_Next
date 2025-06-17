@@ -252,7 +252,7 @@ export default function PageCommons() {
     }
 
     const handleDraftDelete = () => {
-        dispatch(clearDraftThunk());
+        if (confirm("Are you sure?")) dispatch(clearDraftThunk());
     }
 
     function afterContentReadOnly() {
@@ -306,8 +306,8 @@ export default function PageCommons() {
                 if (contentType === "WritingPage") {
                     setcontentEditorContentWithImagesAndVideos(content);
                 }
-                if (contentType === "DrawingPage"){
-                    setDrawingSnapshot({name:content.name, src:content.src})
+                if (contentType === "DrawingPage") {
+                    setDrawingSnapshot({ name: content.name, src: content.src })
                 }
                 dispatch(saveContentThunk({ content, workspaceKey }));
             } else {
@@ -457,8 +457,8 @@ export default function PageCommons() {
                 dispatch(setContentType(""))
             }
             if (draftLoaded) {
-                dispatch(setContentType(""));
-                dispatch(clearDraftThunk());
+                //dispatch(setContentType(""));
+                //dispatch(clearDraftThunk());
                 dispatch(loadOriginalContentThunk());
             }
             dispatch(setDraftLoaded(false));
@@ -712,7 +712,7 @@ export default function PageCommons() {
     }, []);
 
     useEffect(() => {
-        if(!pageItemId) setDrawingSnapshot(null);
+        if (!pageItemId) setDrawingSnapshot(null);
         setcontentEditorContentWithImagesAndVideos(null);
     }, [pageItemId])
 
@@ -984,17 +984,11 @@ export default function PageCommons() {
                             <hr className="my-0" />
 
                         }
-                        {product.fixedSize ?
-                            <div className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
+                        <Row className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
+                            <div className={product.fixedSize ? "" : "col-sm-10 col-12"}>
                                 <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />
                             </div>
-                            :
-                            <Row className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
-                                <Col sm="10" >
-                                    <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />
-                                </Col>
-                            </Row>
-                        }
+                        </Row>
                         {productId === "" ?
                             <Row className="justify-content-center mx-2">
                                 <Col sm="10">
@@ -1009,7 +1003,7 @@ export default function PageCommons() {
                 {true &&
                     <div className={`justify-content-center ${contentType !== "DrawingPage" ? "row" : ""}`}>
                         <div className={`contenEditorRow ${contentType !== "DrawingPage" ? "col-sm-10 col-12" : ""}`} style={{ minHeight: "280px" }}>
-                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} drawingSnapshot={drawingSnapshot}/>
+                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} drawingSnapshot={drawingSnapshot} />
                         </div>
                     </div>
                 }
@@ -1128,7 +1122,7 @@ export default function PageCommons() {
                     />
                 </div>
                 {contentType === "DrawingPage" &&
-                    <HiddenExcalidraw content={contentEditorContent} onSnapshotCaptured={handleSnapshotCaptured}/>
+                    <HiddenExcalidraw content={contentEditorContent} onSnapshotCaptured={handleSnapshotCaptured} />
                 }
             </div>
         </>
