@@ -4,6 +4,7 @@ import { Navigation, Pagination } from 'swiper/modules';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import BSafesStyle from '../../styles/BSafes.module.css'
@@ -59,6 +60,18 @@ export default function AppPreivews() {
                   </div>
                 </Swiper>
               </Col>
+            </Row>
+            <br />
+            <Row>
+              <Col xs={9}><ul>
+                <li></li>
+              </ul></Col>
+              <Col xs={3}><Button size="sm">Try Me</Button></Col>
+            </Row>
+            <br />
+            <Row>
+              <Col xs={9}><ul><li>Sync to your other devices with end-to-end encryption, your privacy is secured.</li></ul></Col>
+              <Col xs={3}><Button size="sm">Go Pro</Button></Col>
             </Row>
           </Container>
         </div>

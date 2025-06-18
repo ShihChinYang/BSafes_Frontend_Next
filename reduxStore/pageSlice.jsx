@@ -97,6 +97,7 @@ const initialState = {
     checkingLatest: false,
     contentUploadProgress: 0,
     contentDownloadProgress: 0,
+    generateDrawingSnapshot: false
 }
 
 const dataFetchedFunc = (state, action) => {
@@ -1046,6 +1047,9 @@ const pageSlice = createSlice({
         setContentDownloadProgress: (state, action) => {
             state.contentDownloadProgress = action.payload;
         },
+        setGenerateDrawingSnapshot: (state, action) => {
+            state.generateDrawingSnapshot = action.payload;
+        },
     }
 })
 
@@ -1151,6 +1155,7 @@ export const {
     setCheckingLatest,
     setContentUploadProgress,
     setContentDownloadProgress,
+    setGenerateDrawingSnapshot
 } = pageSlice.actions;
 
 

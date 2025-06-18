@@ -5,9 +5,9 @@ const forge = require('node-forge');
 
 import jquery from "jquery"
 
-import { debugLog, convertUint8ArrayToBinaryString } from "../lib/helper";
+import { debugLog } from "../lib/helper";
 
-import { setInitialContentRendered, saveAFileThunk, setDrawingTemplateImage } from "../reduxStore/pageSlice";
+import { setGenerateDrawingSnapshot } from "../reduxStore/pageSlice";
 
 let Excalidraw = null;
 let FontsConfig = null;
@@ -16,7 +16,7 @@ export default function HiddenExcalidraw({ content, onSnapshotCaptured }) {
     const debugOn = false;
     const dispatch = useDispatch();
 
-    const ExcalidrawRef = useRef(null);   
+    const ExcalidrawRef = useRef(null);
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
     const draftLoaded = useSelector(state => state.page.draftLoaded);
 
@@ -25,10 +25,12 @@ export default function HiddenExcalidraw({ content, onSnapshotCaptured }) {
             setTimeout(() => {
                 debugLog(debugOn, "Capturing drawing page ...");
                 if (!ExcalidrawRef.current) {
+                    dispatch(setGenerateDrawingSnapshot(false));
                     return;
                 }
                 const elements = ExcalidrawRef.current.getSceneElements();
                 if (!elements || !elements.length) {
+                    dispatch(setGenerateDrawingSnapshot(false));
                     return;
                 }
                 const serialized = Excalidraw.serializeAsJSON(ExcalidrawRef.current.getSceneElements(), ExcalidrawRef.current.getAppState(), ExcalidrawRef.current.getFiles(), 'local');
@@ -49,11 +51,13 @@ export default function HiddenExcalidraw({ content, onSnapshotCaptured }) {
                         blob.name = 'excalidraw.png';
                         blob.src = window.URL.createObjectURL(blob);
                         onSnapshotCaptured(blob);
+                        dispatch(setGenerateDrawingSnapshot(false));
                     })
                 })
             }, 0)
         }
         if (content && content?.metadata?.ExcalidrawSerializedJSON) {
+            dispatch(setGenerateDrawingSnapshot(true));
             const savedJSON = JSON.parse(content?.metadata?.ExcalidrawSerializedJSON);
             const res = Excalidraw.restore(savedJSON);
             function restoreExcalidraw(params) {
@@ -67,9 +71,9 @@ export default function HiddenExcalidraw({ content, onSnapshotCaptured }) {
                     ExcalidrawRef.current.updateScene(res);
                     if (res.files)
                         ExcalidrawRef.current.addFiles(Object.values(res.files));
-                    const thisInterval = setInterval(()=>{
+                    const thisInterval = setInterval(() => {
                         let value = localStorage.getItem("sceneUpdated");
-                        if(value === "true"){
+                        if (value === "true") {
                             clearInterval(thisInterval);
                             captureSnapshot();
                         }
@@ -79,9 +83,6 @@ export default function HiddenExcalidraw({ content, onSnapshotCaptured }) {
             setTimeout(() => {
                 restoreExcalidraw(res);
             }, 500);
-        }
-        else {
-            loadExcalidrawState();
         }
     }
 
@@ -110,26 +111,6 @@ export default function HiddenExcalidraw({ content, onSnapshotCaptured }) {
         drawing();
     }, [draftLoaded, scriptsLoaded, content])
 
-    const saveAsJSON = () => {
-        const elements = ExcalidrawRef.current.getSceneElements();
-        if (!elements || !elements.length) {
-            return;
-        }
-        let appState = ExcalidrawRef.current.getAppState();
-        appState = {
-            ...appState,
-            forBSafes: true,
-            forBSafesImageMaxWidthOrHeight: 120
-        }
-        const serialized = Excalidraw.serializeAsJSON(ExcalidrawRef.current.getSceneElements(), appState, ExcalidrawRef.current.getFiles(), 'local');
-        const encoded = forge.util.encodeUtf8(serialized);
-        const attachment = {
-            fileName: "test.draw",
-            fileSize: encoded.length,
-            data: encoded
-        }
-        dispatch(saveAFileThunk({ attachment }));
-    }
     return (
         <>
             {scriptsLoaded &&
@@ -151,9 +132,6 @@ export default function HiddenExcalidraw({ content, onSnapshotCaptured }) {
                                         <Excalidraw.MainMenu.DefaultItems.LoadScene />
                                         <Excalidraw.MainMenu.DefaultItems.Export />
                                         <Excalidraw.MainMenu.DefaultItems.SaveAsImage />
-                                        <Excalidraw.MainMenu.Item onSelect={saveAsJSON}>
-                                            Save As JSON
-                                        </Excalidraw.MainMenu.Item>
                                         <Excalidraw.MainMenu.DefaultItems.Help />
                                         <Excalidraw.MainMenu.DefaultItems.ClearCanvas />
                                         <Excalidraw.MainMenu.DefaultItems.ToggleTheme />

@@ -35,8 +35,10 @@ yarn-error.log*
 # confidentials
 buildAndAddSri
 buildForIOSColors
+buildForIOSBSafes
 runForIOS
 runForWeb
+runForWebProduct
 runForAndroidBSafes
 runForWebColors
 public/js/excalidraw/custom-fonts
