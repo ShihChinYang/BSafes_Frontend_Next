@@ -9,7 +9,7 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import ProgressBar from 'react-bootstrap/ProgressBar'
-
+import Modal from 'react-bootstrap/Modal'
 import BSafesStyle from '../styles/BSafes.module.css'
 
 import { debugLog } from '../lib/helper'
@@ -36,6 +36,7 @@ export default function KeySetup() {
     const [showPrivacy, setShowPrivacy] = useState(false);
     const [showTerms, setShowTerms] = useState(false);
     const nicknameRef = useRef(null);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     function checkKeyStrength(key) {
         debugLog(debugOn, "Checking key strength:", key.length);
@@ -94,7 +95,16 @@ export default function KeySetup() {
     }
 
     const handleSubmit = async e => {
-        debugLog(debugOn, "handleSubmit");
+        setShowConfirm(true);
+    }
+
+    const handleCloseConfirm = () => {
+        setShowConfirm(false);
+    }
+
+    const handleUnderstood = () => {
+        setShowConfirm(false);
+        debugLog(debugOn, "handleUnderstood");
         dispatch(keySetupAsyncThunk({ nickname: nicknameRef.current.value, keyPassword: keyPassword }));
     }
 
@@ -117,11 +127,11 @@ export default function KeySetup() {
                                 <h5>Own Your <span style={{ backgroundColor: 'yellow', color: 'black', fontWeight: 'bold', padding: '7px' }}>BSafes</span></h5>
                                 <hr></hr>
                                 <Form>
-                                    <Form.Group className="mb-3" controlId="Nickname">
+                                    <Form.Group className="mb-1" controlId="Nickname">
                                         <Form.Label>Nickname</Form.Label>
-                                        <Form.Control ref={nicknameRef} size="lg" type="text" placeholder='Please give it a nickname' />
+                                        <Form.Control ref={nicknameRef} size="md" type="text" placeholder='Please give it a nickname' />
                                     </Form.Group>
-                                    <Form.Group key='keyPassword' className="mb-3" controlId="keyPassword">
+                                    <Form.Group key='keyPassword' className="mb-1" controlId="keyPassword">
                                         <Form.Label>Key Password</Form.Label>
                                         <KeyInput onKeyChanged={keyPasswordChanged} />
                                         <ProgressBar variant={keyStrengthColor} now={keyStrengthProgress} />
@@ -131,13 +141,11 @@ export default function KeySetup() {
                                             . A key of 16 or more characters in length is better.
                                         </Form.Text>
                                     </Form.Group>
-
                                     <Form.Group key='ConfirmkeyPassword' className="mb-3" controlId="ConfirmkeyPassword">
                                         <Form.Label>Please retype to confirm</Form.Label>
                                         <KeyInput onKeyChanged={confirmPasswordChanged} />
                                     </Form.Group>
                                 </Form>
-                                <br />
                                 <p className='text-cent'>You agree to our <Link onClick={handlePrivacy} href='/public/privacyPolicy' style={{ textDecoration: 'none' }}>Privacy Policy</Link> and <Link onClick={handleTerms} href='/public/termsOfService' style={{ textDecoration: 'none' }}>Terms of Service</Link> by clicking GO.</p>
                                 <Row>
                                     <Col className='text-center'>
@@ -157,6 +165,25 @@ export default function KeySetup() {
                     <br />
                     <br />
                     <br />
+                    <Modal
+                        show={showConfirm}
+                        onHide={handleCloseConfirm}
+                        backdrop="static"
+                        keyboard={false}
+                    >
+                        <Modal.Header closeButton>
+                            <Modal.Title>Remember your key?</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            Write your nickname and key password in a secure location, as we cannot recover your key.
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={handleCloseConfirm}>
+                                Close
+                            </Button>
+                            <Button variant="primary" onClick={handleUnderstood}>Understood</Button>
+                        </Modal.Footer>
+                    </Modal>
                 </Container>
                 <Scripts />
             </ContentPageLayout>

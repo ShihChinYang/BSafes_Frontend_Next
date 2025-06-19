@@ -1770,7 +1770,13 @@
 
 /*--****** Login and KeySetup pages *******/
 .keyPanel {
-  padding-top: 30px;
+  padding-top: 10px;
+}
+
+@media only screen and (min-width: 420px) {
+  .keyPanel {
+    padding-top: 30px;
+  }
 }
 
 @media only screen and (min-width: 768px) {

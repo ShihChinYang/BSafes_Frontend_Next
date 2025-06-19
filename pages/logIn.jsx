@@ -12,6 +12,7 @@ import Button from 'react-bootstrap/Button'
 import BSafesStyle from '../styles/BSafes.module.css'
 
 import { debugLog } from '../lib/helper'
+import { getFirstPageAfterLoggedIn } from '../lib/productID'
 
 import ContentPageLayout from '../components/layouts/contentPageLayout';
 import KeyInput from "../components/keyInput";
@@ -31,10 +32,10 @@ export default function LogIn() {
     const [keyPassword, setKeyPassword] = useState("");
     const [recovery, setRecovery] = useState(false);
 
-    const nicknameRef = useRef(null);
     const clientEncryptionKey = useSelector(state => state.auth.clientEncryptionKey);
     const activity = useSelector(state => state.auth.activity);
     const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
+    const memberId = useSelector(state => state.auth.memberId);
     const [toPath, setToPath] = useState(null);
 
     const nicknameChanged = (e) => {
@@ -49,7 +50,7 @@ export default function LogIn() {
     const handleSubmit = async e => {
         debugLog(debugOn, "handleSubmit");
 
-        dispatch(logInAsyncThunk({ nickname/*: nicknameRef.current.value*/, keyPassword }));
+        dispatch(logInAsyncThunk({ nickname, keyPassword }));
     }
 
     const handleRecover = () => {
@@ -85,7 +86,7 @@ export default function LogIn() {
             if (toPath) {
                 router.push(toPath);
             } else {
-                router.push('/safe');
+                router.push(getFirstPageAfterLoggedIn(memberId));
             }
         }
     }, [isLoggedIn])
@@ -115,7 +116,7 @@ export default function LogIn() {
                                     <Form>
                                         <Form.Group className="mb-3" controlId="Nickname">
                                             <Form.Label>Nickname</Form.Label>
-                                            <Form.Control /*ref={nicknameRef}*/ type="text" placeholder='' autoComplete="off" className={BSafesStyle.inputBox} value={nickname} onChange={nicknameChanged} />
+                                            <Form.Control type="text" placeholder='' autoComplete="off" className={BSafesStyle.inputBox} value={nickname} onChange={nicknameChanged} />
                                         </Form.Group>
                                         <Form.Group className="mb-3" controlId="keyPassword">
                                             <Form.Label>Key Password</Form.Label>

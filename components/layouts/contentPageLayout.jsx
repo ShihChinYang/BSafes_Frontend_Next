@@ -28,6 +28,7 @@ import BSafesStyle from '../../styles/BSafes.module.css'
 
 import { debugLog } from '../../lib/helper';
 import { getErrorMessages } from '../../lib/activities';
+import { getFirstPageAfterLoggedIn } from '../../lib/productID'
 
 import { resetAccountActivity, setAccountHashVerified } from '../../reduxStore/accountSlice';
 import { resetAuthActivity, preflightAsyncThunk, setPreflightReady, setLocalSessionState, createCheckSessionIntervalThunk, loggedOut, cleanMemoryThunk, setV2NextAuthStep, logOutAsyncThunk } from '../../reduxStore/auth';
@@ -43,6 +44,8 @@ const hideFunction = (process.env.NEXT_PUBLIC_functions.indexOf('hide') !== -1)
 const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, showNaveBar = true, showNavbarMenu = true, showPathRow = true }) => {
     const debugOn = false;
     debugLog(false, "Rendering ContentPageLayout");
+
+    const product = process.env.NEXT_PUBLIC_product;
 
     SafeArea.getSafeAreaInsets().then(({ insets }) => {
         debugLog(debugOn, insets);
@@ -207,7 +210,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                         if (accountVersion === 'v1') {
                             changePage('/teams');
                         } else {
-                            changePage('/safe');
+                            changePage(getFirstPageAfterLoggedIn(memberId));
                         }
                     }
                     return;
@@ -215,7 +218,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                     if (accountVersion === 'v1') {
                         changePage('/teams');
                     } else {
-                        changePage('/safe');
+                        changePage(getFirstPageAfterLoggedIn(memberId));
                     }
                     return;
                 }
@@ -555,7 +558,8 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                     theme="light"
                 />
             </div>
-            {!hideFunction && isLoggedIn && showPathRow && <ItemPath />}
+            {(!product || (product && product==="")) && !hideFunction && isLoggedIn && showPathRow && <ItemPath />}
+            {router.asPath.startsWith('/services') && product && product!=="" && <Button variant="link" style={{display:"block", marginRight:"0px", marginLeft:"auto"}} onClick={()=>{router.push(getFirstPageAfterLoggedIn(memberId))}}><i className="fa fa-times fa-2x" aria-hidden="true"></i></Button>}
             {children}
             <ItemsMovingProgress />
             <ItemsToolbar />

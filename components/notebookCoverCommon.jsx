@@ -44,7 +44,7 @@ export default function NotebookCoverCommon({ demo = false }) {
 
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
     const titleEditorContent = useSelector(state => state.page.title);
-    
+
     const product = demo ? NotebookDemo : 'notebook';
     let productId = ""
     if (router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`)) {
@@ -136,9 +136,9 @@ export default function NotebookCoverCommon({ demo = false }) {
                         <br />
                         <TopControlPanel onCoverClicked={handleCoverClicked} onContentsClicked={handleContentsClicked} ></TopControlPanel>
                         <br />
-                        <Row>
-                            <Col lg={{ span: 10, offset: 1 }}>
-                                {router.query.itemId && !router.query.itemId.startsWith(`n:${productIdDelimiter}`) &&
+                        {router.query.itemId && !router.query.itemId.startsWith(`n:${productIdDelimiter}`) &&
+                            <Row>
+                                <Col lg={{ span: 10, offset: 1 }}>
                                     <div className={`${BSafesStyle.notebookPanel} ${BSafesStyle.notebookCoverPanel} ${BSafesStyle.containerCoverPanel}`}>
                                         <ItemTopRows />
                                         <br />
@@ -156,26 +156,27 @@ export default function NotebookCoverCommon({ demo = false }) {
                                         </Row>
                                         <PageCommonControls showWriteBtn={false} isEditing={editingEditorId} onWrite={handleWrite} onSave={handleSave} onCancel={handleCancel} />
                                     </div>
-                                }
-                                {router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`) &&
-                                    <div className={`${BSafesProductsStyle[`${productId}_Cover`]}`}>
-                                        <ItemTopRows />
-                                        <Row className="justify-content-center">
-                                            <div className={`${BSafesProductsStyle[`${productId}_CoverTitle`]}`}>
-                                                <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
-                                            </div>
-                                        </Row>
-                                        <br />
-                                        <Row>
-                                            <Col>
-                                                <ContainerOpenButton handleOpen={handleOpen} />
-                                            </Col>
-                                        </Row>
-                                        <PageCommonControls showWriteBtn={false} isEditing={editingEditorId} onWrite={handleWrite} onSave={handleSave} onCancel={handleCancel} />
+                                </Col>
+                            </Row>
+                        }
+                        {router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`) &&
+                            <div className={`${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Cover`]}`}>
+                                <ItemTopRows />
+                                <Row className="justify-content-center">
+                                    <div className={`${BSafesProductsStyle[`${productId}_CoverTitle`]}`}>
+                                        <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
                                     </div>
-                                }
-                            </Col>
-                        </Row>
+                                </Row>
+                                <br />
+                                <Row>
+                                    <Col>
+                                        <ContainerOpenButton handleOpen={handleOpen} />
+                                    </Col>
+                                </Row>
+                                <PageCommonControls showWriteBtn={false} isEditing={editingEditorId} onWrite={handleWrite} onSave={handleSave} onCancel={handleCancel} />
+                            </div>
+                        }
+
                     </PageItemWrapper>
                 </ContentPageLayout>
                 <Scripts />

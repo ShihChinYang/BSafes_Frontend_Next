@@ -160,7 +160,7 @@ export default function ItemPath() {
                 <Row>
                     <Col xs={10} md={11} className={`${BSafesStyle.itemPath} rounded-end`}>
                         <Breadcrumb className={`${BSafesStyle.itemPathBreadcrumb}`}>
-                            <Breadcrumb.Item /*href="/teams"*/ onClick={() => router.push('/teams')} active={false} className={`${BSafesStyle.teamsPathItem}`} linkProps={{ className: BSafesStyle.teamsPathLink }}><i className="fa fa-building" aria-hidden="true" /> Spaces </Breadcrumb.Item>
+                            <Breadcrumb.Item onClick={() => router.push('/teams')} active={false} className={`${BSafesStyle.teamsPathItem}`} linkProps={{ className: BSafesStyle.teamsPathLink }}><i className="fa fa-building" aria-hidden="true" /> Spaces </Breadcrumb.Item>
                             {breadItems}
                         </Breadcrumb>
                     </Col>

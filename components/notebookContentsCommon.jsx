@@ -50,7 +50,7 @@ export default function NotebookContentsCommon({ demo = false }) {
     if(productId === ""){
         panelStyle = `${BSafesStyle.pagePanel} ${BSafesStyle.notebookPanel} ${pageStyle}`;
     } else {
-        panelStyle = `${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
+        panelStyle = `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
     }
 
     const items = itemsState.map((item, index) =>

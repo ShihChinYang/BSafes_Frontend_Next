@@ -1,15 +1,21 @@
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
 import { Navigation, Pagination } from 'swiper/modules';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import BSafesStyle from '../../styles/BSafes.module.css'
 
 export default function AppPreivews() {
+  const router = useRouter();
+  const [show, setShow] = useState(false);
 
   const slideSettings = useMemo(() => {
     return {
@@ -31,7 +37,7 @@ export default function AppPreivews() {
   }, [])
 
   return (
-    <div>
+    <>
       <div className="bsafesStore">
         <div className={BSafesStyle.appPreview}>
           <Container>
@@ -41,7 +47,7 @@ export default function AppPreivews() {
                   <div className="swiper-wrapper">
                     <SwiperSlide key={11} className="swiper-slide">
                       <div className={BSafesStyle.appPreviewImageWrapper}>
-                        <img src="https://placehold.co/360X480" alt="" />
+                        <img src="/images/feature_OneClick.png" alt="" />
                       </div>
                     </SwiperSlide>
                     <SwiperSlide key={12} className="swiper-slide">
@@ -70,12 +76,38 @@ export default function AppPreivews() {
             </Row>
             <br />
             <Row>
-              <Col xs={9}><ul><li>Sync to your other devices with end-to-end encryption, your privacy is secured.</li></ul></Col>
-              <Col xs={3}><Button size="sm">Go Pro</Button></Col>
+              <Col xs={9}>
+                <ul><li>Sync your other devices with end-to-end encryption to ensure your privacy is protected.<Button variant="link" size="sm" onClick={() => { setShow(true) }}>Learne more</Button></li></ul>
+              </Col>
+              <Col xs={3}>
+                <Button size="sm" onClick={() => { router.push('/keySetup') }}>Go Pro</Button>
+              </Col>
             </Row>
           </Container>
         </div>
       </div>
-    </div>
+      <Modal fullscreen={true} show={show} onHide={() => setShow(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Modal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Tabs
+            defaultActiveKey="home"
+            id="uncontrolled-tab-example"
+            className="mb-3"
+          >
+            <Tab eventKey="home" title="Home">
+              Tab content for Home
+            </Tab>
+            <Tab eventKey="profile" title="Profile">
+              Tab content for Profile
+            </Tab>
+            <Tab eventKey="contact" title="Contact">
+              Tab content for Contact
+            </Tab>
+          </Tabs>
+        </Modal.Body>
+      </Modal>
+    </>
   );
 };

@@ -9,6 +9,7 @@ import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Badge from 'react-bootstrap/Badge';
 
+import { getFirstPageAfterLoggedIn } from '../../lib/productID';
 import ContentPageLayout from "../../components/layouts/contentPageLayout";
 
 import { changeDataCenterThunk, getDataCentersThunk } from '../../reduxStore/accountSlice';
@@ -21,6 +22,7 @@ export default function DataCenterSetup() {
     const dataCenters = useSelector(state => state.account.dataCenters);
     const currentDataCenter = useSelector(state => state.account.currentDataCenter);
     const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
+    const memberId = useSelector(state => state.auth.memberId);
 
     const handleUserSelection = (dataCenter)=> {
         const result = confirm(`Are you sure to select ${dataCenter.location} as your data center?`);
@@ -30,7 +32,7 @@ export default function DataCenterSetup() {
     }
 
     const handleAccept = () => {
-        router.push('/safe');
+        router.push(getFirstPageAfterLoggedIn(memberId));
     }
 
     useEffect(() => {
