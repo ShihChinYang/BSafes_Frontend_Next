@@ -12,14 +12,13 @@ import Button from 'react-bootstrap/Button'
 import BSafesStyle from '../styles/BSafes.module.css'
 
 import { debugLog } from '../lib/helper'
-import { getFirstPageAfterLoggedIn } from '../lib/productID'
 
 import ContentPageLayout from '../components/layouts/contentPageLayout';
 import KeyInput from "../components/keyInput";
 import RecoverAccountModal from '../components/recoverAccountModal';
-import Turnstile from '../components/turnstile'; 
+import Turnstile from '../components/turnstile';
 
-import { logInAsyncThunk } from '../reduxStore/auth'
+import { logInAsyncThunk, setGotoFirstPagetAfterLoggedIn } from '../reduxStore/auth'
 
 import { readAccountRecoveryCode } from '../lib/crypto';
 
@@ -86,13 +85,13 @@ export default function LogIn() {
             if (toPath) {
                 router.push(toPath);
             } else {
-                router.push(getFirstPageAfterLoggedIn(memberId));
+                dispatch(setGotoFirstPagetAfterLoggedIn(true));
             }
         }
     }, [isLoggedIn])
 
     return (
-        <div className={`${BSafesStyle.minHeight100Percent}`} style={{backgroundColor:"#F8F9F9"}}>
+        <div className={`${BSafesStyle.minHeight100Percent}`} style={{ backgroundColor: "#F8F9F9" }}>
             <ContentPageLayout showNaveBar={false} showNavbarMenu={false} showPathRow={false}>
                 <div>
                     <Container>
@@ -100,11 +99,11 @@ export default function LogIn() {
                             <Col sm={{ span: 10, offset: 1 }} lg={{ span: 6, offset: 3 }}>
                                 {process.env.NEXT_PUBLIC_app !== 'colors' &&
                                     <>
-                                        <br/>
-                                        <br/>
+                                        <br />
+                                        <br />
                                     </>
                                 }
-                                <Card className='p-3' style={{maxWidth:'420px', margin:'auto'}}>
+                                <Card className='p-3' style={{ maxWidth: '420px', margin: 'auto' }}>
                                     {process.env.NEXT_PUBLIC_app === 'colors' &&
                                         <>
                                             <p>This app securely hides your stories, videos, photos, and files using the reliable cloud service BSafes.</p>

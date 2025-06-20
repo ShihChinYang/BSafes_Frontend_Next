@@ -8,7 +8,7 @@ import { setNavigationInSameContainer } from './containerSlice';
 import { getBrowserInfo, usingServiceWorker, convertBinaryStringToUint8Array, debugLog, PostCall, extractHTMLElementText, requestAppleReview } from '../lib/helper'
 import { generateNewItemKey, decryptBinaryString, encryptBinaryString, encryptLargeBinaryString, decryptChunkBinaryStringToBinaryStringAsync, decryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync, stringToEncryptedTokensCBC, stringToEncryptedTokensECB, tokenfieldToEncryptedArray, tokenfieldToEncryptedTokensCBC, tokenfieldToEncryptedTokensECB } from '../lib/crypto';
 import { pageActivity } from '../lib/activities';
-import { getBookIdFromPage, timeToString, formatTimeDisplay, getEditorConfig } from '../lib/bSafesCommonUI';
+import { getBookIdFromPage, timeToString, formatTimeDisplay, getEditorConfig, getItemType } from '../lib/bSafesCommonUI';
 import { preS3Download, preS3ChunkUpload, preS3ChunkDownload, putS3Object } from '../lib/s3Helper';
 import { downScaleImage } from '../lib/wnImage';
 import { isDemoMode } from '../lib/demoHelper';
@@ -1566,7 +1566,9 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
             let state;
             dispatch(setActiveRequest(data.itemId));
 
-            const payload = { itemId: data.itemId };
+            let payload = { itemId: data.itemId };
+            const containerSlice = getState().container
+            const space = containerSlice.workspace;
             if (data.version) {
                 payload.oldVersion = data.version;
                 dispatch(setOldVersion());
@@ -1674,6 +1676,32 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
             }
             function getItemFromServer() {
                 debugLog(debugOn, "/memberAPI/getPageItem: ", data.itemId);
+                function getProductemplate() {
+                    const targetContainer = space;
+                    const type = getItemType(data.itemId);
+                    const title = '<h2></h2>';
+                    const encodedTitle = forge.util.encodeUtf8(title);
+                    const itemKey = generateNewItemKey();
+                    const workspaceKey = containerSlice.workspaceKey;
+                    const keyEnvelope = encryptBinaryString(itemKey, workspaceKey);
+                    const encryptedTitle = encryptBinaryString(encodedTitle, itemKey);
+                    const template = {
+                        space,
+                        targetContainer,
+                        type,
+                        keyEnvelope: forge.util.encode64(keyEnvelope),
+                        title: forge.util.encode64(encryptedTitle),
+                        titleTokens: JSON.stringify([])
+                    };
+                    return template;
+                }
+                if (space && data.itemId.startsWith("n:") || data.itemId.startsWith("d:")) {
+                    const product = process.env.NEXT_PUBLIC_product;
+                    if (product && product !== "") {
+                        payload = { ...payload, createFromTemplate: true, ...getProductemplate() };
+                    }
+                }
+
                 PostCall({
                     api: '/memberAPI/getPageItem',
                     body: payload,

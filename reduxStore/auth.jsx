@@ -39,7 +39,8 @@ const initialState = {
     v2NextAuthStep: null,
     mfa: null,
     demoMode: false,
-    serviceWorkerRegistered: false
+    serviceWorkerRegistered: false,
+    gotoFirstPagetAfterLoggedIn: false,
 }
 
 const authSlice = createSlice({
@@ -138,11 +139,14 @@ const authSlice = createSlice({
         },
         setFroalaLicenseKey: (state, action) => {
             state.froalaLicenseKey = action.payload.froalaLicenseKey;
+        },
+        setGotoFirstPagetAfterLoggedIn: (state, action) => {
+            state.gotoFirstPagetAfterLoggedIn = action.payload;
         }
     }
 });
 
-export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey } = authSlice.actions;
+export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey, setGotoFirstPagetAfterLoggedIn } = authSlice.actions;
 
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));

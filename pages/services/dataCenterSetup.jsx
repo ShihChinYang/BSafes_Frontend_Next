@@ -4,25 +4,22 @@ import { useRouter } from 'next/router';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Badge from 'react-bootstrap/Badge';
 
-import { getFirstPageAfterLoggedIn } from '../../lib/productID';
 import ContentPageLayout from "../../components/layouts/contentPageLayout";
 
 import { changeDataCenterThunk, getDataCentersThunk } from '../../reduxStore/accountSlice';
+import { setGotoFirstPagetAfterLoggedIn } from '../../reduxStore/auth';
 
 export default function DataCenterSetup() {
     const dispatch = useDispatch();
-    const router = useRouter();
 
     const dataCenterModal = useSelector(state => state.account.dataCenterModal);
     const dataCenters = useSelector(state => state.account.dataCenters);
     const currentDataCenter = useSelector(state => state.account.currentDataCenter);
     const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
-    const memberId = useSelector(state => state.auth.memberId);
 
     const handleUserSelection = (dataCenter)=> {
         const result = confirm(`Are you sure to select ${dataCenter.location} as your data center?`);
@@ -32,7 +29,7 @@ export default function DataCenterSetup() {
     }
 
     const handleAccept = () => {
-        router.push(getFirstPageAfterLoggedIn(memberId));
+        dispatch(setGotoFirstPagetAfterLoggedIn(true));
     }
 
     useEffect(() => {

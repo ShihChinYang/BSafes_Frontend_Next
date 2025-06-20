@@ -31,8 +31,8 @@ import { getErrorMessages } from '../../lib/activities';
 import { getFirstPageAfterLoggedIn } from '../../lib/productID'
 
 import { resetAccountActivity, setAccountHashVerified } from '../../reduxStore/accountSlice';
-import { resetAuthActivity, preflightAsyncThunk, setPreflightReady, setLocalSessionState, createCheckSessionIntervalThunk, loggedOut, cleanMemoryThunk, setV2NextAuthStep, logOutAsyncThunk } from '../../reduxStore/auth';
-import { resetContainerActivity } from '../../reduxStore/containerSlice';
+import { resetAuthActivity, preflightAsyncThunk, setPreflightReady, setLocalSessionState, createCheckSessionIntervalThunk, loggedOut, cleanMemoryThunk, setV2NextAuthStep, logOutAsyncThunk, setGotoFirstPagetAfterLoggedIn } from '../../reduxStore/auth';
+import { resetContainerActivity, initContainer } from '../../reduxStore/containerSlice';
 import { resetPageActivity } from '../../reduxStore/pageSlice';
 import { resetTeamActivity } from '../../reduxStore/teamSlice';
 import { resetV1AccountActivity } from '../../reduxStore/v1AccountSlice';
@@ -66,6 +66,10 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     const authActivity = useSelector(state => state.auth.activity);
     const authActivityErrors = useSelector(state => state.auth.activityErrors);
     const authActivityErrorCodes = useSelector(state => state.auth.activityErrorCodes);
+    const workspaceKey = useSelector(state => state.auth.expandedKey);
+    const searchKey = useSelector(state => state.auth.searchKey);
+    const searchIV = useSelector(state => state.auth.searchIV);
+    const gotoFirstPagetAfterLoggedIn = useSelector(state => state.auth.gotoFirstPagetAfterLoggedIn);
     const v1AccountActivity = useSelector(state => state.v1Account.activity);
     const teamsActivity = useSelector(state => state.team.activity);
     const containerActivity = useSelector(state => state.container.activity);
@@ -83,7 +87,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     const displayName = useSelector(state => state.auth.displayName);
     const nextAuthStep = useSelector(state => state.v1Account.nextAuthStep);
 
-    const workspace = useSelector(state=>state.container.workspace);
+    const workspace = useSelector(state => state.container.workspace);
     const workspaceName = useSelector(state => state.container.workspaceName);
 
     const displayPaymentBanner = !(router.asPath.startsWith('/logIn')) && !(router.asPath.startsWith('/services/')) && !(router.asPath.startsWith('/apps/'));
@@ -210,7 +214,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                         if (accountVersion === 'v1') {
                             changePage('/teams');
                         } else {
-                            changePage(getFirstPageAfterLoggedIn(memberId));
+                            dispatch(setGotoFirstPagetAfterLoggedIn(true));
                         }
                     }
                     return;
@@ -218,7 +222,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                     if (accountVersion === 'v1') {
                         changePage('/teams');
                     } else {
-                        changePage(getFirstPageAfterLoggedIn(memberId));
+                        dispatch(setGotoFirstPagetAfterLoggedIn(true));
                     }
                     return;
                 }
@@ -416,9 +420,27 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
         }
     }, [authActivityErrors]);
 
+    useEffect(() => {
+        if (gotoFirstPagetAfterLoggedIn) {
+            const firstPage = getFirstPageAfterLoggedIn(memberId);
+            if (firstPage !== "/safe") {
+                let currentKeyVersion;
+                if (accountVersion === 'v1') {
+                    currentKeyVersion = 1;
+                } else if (accountVersion === 'v2') {
+                    currentKeyVersion = 3;
+                }
+                const workspaceId = 'u:' + memberId + ':' + currentKeyVersion + ':' + '0';;
+                dispatch(initContainer({ container: 'root', workspaceId, workspaceKey, searchKey, searchIV }));
+            }
+            changePage(firstPage);
+            dispatch(setGotoFirstPagetAfterLoggedIn(false));
+        }
+    }, [gotoFirstPagetAfterLoggedIn])
+
     return (
         <div>
-            {( generateDrawingSnapshot || (accountActivity !== 0) || (authActivity !== 0) || (v1AccountActivity !== 0) || (teamsActivity !== 0) || (containerActivity !== 0) || (pageActivity !== 0) || (iOSActivity !== 0)) &&
+            {(generateDrawingSnapshot || (accountActivity !== 0) || (authActivity !== 0) || (v1AccountActivity !== 0) || (teamsActivity !== 0) || (containerActivity !== 0) || (pageActivity !== 0) || (iOSActivity !== 0)) &&
                 <div className={BSafesStyle.screenCenter}>
                     <Blocks
                         visible={true}
@@ -558,8 +580,8 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                     theme="light"
                 />
             </div>
-            {(!product || (product && product==="")) && !hideFunction && isLoggedIn && showPathRow && <ItemPath />}
-            {router.asPath.startsWith('/services') && product && product!=="" && <Button variant="link" style={{display:"block", marginRight:"0px", marginLeft:"auto"}} onClick={()=>{router.push(getFirstPageAfterLoggedIn(memberId))}}><i className="fa fa-times fa-2x" aria-hidden="true"></i></Button>}
+            {(!product || (product && product === "")) && !hideFunction && isLoggedIn && showPathRow && <ItemPath />}
+            {router.asPath.startsWith('/services') && product && product !== "" && <Button variant="link" style={{ display: "block", marginRight: "0px", marginLeft: "auto" }} onClick={() => { dispatch(setGotoFirstPagetAfterLoggedIn(true)) }}><i className="fa fa-times fa-2x" aria-hidden="true"></i></Button>}
             {children}
             <ItemsMovingProgress />
             <ItemsToolbar />
