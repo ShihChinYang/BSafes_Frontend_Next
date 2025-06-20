@@ -353,8 +353,8 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     useEffect(() => {
         if (itemId && itemKey) {
-            $('.container').data('itemId', itemId);
-            $('.container').data('itemKey', itemKey);
+            $('body').data('itemId', itemId);
+            $('body').data('itemKey', itemKey);
         }
     }, [itemId, itemKey, itemIV]);
 
@@ -499,7 +499,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     const bSafesPreflightHook = (fn) => {
         debugLog(debugOn, "bSafesPreflight");
-        if (!workspace.startsWith("d:")) {
+        if (!workspace ||( workspace && !workspace.startsWith("d:"))) {
             PostCall({
                 api: '/memberAPI/preflight',
                 dispatch
@@ -565,7 +565,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     const preS3UploadHook = () => {
         return new Promise(async (resolve, reject) => {
-            if (!workspace.startsWith("d:")) {
+            if (!workspace ||( workspace && !workspace.startsWith("d:"))) {
                 PostCall({
                     api: '/memberAPI/preS3Upload',
                     dispatch
@@ -600,7 +600,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const preS3ChunkUploadHook = (itemId, chunkIndex, timeStamp) => {
         return new Promise((resolve, reject) => {
             let s3Key, s3KeyPrefix, signedURL;
-            if (!workspace.startsWith("d:")) {
+            if (!workspace ||( workspace && !workspace.startsWith("d:"))) {
                 PostCall({
                     api: '/memberAPI/preS3ChunkUpload',
                     body: {
@@ -641,7 +641,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     const uploadDataHook = (data, s3Key, signedURL, onProgress) => {
         return new Promise(async (resolve, reject) => {
-            if (!workspace.startsWith("d:")) {
+            if (!workspace ||( workspace && !workspace.startsWith("d:"))) {
                 const config = {
                     onUploadProgress: async (progressEvent) => {
                         onProgress(progressEvent);

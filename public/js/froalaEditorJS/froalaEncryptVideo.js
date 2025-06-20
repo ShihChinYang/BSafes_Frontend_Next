@@ -423,8 +423,8 @@ const { getEditorConfigHook, getEditorConfig } = require('./bsafesAPIHooks');
         let context = canvas.getContext('2d');
 
         const uploadSnapshot = async (data) => {
-          const itemId = $('.container').data('itemId');
-          const itemKey = $('.container').data('itemKey');
+          const itemId = $('body').data('itemId');
+          const itemKey = $('body').data('itemKey');
           let encryptedStr = encryptLargeBinaryString(data, itemKey);
           let s3KeyParts = s3Key.split('&');
           let s3KeyPrefix = s3KeyParts[3];
@@ -1280,8 +1280,8 @@ const { getEditorConfigHook, getEditorConfig } = require('./bsafesAPIHooks');
      * Do video upload.
      */
     async function upload (videos) {
-      const itemId = $('.container').data('itemId');
-      const itemKey = $('.container').data('itemKey');
+      const itemId = $('body').data('itemId');
+      const itemKey = $('body').data('itemKey');
 
       if (typeof videos != 'undefined' && videos.length > 0) {
         // Check if we should cancel the video upload.

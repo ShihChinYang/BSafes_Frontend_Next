@@ -946,8 +946,8 @@ const { downScaleImage } = require('./bsafesAPIHooks');
         $img.off('load');
         $img.addClass('fr-uploading');
 
-        var itemKey = $('.container').data('itemKey');
-        var itemIV = $('.container').data('itemIV');
+        var itemKey = $('body').data('itemKey');
+        var itemIV = $('body').data('itemIV');
         var s3Key;
 
         function uploadToS3(data, fn) {
