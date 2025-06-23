@@ -11,6 +11,7 @@ import ContentPageLayout from '../../../components/layouts/contentPageLayout';
 import PageItemWrapper from "../../../components/pageItemWrapper";
 import TopControlPanel from "../../../components/topControlPanel";
 import ItemCard from '../../../components/itemCard'
+import ProductCard from "../../../components/productCard";
 import AddAnItemButton from "../../../components/addAnItemButton";
 import NewItemModal from "../../../components/newItemModal";
 import PaginationControl from "../../../components/paginationControl";
@@ -19,6 +20,7 @@ import { createANewItemThunk, clearNewItem, listItemsThunk, searchItemsThunk, ge
 import { } from "../../../reduxStore/pageSlice";
 
 import { debugLog } from "../../../lib/helper";
+import { productIdDelimiter } from "../../../lib/productID";
 import { getItemLink } from "../../../lib/bSafesCommonUI";
 
 export default function BoxContents() {
@@ -50,13 +52,21 @@ export default function BoxContents() {
         addAnItem(type, action, target, position);
     }
 
-    const items = itemsState.map((item, index) =>
-        <Row key={index}>
-            <Col lg={{ span: 10, offset: 1 }}>
-                <ItemCard itemIndex={index} item={item} onAdd={handleAdd} />
-            </Col>
-        </Row>
-    );
+    const items = itemsState.map((item, index) => {
+        return (item.id.split(":")[1].startsWith(productIdDelimiter) && (item.itemPack.type === 'N' || item.itemPack.type === 'D')) ?
+            <Row key={index}>
+                <Col lg={{ span: 10, offset: 1 }}>
+                    <ProductCard key={index} itemIndex={index} item={item} onAdd={handleAdd} />
+                </Col>
+            </Row>
+            :
+            <Row key={index}>
+                <Col lg={{ span: 10, offset: 1 }}>
+                    <ItemCard key={index} itemIndex={index} item={item} onAdd={handleAdd} />
+                </Col>
+            </Row>
+
+    });
 
     function gotoAnotherPage(anotherPageNumber) {
     }

@@ -17,9 +17,11 @@ import BSafesStyle from '../styles/BSafes.module.css'
 import AddAnItemButton from './addAnItemButton'
 import NewItemModal from './newItemModal'
 import ItemCard from './itemCard'
+import ProductCard from './productCard';
 import PaginationControl from './paginationControl';
 
 import { getItemLink } from '../lib/bSafesCommonUI'
+import { productIdDelimiter } from '../lib/productID';
 import { clearItems, createANewItemThunk, clearNewItem, listItemsThunk, searchItemsThunk, setListingDone } from '../reduxStore/containerSlice';
 import { abort, initPage, clearPage, itemPathLoaded } from '../reduxStore/pageSlice';
 import { debugLog } from '../lib/helper'
@@ -62,7 +64,12 @@ export default function Workspace({ readyToList = false }) {
     }
 
     const items = itemsState.map((item, index) =>
-        <ItemCard key={index} itemIndex={index} item={item} onAdd={handleAdd} />
+        {
+            return (item.id.split(":")[1].startsWith(productIdDelimiter) && (item.itemPack.type === 'N' || item.itemPack.type === 'D')) ?
+            <ProductCard key={index} itemIndex={index} item={item} onAdd={handleAdd} />
+            :
+            <ItemCard key={index} itemIndex={index} item={item} onAdd={handleAdd} />
+        }
     );
 
     const addAnItem = (itemType, addAction, targetItem = null, targetPosition = null) => {

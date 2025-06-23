@@ -1675,92 +1675,94 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                 }
             }
             function getItemFromServer() {
-                debugLog(debugOn, "/memberAPI/getPageItem: ", data.itemId);
-                function getProductemplate() {
-                    const targetContainer = space;
-                    const type = getItemType(data.itemId);
-                    const title = '<h2></h2>';
-                    const encodedTitle = forge.util.encodeUtf8(title);
-                    const itemKey = generateNewItemKey();
-                    const workspaceKey = containerSlice.workspaceKey;
-                    const keyEnvelope = encryptBinaryString(itemKey, workspaceKey);
-                    const encryptedTitle = encryptBinaryString(encodedTitle, itemKey);
-                    const template = {
-                        space,
-                        targetContainer,
-                        type,
-                        keyEnvelope: forge.util.encode64(keyEnvelope),
-                        title: forge.util.encode64(encryptedTitle),
-                        titleTokens: JSON.stringify([])
-                    };
-                    return template;
-                }
-                if (space && data.itemId.startsWith("n:") || data.itemId.startsWith("d:")) {
-                    const product = process.env.NEXT_PUBLIC_product;
-                    if (product && product !== "") {
-                        payload = { ...payload, createFromTemplate: true, ...getProductemplate() };
+                return new Promise((resolve, reject) => {
+                    debugLog(debugOn, "/memberAPI/getPageItem: ", data.itemId);
+                    function getProductemplate() {
+                        const targetContainer = space;
+                        const type = getItemType(data.itemId);
+                        const title = '<h2></h2>';
+                        const encodedTitle = forge.util.encodeUtf8(title);
+                        const itemKey = generateNewItemKey();
+                        const workspaceKey = containerSlice.workspaceKey;
+                        const keyEnvelope = encryptBinaryString(itemKey, workspaceKey);
+                        const encryptedTitle = encryptBinaryString(encodedTitle, itemKey);
+                        const template = {
+                            space,
+                            targetContainer,
+                            type,
+                            keyEnvelope: forge.util.encode64(keyEnvelope),
+                            title: forge.util.encode64(encryptedTitle),
+                            titleTokens: JSON.stringify([])
+                        };
+                        return template;
                     }
-                }
-
-                PostCall({
-                    api: '/memberAPI/getPageItem',
-                    body: payload,
-                    dispatch
-                }).then(async result => {
-                    debugLog(debugOn, result);
-                    state = getState().page;
-                    if (result.status === 'ok') {
-                        if (data.itemId !== state.activeRequest) {
-                            debugLog(debugOn, "Aborted");
-                            reject("Aborted");
-                            return;
+                    if (space && data.itemId.startsWith("n:") || data.itemId.startsWith("d:")) {
+                        const product = process.env.NEXT_PUBLIC_product;
+                        if (product && product !== "") {
+                            payload = { ...payload, createFromTemplate: true, ...getProductemplate() };
                         }
-                        if (result.item) {
-                            await processResultItem(result);
-                            await addItemToServiceWorkerDB(data.itemId, result.item);
-                            dispatch(setGetPageContentDone(true));
-                        } else {
-                            dispatch(setGetPageContentDone(true));
-                            if (data.navigationInSameContainer) {
-                                debugLog(debugOn, "setNavigationMode ...");
-                                dispatch(setNavigationMode(true));
-                                dispatch(setNavigationInSameContainer(false));
-                                resolve();
+                    }
+
+                    PostCall({
+                        api: '/memberAPI/getPageItem',
+                        body: payload,
+                        dispatch
+                    }).then(async result => {
+                        debugLog(debugOn, result);
+                        state = getState().page;
+                        if (result.status === 'ok') {
+                            if (data.itemId !== state.activeRequest) {
+                                debugLog(debugOn, "Aborted");
+                                reject("Aborted");
                                 return;
                             }
-                            if (!data.navigationInSameContainer && (data.itemId.startsWith('np') || data.itemId.startsWith('dp'))) {
-                                try {
-                                    const container = await getContainerData(data.itemId);
-                                    state = getState().page;
-                                    if (data.itemId === state.activeRequest) {
-                                        dispatch(containerDataFetched({ itemId: data.itemId, container }));
-                                        resolve();
-                                    } else {
-                                        reject("Aborted");
-                                    }
-                                } catch (error) {
-                                    reject("Failed to get the container data!");
-                                }
+                            if (result.item) {
+                                await processResultItem(result);
+                                await addItemToServiceWorkerDB(data.itemId, result.item);
+                                dispatch(setGetPageContentDone(true));
                             } else {
-                                reject("Failed to get a page item!!!");
+                                dispatch(setGetPageContentDone(true));
+                                if (data.navigationInSameContainer) {
+                                    debugLog(debugOn, "setNavigationMode ...");
+                                    dispatch(setNavigationMode(true));
+                                    dispatch(setNavigationInSameContainer(false));
+                                    resolve();
+                                    return;
+                                }
+                                if (!data.navigationInSameContainer && (data.itemId.startsWith('np') || data.itemId.startsWith('dp'))) {
+                                    try {
+                                        const container = await getContainerData(data.itemId);
+                                        state = getState().page;
+                                        if (data.itemId === state.activeRequest) {
+                                            dispatch(containerDataFetched({ itemId: data.itemId, container }));
+                                            resolve();
+                                        } else {
+                                            reject("Aborted");
+                                        }
+                                    } catch (error) {
+                                        reject("Failed to get the container data!");
+                                    }
+                                } else {
+                                    reject("Failed to get a page item!!!");
+                                }
                             }
-                        }
-                        const { draftId, draftContentTypeId } = formDraftId(data.itemId);
-                        const response = await readDraftInDB(draftId);
-                        if (response.status === 'ok') {
-                            const draft = response.data;
-                            const draftContentType = localStorage.getItem(draftContentTypeId);
-                            if (draft) {
-                                dispatch(setDraft({ draft, draftContentType }));
+                            const { draftId, draftContentTypeId } = formDraftId(data.itemId);
+                            const response = await readDraftInDB(draftId);
+                            if (response.status === 'ok') {
+                                const draft = response.data;
+                                const draftContentType = localStorage.getItem(draftContentTypeId);
+                                if (draft) {
+                                    dispatch(setDraft({ draft, draftContentType }));
+                                }
                             }
+                        } else {
+                            debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
+                            reject("Failed to get a page item.");
                         }
-                    } else {
-                        debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
+                    }).catch(error => {
+                        debugLog(debugOn, "woo... failed to get a page item:", error)
                         reject("Failed to get a page item.");
-                    }
-                }).catch(error => {
-                    debugLog(debugOn, "woo... failed to get a page item:", error)
-                    reject("Failed to get a page item.");
+                    })
                 })
             }
 
@@ -1897,58 +1899,62 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
             }
 
             if (!isDemoMode()) {
-                function queryItemFromServer() {
-                    return new Promise((resolve, reject) => {
-                        debugLog(debugOn, "/memberAPI/getPageItem: ", data.itemId);
-                        PostCall({
-                            api: '/memberAPI/getPageItem',
-                            body: payload,
-                            dispatch
-                        }).then(async result => {
-                            debugLog(debugOn, result);
-                            state = getState().page;
-                            if (result.status === 'ok') {
-                                resolve(result.item);
-                            } else {
-                                debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
+                try {
+                    function queryItemFromServer() {
+                        return new Promise((resolve, reject) => {
+                            debugLog(debugOn, "/memberAPI/getPageItem: ", data.itemId);
+                            PostCall({
+                                api: '/memberAPI/getPageItem',
+                                body: payload,
+                                dispatch
+                            }).then(async result => {
+                                debugLog(debugOn, result);
+                                state = getState().page;
+                                if (result.status === 'ok') {
+                                    resolve(result.item);
+                                } else {
+                                    debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
+                                    reject("Failed to get a page item.");
+                                }
+                            }).catch(error => {
+                                debugLog(debugOn, "woo... failed to get a page item:", error)
                                 reject("Failed to get a page item.");
-                            }
-                        }).catch(error => {
-                            debugLog(debugOn, "woo... failed to get a page item:", error)
-                            reject("Failed to get a page item.");
+                            })
                         })
-                    })
-                }
-                if (navigationInSameContainer) {
-                    const result = await getItemFromServiceWorkerDB(data.itemId);
-                    if ((result.status === 'ok') && result.item) {
-                        await processResultItem(result);
-                        dispatch(setCheckingLatest(true));
-                        const latestItem = await queryItemFromServer(data.itemId);
-                        if (result.item.version !== latestItem.version) {
-                            await processResultItem({ item: latestItem });
-                            await addItemToServiceWorkerDB(data.itemId, latestItem);
-                        }
-                        dispatch(setCheckingLatest(false));
-                        PostCall({
-                            api: '/memberAPI/updateLastAccessedPage',
-                            body: payload
-                        }).then(async result => {
-                            debugLog(debugOn, result);
-                        }).catch(error => {
-                            debugLog(debugOn, "woo... failed to updateLastAccessedPage", error)
-                        })
-                    } else {
-                        getItemFromServer();
                     }
-                } else {
-                    getItemFromServer();
+                    if (navigationInSameContainer) {
+                        const result = await getItemFromServiceWorkerDB(data.itemId);
+                        if ((result.status === 'ok') && result.item) {
+                            await processResultItem(result);
+                            dispatch(setCheckingLatest(true));
+                            const latestItem = await queryItemFromServer(data.itemId);
+                            if (result.item.version !== latestItem.version) {
+                                await processResultItem({ item: latestItem });
+                                await addItemToServiceWorkerDB(data.itemId, latestItem);
+                            }
+                            dispatch(setCheckingLatest(false));
+                            PostCall({
+                                api: '/memberAPI/updateLastAccessedPage',
+                                body: payload
+                            }).then(async result => {
+                                debugLog(debugOn, result);
+                            }).catch(error => {
+                                debugLog(debugOn, "woo... failed to updateLastAccessedPage", error)
+                            })
+                        } else {
+                            await getItemFromServer();
+                        }
+                    } else {
+                        await getItemFromServer();
+                    }
+                    await getItemPath(data.itemId, dispatch, getState);
+                    if (data.itemId.startsWith("np") || data.itemId.startsWith("dp")) {
+                        await downloadAdjacentPages();
+                    }
+                    resolve();
+                } catch (error) {
+                    reject(error);
                 }
-                await getItemPath(data.itemId, dispatch, getState);
-                if (data.itemId.startsWith("np") || data.itemId.startsWith("dp")) {
-                    await downloadAdjacentPages();
-                }
-
             } else {
                 const result = await getDemoItemFromServiceWorkerDB(data.itemId);
                 state = getState().page;

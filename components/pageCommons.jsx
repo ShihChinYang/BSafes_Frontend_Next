@@ -749,7 +749,7 @@ export default function PageCommons() {
 
     useEffect(() => {
         if (templateLoaded) {
-            handleWrite();
+        //    handleWrite();
         }
     }, [templateLoaded])
 
