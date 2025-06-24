@@ -61,7 +61,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     }
     let controlPanelStyle = "";
     let searchPanelStyle = "";
-    if(productId === "") {
+    if (productId === "") {
         controlPanelStyle = BSafesStyle.containerControlPanel;
         searchPanelStyle = BSafesStyle.containerSearchPanel;
     } else {
@@ -184,105 +184,107 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     }, [itemTrashed]);
 
     return (
-        <>
-            <Row>
-                <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
-                    <Card className={controlPanelStyle}>
-                        <Card.Body className=''>
-                            <Row>
-                                <Col xs={5}>
-                                    {((pageActivity === 0) && (containerActivity === 0)) && (workspaceId && workspaceId.startsWith("d:") && (containerInWorkspace === workspaceId || (pageItemId && pageItemId.startsWith("p:")))) && <Button onClick={onHomeClicked} variant='link' size='sm' className='text-white'><i className="fa fa-home fa-lg" aria-hidden="true"></i></Button>}
-                                    {((pageActivity === 0) && (containerActivity === 0)) && !containerInWorkspace && <Button variant='link' size='sm' className='text-white'><i className="fa fa-square fa-lg" aria-hidden="true"></i></Button>}
-                                    {((pageActivity === 0) && (containerActivity === 0)) && containerInWorkspace && (containerInWorkspace.startsWith('u') || containerInWorkspace.startsWith('t')) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-square fa-lg" aria-hidden="true"></i></Button>}
-                                    {((pageActivity === 0) && (containerActivity === 0)) && (pageNumber || (containerInWorkspace && (containerInWorkspace.startsWith('n')))) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-book fa-lg" aria-hidden="true"></i></Button>}
-                                    {((pageActivity === 0) && (containerActivity === 0)) && (containerInWorkspace && containerInWorkspace.startsWith('f')) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-folder-o fa-lg" aria-hidden="true"></i></Button>}
-                                    {((pageActivity === 0) && (containerActivity === 0)) && (containerInWorkspace && containerInWorkspace.startsWith('b')) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-archive fa-lg" aria-hidden="true"></i></Button>}
-                                    {(pageNumber ||
-                                        (containerInWorkspace && (
-                                            (containerInWorkspace.startsWith('n') && !router.asPath.includes('\/contents\/')) ||
-                                            (containerInWorkspace.startsWith('f') && !router.asPath.includes('\/contents\/')) ||
-                                            (containerInWorkspace.startsWith('b') && !router.asPath.includes('\/contents\/'))
-                                        ))) && <Button variant='link' size='sm' className='text-white' onClick={onContentsClicked}><i className="fa fa-list-ul fa-lg" aria-hidden="true"></i></Button>}
-                                </Col>
-                                <Col xs={7}>
-                                    {(pageNumber || (containerInWorkspace && containerInWorkspace.startsWith('n'))) &&
-                                        <Form.Group className='pull-right'>
-                                            <Form.Control ref={pageNumberInputRef} type="text" defaultValue={pageNumber ? pageNumber : ''} className={`${BSafesStyle.pageNavigationPart} ${BSafesStyle.pageNumberInput} pt-0 pb-0`} />
-                                            <Button variant='link' size='sm' className='text-white' id="gotoPageBtn" onClick={pageNumberChanged}><i className="fa fa-arrow-right fa-lg" aria-hidden="true"></i></Button>
-                                            <Button variant='link' size='sm' className='text-white' id="gotoFirstItemBtn" onClick={onGotoFirstItem}><i className="fa fa-step-backward fa-lg" aria-hidden="true"></i></Button>
-                                            <Button variant='link' size='sm' className='text-white' id="gotoLastItemBtn" onClick={onGotoLastItem}><i className="fa fa-step-forward fa-lg" aria-hidden="true"></i></Button>
-                                            {router.asPath.includes('\/contents\/') && !showSearchBar &&
-                                                <Button variant='link' size='sm' className='text-white' onClick={onShowSearchBarClicked}><i className="fa fa-search fa-lg" aria-hidden="true"></i></Button>
-                                            }
-                                        </Form.Group>
-                                    }
-                                    {((containerInWorkspace && (containerInWorkspace.startsWith('u') || containerInWorkspace.startsWith('t') || containerInWorkspace.startsWith('f') || containerInWorkspace.startsWith('b')))) &&
-                                        <ButtonGroup className='pull-right'>
-                                            {containerInWorkspace.startsWith('f') &&
-                                                <>
-                                                    <Button variant='link' size='sm' className='text-white' id="gotoFirstItemBtn" onClick={onGotoFirstItem}><i className="fa fa-step-backward fa-lg" aria-hidden="true"></i></Button>
-                                                    <Button variant='link' size='sm' className='text-white' id="gotoLastItemBtn" onClick={onGotoLastItem}><i className="fa fa-step-forward fa-lg" aria-hidden="true"></i></Button>
-                                                </>
-                                            }
-                                            {pageItemId && pageItemId.startsWith('p') &&
-                                                <>
-                                                    <Dropdown align="end" className={`justify-content-end ${BSafesStyle.mt3px}`}>
-                                                        <Dropdown.Toggle as={plusToggle} variant="link">
-
-                                                        </Dropdown.Toggle>
-
-                                                        <Dropdown.Menu>
-                                                            <Dropdown.Item onClick={() => handleAddClicked("addAnItemBefore")}>Add before</Dropdown.Item>
-                                                            <Dropdown.Item onClick={() => handleAddClicked("addAnItemAfter")}>Add after</Dropdown.Item>
-                                                        </Dropdown.Menu>
-                                                    </Dropdown>
-                                                </>
-                                            }
-                                            {!router.asPath.includes('\/contents\/') && pageItemId && (pageItemId.startsWith('p') || pageItemId.startsWith('b') || pageItemId.startsWith('f')) &&
-                                                <>
-                                                    <Button variant='link' size='sm' className='text-white' onClick={onMore}><i className="fa fa-ellipsis-v fa-lg" aria-hidden="true"></i></Button>
-                                                </>
-                                            }
-                                            {router.asPath.includes('\/contents\/') && !showSearchBar &&
-                                                <>
+        <>{pageItemId &&
+            <>
+                <Row>
+                    <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
+                        <Card className={controlPanelStyle}>
+                            <Card.Body className=''>
+                                <Row>
+                                    <Col xs={5}>
+                                        {((pageActivity === 0) && (containerActivity === 0)) && (workspaceId && workspaceId.startsWith("d:") && (containerInWorkspace === workspaceId || (pageItemId && pageItemId.startsWith("p:")))) && <Button onClick={onHomeClicked} variant='link' size='sm' className='text-white'><i className="fa fa-home fa-lg" aria-hidden="true"></i></Button>}
+                                        {((pageActivity === 0) && (containerActivity === 0)) && !containerInWorkspace && <Button variant='link' size='sm' className='text-white'><i className="fa fa-square fa-lg" aria-hidden="true"></i></Button>}
+                                        {((pageActivity === 0) && (containerActivity === 0)) && containerInWorkspace && (containerInWorkspace.startsWith('u') || containerInWorkspace.startsWith('t')) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-square fa-lg" aria-hidden="true"></i></Button>}
+                                        {((pageActivity === 0) && (containerActivity === 0)) && (pageNumber || (containerInWorkspace && (containerInWorkspace.startsWith('n')))) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-book fa-lg" aria-hidden="true"></i></Button>}
+                                        {((pageActivity === 0) && (containerActivity === 0)) && (containerInWorkspace && containerInWorkspace.startsWith('f')) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-folder-o fa-lg" aria-hidden="true"></i></Button>}
+                                        {((pageActivity === 0) && (containerActivity === 0)) && (containerInWorkspace && containerInWorkspace.startsWith('b')) && <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-archive fa-lg" aria-hidden="true"></i></Button>}
+                                        {(pageNumber ||
+                                            (containerInWorkspace && (
+                                                (containerInWorkspace.startsWith('n') && !router.asPath.includes('\/contents\/')) ||
+                                                (containerInWorkspace.startsWith('f') && !router.asPath.includes('\/contents\/')) ||
+                                                (containerInWorkspace.startsWith('b') && !router.asPath.includes('\/contents\/'))
+                                            ))) && <Button variant='link' size='sm' className='text-white' onClick={onContentsClicked}><i className="fa fa-list-ul fa-lg" aria-hidden="true"></i></Button>}
+                                    </Col>
+                                    <Col xs={7}>
+                                        {(pageNumber || (containerInWorkspace && containerInWorkspace.startsWith('n'))) &&
+                                            <Form.Group className='pull-right'>
+                                                <Form.Control ref={pageNumberInputRef} type="text" defaultValue={pageNumber ? pageNumber : ''} className={`${BSafesStyle.pageNavigationPart} ${BSafesStyle.pageNumberInput} pt-0 pb-0`} />
+                                                <Button variant='link' size='sm' className='text-white' id="gotoPageBtn" onClick={pageNumberChanged}><i className="fa fa-arrow-right fa-lg" aria-hidden="true"></i></Button>
+                                                <Button variant='link' size='sm' className='text-white' id="gotoFirstItemBtn" onClick={onGotoFirstItem}><i className="fa fa-step-backward fa-lg" aria-hidden="true"></i></Button>
+                                                <Button variant='link' size='sm' className='text-white' id="gotoLastItemBtn" onClick={onGotoLastItem}><i className="fa fa-step-forward fa-lg" aria-hidden="true"></i></Button>
+                                                {router.asPath.includes('\/contents\/') && !showSearchBar &&
                                                     <Button variant='link' size='sm' className='text-white' onClick={onShowSearchBarClicked}><i className="fa fa-search fa-lg" aria-hidden="true"></i></Button>
-                                                </>
-                                            }
-                                        </ButtonGroup>
-                                    }
-                                </Col>
-                            </Row>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-            {showSearchBar &&
-                <>
-                    <br />
-                    <Row>
-                        <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
-                            <Card className={searchPanelStyle}>
+                                                }
+                                            </Form.Group>
+                                        }
+                                        {((containerInWorkspace && (containerInWorkspace.startsWith('u') || containerInWorkspace.startsWith('t') || containerInWorkspace.startsWith('f') || containerInWorkspace.startsWith('b')))) &&
+                                            <ButtonGroup className='pull-right'>
+                                                {containerInWorkspace.startsWith('f') &&
+                                                    <>
+                                                        <Button variant='link' size='sm' className='text-white' id="gotoFirstItemBtn" onClick={onGotoFirstItem}><i className="fa fa-step-backward fa-lg" aria-hidden="true"></i></Button>
+                                                        <Button variant='link' size='sm' className='text-white' id="gotoLastItemBtn" onClick={onGotoLastItem}><i className="fa fa-step-forward fa-lg" aria-hidden="true"></i></Button>
+                                                    </>
+                                                }
+                                                {pageItemId && pageItemId.startsWith('p') &&
+                                                    <>
+                                                        <Dropdown align="end" className={`justify-content-end ${BSafesStyle.mt3px}`}>
+                                                            <Dropdown.Toggle as={plusToggle} variant="link">
 
-                                <Form onSubmit={onSearchEntered} className={BSafesStyle.searchBar}>
-                                    <InputGroup>
-                                        <Form.Control ref={searchInputRef} type="text" className={`${BSafesStyle.searchBarInput}  display-1`}
-                                            value={searchValue}
-                                            onChange={onSearchValueChanged}
-                                        />
-                                        <Button variant="link">
-                                            <i id="1" className="fa fa-search fa-lg text-black" aria-hidden="true" onClick={onSearchEntered}></i>
-                                        </Button>
-                                        <Button variant="link">
-                                            <i id="1" className="fa fa-times fa-lg text-black" aria-hidden="true" onClick={onCancelSearchClicked}></i>
-                                        </Button>
-                                    </InputGroup>
-                                </Form>
-                            </Card>
-                        </Col>
-                    </Row>
-                </>
-            }
-            <NewItemModal show={showNewItemModal} handleClose={handleClose} handleCreateANewItem={handleCreateANewItem} />
+                                                            </Dropdown.Toggle>
+
+                                                            <Dropdown.Menu>
+                                                                <Dropdown.Item onClick={() => handleAddClicked("addAnItemBefore")}>Add before</Dropdown.Item>
+                                                                <Dropdown.Item onClick={() => handleAddClicked("addAnItemAfter")}>Add after</Dropdown.Item>
+                                                            </Dropdown.Menu>
+                                                        </Dropdown>
+                                                    </>
+                                                }
+                                                {!router.asPath.includes('\/contents\/') && pageItemId && (pageItemId.startsWith('p') || pageItemId.startsWith('b') || pageItemId.startsWith('f')) &&
+                                                    <>
+                                                        <Button variant='link' size='sm' className='text-white' onClick={onMore}><i className="fa fa-ellipsis-v fa-lg" aria-hidden="true"></i></Button>
+                                                    </>
+                                                }
+                                                {router.asPath.includes('\/contents\/') && !showSearchBar &&
+                                                    <>
+                                                        <Button variant='link' size='sm' className='text-white' onClick={onShowSearchBarClicked}><i className="fa fa-search fa-lg" aria-hidden="true"></i></Button>
+                                                    </>
+                                                }
+                                            </ButtonGroup>
+                                        }
+                                    </Col>
+                                </Row>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+                {showSearchBar &&
+                    <>
+                        <br />
+                        <Row>
+                            <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
+                                <Card className={searchPanelStyle}>
+
+                                    <Form onSubmit={onSearchEntered} className={BSafesStyle.searchBar}>
+                                        <InputGroup>
+                                            <Form.Control ref={searchInputRef} type="text" className={`${BSafesStyle.searchBarInput}  display-1`}
+                                                value={searchValue}
+                                                onChange={onSearchValueChanged}
+                                            />
+                                            <Button variant="link">
+                                                <i id="1" className="fa fa-search fa-lg text-black" aria-hidden="true" onClick={onSearchEntered}></i>
+                                            </Button>
+                                            <Button variant="link">
+                                                <i id="1" className="fa fa-times fa-lg text-black" aria-hidden="true" onClick={onCancelSearchClicked}></i>
+                                            </Button>
+                                        </InputGroup>
+                                    </Form>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </>
+                }
+                <NewItemModal show={showNewItemModal} handleClose={handleClose} handleCreateANewItem={handleCreateANewItem} />
+            </>}
         </>
     )
 }

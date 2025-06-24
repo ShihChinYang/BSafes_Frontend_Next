@@ -133,7 +133,7 @@ export default function ProductCard({ itemIndex, item, onAdd, isOpenable = true 
         <Card className={cardStyle} style={{ cursor: 'pointer' }}>
             <Card.Body className={cardBodyStyle}>
                 <div className="d-flex">
-                    <div style={{width:"96px"}}>
+                    <div style={{ width: "96px" }}>
                         <Link href={isOpenable ? getItemLink(item) : '#'} legacyBehavior>
                             <div style={{ width: "84px", height: "84px", borderRadius: "3px" }}>
                                 <img style={{ width: "auto", height: "auto", maxWidth: "100%", maxHeight: "100%" }} src="/images/A002_Icon.png" />
@@ -179,11 +179,13 @@ export default function ProductCard({ itemIndex, item, onAdd, isOpenable = true 
                                 </ButtonGroup>
                             </Col>
                         </Row>
-                        <Row>
-                            <Col>
-                                <div dangerouslySetInnerHTML={{ __html: `<h2>${item.title}</h2>` }} />
-                            </Col>
-                        </Row>
+                        <Link href={isOpenable ? getItemLink(item) : '#'} legacyBehavior>
+                            <Row>
+                                <Col>
+                                    <div dangerouslySetInnerHTML={{ __html: `<h2>${item.title}</h2>` }} />
+                                </Col>
+                            </Row>
+                        </Link>
                     </div>
                 </div>
                 {(router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) &&

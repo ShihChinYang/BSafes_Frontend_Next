@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 import ItemTopRows from "./itemTopRows";
 import PageCommons from "./pageCommons";
@@ -20,16 +19,18 @@ export default function PagePanel() {
         productId = itemId.split(productIdDelimiter)[1];
     }
     let pagePanelStyle = "";
-    if( productId === "") {
+    if (productId === "") {
         pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesStyle.pagePanel} ${pageStyle}`;
     } else {
         pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_PagePanel`]} ${pageStyle}`;
     }
-    
+
     return (
-        <div className={pagePanelStyle}>
-            <ItemTopRows />
-            <PageCommons />
-        </div>
+        <>
+            {itemId && <div className={pagePanelStyle}>
+                <ItemTopRows />
+                <PageCommons />
+            </div>}
+        </>
     )
 }
