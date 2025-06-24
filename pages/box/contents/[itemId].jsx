@@ -158,7 +158,7 @@ export default function BoxContents() {
             <ContentPageLayout>
                 <PageItemWrapper itemId={router.query.itemId}>
                     <br />
-                    <TopControlPanel onCoverClicked={handleCoverClicked} onGotoFirstItem={handleGoToFirstItem} onGotoLastItem={handleGoToLastItem} onSubmitSearch={handleSubmitSearch} onCancelSearch={handleCancelSearch}></TopControlPanel>Ｆ
+                    <TopControlPanel onCoverClicked={handleCoverClicked} onGotoFirstItem={handleGoToFirstItem} onGotoLastItem={handleGoToLastItem} onSubmitSearch={handleSubmitSearch} onCancelSearch={handleCancelSearch}></TopControlPanel>
                     <Row>
                         <Col lg={{ span: 10, offset: 1 }}>
                             <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.boxPanel}`}>

@@ -1755,6 +1755,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                     dispatch(setDraft({ draft, draftContentType }));
                                 }
                             }
+                            resolve();
                         } else {
                             debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
                             reject("Failed to get a page item.");
