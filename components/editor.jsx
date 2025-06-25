@@ -72,6 +72,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const draft = useSelector(state => state.page.draft);
     const contentType = useSelector(state => state.page.contentType) || 'WritingPage';
     const pageTemplate = useSelector(state => state.page.pageTemplate);
+    const productId = useSelector(state => state.product.currentProduct);
 
     debugLog(debugOn, `editor key: ${froalaKey}`);
 
@@ -84,10 +85,6 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const [needToUpdatePageCommonControls, setNeedToUpdatePageCommonControls] = useState(false);
     debugLog(debugOn, "Rendering editor, id,  mode: ", `${editorId} ${mode}`);
 
-    let productId = "";
-    if (itemId && itemId.split(":")[1].startsWith(`${productIdDelimiter}`)) {
-        productId = itemId.split(productIdDelimiter)[1];
-    }
     let product = {};
     if (productId) {
         product = products[productId];
@@ -751,7 +748,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div style={{ position: "relative" }}>
                             <div style={{ paddingTop: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
-                                {false && !content &&
+                                {(productId !== "") && (!content || content==='<h2></h2>') &&
                                     <h6 className='m-0 text-secondary'>Title</h6>
                                 }
                                 <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>

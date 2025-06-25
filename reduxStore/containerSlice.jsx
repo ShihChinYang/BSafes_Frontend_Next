@@ -49,7 +49,7 @@ const initialState = {
     reloadAPage: false,
     itemTrashed: false,
     listingDone: false,
-    turningPage: false,
+    turningPage: false
 };
 
 function separateActivities(activities, getTitle) {

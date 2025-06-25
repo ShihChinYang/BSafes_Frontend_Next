@@ -9,6 +9,7 @@ import containerSlice, {containerReducer} from './containerSlice';
 import pageSlice, {pageReducer} from './pageSlice';
 import teamSlice, {teamReducer} from './teamSlice';
 import v1AccountSlice, { v1AccountReducer } from './v1AccountSlice';
+import productSlice, {productReducer} from './productSlice';
 
 
 const reduxStore = configureStore({
@@ -20,7 +21,8 @@ const reduxStore = configureStore({
         [pageSlice.name]: pageReducer,
         [teamSlice.name]: teamReducer,
         [v1AccountSlice.name]: v1AccountReducer,
-        [accountSlice.name]:accountReducer
+        [accountSlice.name]:accountReducer,
+        [productSlice.name]:productReducer
     },
     devTools: true,
     middleware: (getDefaultMiddleware) =>

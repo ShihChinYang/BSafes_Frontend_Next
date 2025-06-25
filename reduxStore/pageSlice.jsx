@@ -4,6 +4,7 @@ const forge = require('node-forge');
 const DOMPurify = require('dompurify');
 
 import { setNavigationInSameContainer } from './containerSlice';
+import { setCurrentProduct } from './productSlice';
 
 import { getBrowserInfo, usingServiceWorker, convertBinaryStringToUint8Array, debugLog, PostCall, extractHTMLElementText, requestAppleReview } from '../lib/helper'
 import { generateNewItemKey, decryptBinaryString, encryptBinaryString, encryptLargeBinaryString, decryptChunkBinaryStringToBinaryStringAsync, decryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync, stringToEncryptedTokensCBC, stringToEncryptedTokensECB, tokenfieldToEncryptedArray, tokenfieldToEncryptedTokensCBC, tokenfieldToEncryptedTokensECB } from '../lib/crypto';
@@ -13,6 +14,7 @@ import { preS3Download, preS3ChunkUpload, preS3ChunkDownload, putS3Object } from
 import { downScaleImage } from '../lib/wnImage';
 import { isDemoMode } from '../lib/demoHelper';
 import { readDataFromServiceWorkerDBTable, writeDataToServiceWorkerDBTable, deleteAnItemInServiceWorkerDBTable, writeDataToServiceWorkerDB } from '../lib/serviceWorkerDBHelper';
+import { productIdDelimiter } from '../lib/productID';
 
 const embeddJSONSeperator = '=#=#=embeddJSON=';
 const MAX_NUMBER_OF_MEDIA_FILES = 32;
@@ -1677,6 +1679,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
             function getItemFromServer() {
                 return new Promise((resolve, reject) => {
                     debugLog(debugOn, "/memberAPI/getPageItem: ", data.itemId);
+                    const productId = data.itemId.split(productIdDelimiter)[1] || "";
+                    dispatch(setCurrentProduct(productId));
                     function getProductemplate() {
                         const targetContainer = space;
                         const type = getItemType(data.itemId);

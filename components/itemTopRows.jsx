@@ -40,16 +40,17 @@ export default function ItemTopRows() {
     const activity = useSelector(state => state.page.activity);
     const tagsState = useSelector(state => state.page.tags);
     const itemCopy = useSelector(state => state.page.itemCopy);
+    const productId = useSelector(state => state.product.currentProduct);
 
     const [tags, setTags] = useState([]);
     const [showTagsConfirmButton, setShowTagsConfirmButton] = useState(false);
     const [versionsHistoryModalOpened, setVersionsHistoryModalOpened] = useState(false);
     const [showFeatureNotAvailableForDemoToast, setShowFeatureNotAvailableForDemoToast] = useState(false);
-
-    let productId = "";
+    
+    /*let productId = "";
     if (itemId && itemId.split(":")[1].startsWith(`${productIdDelimiter}`)) {
         productId = itemId.split(productIdDelimiter)[1];
-    }
+    }*/
 
     const handleChange = (tags) => {
         setTags(tags);
@@ -114,7 +115,7 @@ export default function ItemTopRows() {
                 </Col>
                 <Col xs="2">
                     <div className="pull-right">
-                        <Button variant="link" className="pt-2 pb-1 px-1 text-dark" onClick={openVersionsHistoryModal}  ><i className="fa fa-history" aria-hidden="true"></i></Button>
+                        <Button variant="link" className="pt-2 pb-0 px-2 text-dark" onClick={openVersionsHistoryModal}  ><i className="fa fa-history" aria-hidden="true"></i></Button>
                         <p><span>{true && itemCopy && `v.${itemCopy.version}`}</span></p>
                         {false && <Button variant="link" className="text-dark" >
                             <i className="fa fa-share-square-o" aria-hidden="true"></i>

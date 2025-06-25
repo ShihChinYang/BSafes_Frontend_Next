@@ -40,12 +40,10 @@ export default function NotebookContentsCommon({ demo = false }) {
 
     const pageItemId = useSelector(state => state.page.id);
     const pageStyle = useSelector(state => state.page.style);
+    const productId = useSelector(state=>state.product.currentProduct);
 
     const product = demo ? NotebookDemo : 'notebook';
-    let productId = ""
-    if (router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`)) {
-        productId = router.query.itemId.split(productIdDelimiter)[1];
-    }
+    
     let panelStyle = "";
     if(productId === ""){
         panelStyle = `${BSafesStyle.pagePanel} ${BSafesStyle.notebookPanel} ${pageStyle}`;
@@ -74,7 +72,7 @@ export default function NotebookContentsCommon({ demo = false }) {
             case '+1':
                 if (!totalNumberOfPages || (pageNumber === totalNumberOfPages)) {
                     nextPageId = 'np:' + idParts.join(':') + ':1';
-                    newLink = `${product}/p/${nextPageId}`;
+                    newLink = `/${product}/p/${nextPageId}`;
                 } else {
                     listItems({ pageNumber: pageNumber + 1 });
                     return;

@@ -131,6 +131,7 @@ const PageItemWrapper = ({ itemId, children }) => {
       const elem = document.getElementById("BSafesPage");
       if (elem && navigationInSameContainer) {
         elem.scrollIntoView({ behavior: "smooth" });
+        //elem.scrollTo({ top:100, left:0, behavior: "smooth" });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

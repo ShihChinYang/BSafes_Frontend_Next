@@ -981,7 +981,7 @@ export default function PageCommons() {
                                 </Col>
                             </Row>
                             :
-                            <hr className="my-0" />
+                            <hr className="mx-3 my-0" />
 
                         }
                         <Row className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
@@ -996,7 +996,7 @@ export default function PageCommons() {
                                 </Col>
                             </Row>
                             :
-                            <hr className="my-0 mx-2" />
+                            <hr className="my-0 mx-3" />
                         }
                     </>
                 }
@@ -1009,7 +1009,7 @@ export default function PageCommons() {
                 }
                 <br />
                 <br />
-                <hr />
+                <hr className="my-2 mx-3" />
                 {!turningPage && !(contentType === 'DrawingPage' && contentEditorMode === "Writing") &&
                     <div className={`${BSafesStyle.pageCommonsExtension}`}>
                         {(!abort && !editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)) &&

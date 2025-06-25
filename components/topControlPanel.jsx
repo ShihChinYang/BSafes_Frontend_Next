@@ -54,11 +54,8 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     const workspaceSearchIV = useSelector(state => state.container.searchIV);
     const reloadAPage = useSelector(state => state.container.reloadAPage);
     const itemTrashed = useSelector(state => state.container.itemTrashed);
+    const productId = useSelector(state=>state.product.currentProduct);
 
-    let productId = "";
-    if (pageItemId && pageItemId.split(":")[1].startsWith(productIdDelimiter)) {
-        productId = pageItemId.split(productIdDelimiter)[1];
-    }
     let controlPanelStyle = "";
     let searchPanelStyle = "";
     if (productId === "") {
@@ -184,7 +181,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     }, [itemTrashed]);
 
     return (
-        <>{pageItemId &&
+        <>{true &&
             <>
                 <Row>
                     <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
