@@ -1604,7 +1604,6 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
 
             async function processResultItem(result) {
                 dispatch(dataFetched({ item: result.item }));
-
                 const getCurrentItemKey = () => {
                     let itemKey, itemIV;
                     let workspaceKey = getState().container.workspaceKey;
@@ -1722,8 +1721,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             }
                             if (result.item) {
                                 await processResultItem(result);
-                                await addItemToServiceWorkerDB(data.itemId, result.item);
                                 dispatch(setGetPageContentDone(true));
+                                await addItemToServiceWorkerDB(data.itemId, result.item);
                             } else {
                                 dispatch(setGetPageContentDone(true));
                                 if (data.navigationInSameContainer) {
@@ -1935,7 +1934,10 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             const latestItem = await queryItemFromServer(data.itemId);
                             if (result.item.version !== latestItem.version) {
                                 await processResultItem({ item: latestItem });
+                                dispatch(setGetPageContentDone(true));
                                 await addItemToServiceWorkerDB(data.itemId, latestItem);
+                            } else {
+                                dispatch(setGetPageContentDone(true));
                             }
                             dispatch(setCheckingLatest(false));
                             PostCall({

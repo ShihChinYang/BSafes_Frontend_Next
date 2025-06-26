@@ -128,11 +128,12 @@ const PageItemWrapper = ({ itemId, children }) => {
         payload.version = parseInt(version);
       }
       dispatch(getPageItemThunk(payload));
-      const elem = document.getElementById("BSafesPage");
+      /*const elem = document.getElementById("BSafesPage");
       if (elem && navigationInSameContainer) {
-        elem.scrollIntoView({ behavior: "smooth" });
+        //elem.scrollIntoView({ behavior: "smooth" });
+        window.scrollTo(0,120);
         //elem.scrollTo({ top:100, left:0, behavior: "smooth" });
-      }
+      }*/
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageItemId]);

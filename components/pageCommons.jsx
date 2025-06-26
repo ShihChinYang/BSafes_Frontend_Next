@@ -749,7 +749,7 @@ export default function PageCommons() {
 
     useEffect(() => {
         if (templateLoaded) {
-        //    handleWrite();
+            //    handleWrite();
         }
     }, [templateLoaded])
 
@@ -918,6 +918,14 @@ export default function PageCommons() {
         }
     }, [contentEditorContentWithImagesAndVideos])
 
+    useEffect(() => {
+        if (!activity) {
+            const elem = document.getElementById("BSafesPage");
+            if (elem) {
+                elem.scrollIntoView({ behavior: "smooth" });
+            }
+        }
+    }, [activity])
     const photoSwipeGallery = () => {
         return (
             //<!-- Root element of PhotoSwipe. Must have class pswp. -->

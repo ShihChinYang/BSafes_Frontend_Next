@@ -431,7 +431,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     debugLog(debugOn, "Saving draft ...");
                     if (contentType === "WritingPage") {
                         content = $(editorRef.current).froalaEditor('html.get');
-                        debugLog(debugOn, "editor content: ", content );
+                        debugLog(debugOn, "editor content: ", content);
                         if (content !== originalContent) {
                             debugLog(debugOn, 'Content changed');
                             onDraftSampled(content);
@@ -496,7 +496,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     const bSafesPreflightHook = (fn) => {
         debugLog(debugOn, "bSafesPreflight");
-        if (!workspace ||( workspace && !workspace.startsWith("d:"))) {
+        if (!workspace || (workspace && !workspace.startsWith("d:"))) {
             PostCall({
                 api: '/memberAPI/preflight',
                 dispatch
@@ -562,7 +562,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     const preS3UploadHook = () => {
         return new Promise(async (resolve, reject) => {
-            if (!workspace ||( workspace && !workspace.startsWith("d:"))) {
+            if (!workspace || (workspace && !workspace.startsWith("d:"))) {
                 PostCall({
                     api: '/memberAPI/preS3Upload',
                     dispatch
@@ -597,7 +597,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const preS3ChunkUploadHook = (itemId, chunkIndex, timeStamp) => {
         return new Promise((resolve, reject) => {
             let s3Key, s3KeyPrefix, signedURL;
-            if (!workspace ||( workspace && !workspace.startsWith("d:"))) {
+            if (!workspace || (workspace && !workspace.startsWith("d:"))) {
                 PostCall({
                     api: '/memberAPI/preS3ChunkUpload',
                     body: {
@@ -638,7 +638,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
 
     const uploadDataHook = (data, s3Key, signedURL, onProgress) => {
         return new Promise(async (resolve, reject) => {
-            if (!workspace ||( workspace && !workspace.startsWith("d:"))) {
+            if (!workspace || (workspace && !workspace.startsWith("d:"))) {
                 const config = {
                     onUploadProgress: async (progressEvent) => {
                         onProgress(progressEvent);
@@ -699,33 +699,35 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     return (
         <>
             {scriptsLoaded ?
-                <>
+                <div>
                     {(showPen) && (editable) ?
                         <>
                             <Row>
                                 <Col xs={6}>
                                     {(productId === "") && (editorId === 'title' && (!content || (content === '<h2></h2>'))) && <h6 className='m-0 text-secondary'>Title</h6>}
-                                    {(editorId === 'content' && content === null) && <h6 className='m-0 text-secondary'>Write {showDrawIcon ? `or Draw` : ``}</h6>}
+                                    {(editorId === 'content' && content === null) && <div className="px-3 pt-1"><h6 className='m-0 text-secondary'>Write {showDrawIcon ? `or Draw` : ``}</h6></div>}
                                 </Col>
                                 <Col xs={6}>
-                                    {(editorId === "content" || (productId === "")) && showWriteIcon && <OverlayTrigger
-                                        placement="top"
-                                        delay={{ show: 250, hide: 400 }}
-                                        overlay={(props) => (
-                                            <Tooltip id="button-tooltip" {...props}>
-                                                Write
-                                            </Tooltip>
-                                        )}
-                                    ><Button variant="link" className="text-dark pull-right p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button></OverlayTrigger>}
-                                    {showDrawIcon && <span className='pull-right mx-2'><OverlayTrigger
-                                        placement="top"
-                                        delay={{ show: 250, hide: 400 }}
-                                        overlay={(props) => (
-                                            <Tooltip id="button-tooltip" {...props}>
-                                                Draw
-                                            </Tooltip>
-                                        )}
-                                    ><Button variant="link" className="text-dark p-0 mx-3" onClick={handlePenClicked.bind(null, 'excalidraw')}><i className="fa fa-paint-brush" aria-hidden="true"></i></Button></OverlayTrigger> </span>}
+                                    <div className={`${editorId === "content" ? "px-3 pt-1" : ""}`}>
+                                        {(editorId === "content" || (productId === "")) && showWriteIcon && <OverlayTrigger
+                                            placement="top"
+                                            delay={{ show: 250, hide: 400 }}
+                                            overlay={(props) => (
+                                                <Tooltip id="button-tooltip" {...props}>
+                                                    Write
+                                                </Tooltip>
+                                            )}
+                                        ><Button variant="link" className="text-dark pull-right p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button></OverlayTrigger>}
+                                        {showDrawIcon && <span className='pull-right mx-2'><OverlayTrigger
+                                            placement="top"
+                                            delay={{ show: 250, hide: 400 }}
+                                            overlay={(props) => (
+                                                <Tooltip id="button-tooltip" {...props}>
+                                                    Draw
+                                                </Tooltip>
+                                            )}
+                                        ><Button variant="link" className="text-dark p-0 mx-3" onClick={handlePenClicked.bind(null, 'excalidraw')}><i className="fa fa-paint-brush" aria-hidden="true"></i></Button></OverlayTrigger> </span>}
+                                    </div>
                                     {(editorId === 'content' && draft) &&
                                         <ButtonGroup className='pull-right mx-3' size="sm">
                                             <Button variant="outline-danger" className='m-0' onClick={onDraftClicked}>Draft</Button>
@@ -748,7 +750,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div style={{ position: "relative" }}>
                             <div style={{ paddingTop: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
-                                {(productId !== "") && (!content || content==='<h2></h2>') &&
+                                {(productId !== "") && (!content || content === '<h2></h2>') &&
                                     <h6 className='m-0 text-secondary'>Title</h6>
                                 }
                                 <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
@@ -770,10 +772,12 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                         </div>
                     }
                     {(editorId !== 'title' && (editorId !== 'content' || contentType === 'WritingPage') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
-                        <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
-                            <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
-                            </div>
-                        </Row>
+                        <div className="px-2">
+                            <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
+                                <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
+                                </div>
+                            </Row>
+                        </div>
                     }
                     {editorId === 'content' && contentType === 'DrawingPage' &&
                         <>
@@ -813,7 +817,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                             }
                         </>
                     }
-                </> :
+                </div> :
                 <div className={BSafesStyle.screenCenter}>
                     <Blocks
                         visible={true}
