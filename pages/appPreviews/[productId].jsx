@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Navigation, Pagination } from 'swiper/modules';
 import Container from 'react-bootstrap/Container';
@@ -13,9 +13,15 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 
 import BSafesStyle from '../../styles/BSafes.module.css'
 
+import { debugLog } from '../../lib/helper';
+import { products } from '../../lib/productID';
+import { setupDemo } from '../../lib/demoHelper';
+
 export default function AppPreivews() {
+  const debugOn = false;
   const router = useRouter();
   const [show, setShow] = useState(false);
+  const [demoReady, setDemoReady] = useState(false);
 
   const slideSettings = useMemo(() => {
     return {
@@ -34,7 +40,29 @@ export default function AppPreivews() {
         prevEl: ".exclusive-prev-btn",
       },
     }
-  }, [])
+  }, []);
+
+  const productId = router.query.productId;
+  const handleTryMe = () => {
+    if (productId) {
+      setupDemo();
+      setDemoReady(true);
+      setTimeout(() => {
+        debugLog(debugOn, `ProductId: ${productId}`);
+        let productLink = products[productId].demoUrl;
+        if (productLink) {
+          router.push(productLink)
+        }
+      }, 1000)
+    }
+  };
+
+  useEffect(() => {
+    if (demoReady) {
+
+
+    }
+  }, [demoReady])
 
   return (
     <>
@@ -72,7 +100,7 @@ export default function AppPreivews() {
               <Col xs={9}><ul>
                 <li></li>
               </ul></Col>
-              <Col xs={3}><Button size="sm">Try Me</Button></Col>
+              <Col xs={3}><Button size="sm" onClick={handleTryMe}>Try Me</Button></Col>
             </Row>
             <br />
             <Row>

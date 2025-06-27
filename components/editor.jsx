@@ -717,7 +717,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                                     Write
                                                 </Tooltip>
                                             )}
-                                        ><Button variant="link" className="text-dark pull-right p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button></OverlayTrigger>}
+                                        ><Button id="write-1" variant="link" className="text-dark pull-right p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button></OverlayTrigger>}
                                         {showDrawIcon && <span className='pull-right mx-2'><OverlayTrigger
                                             placement="top"
                                             delay={{ show: 250, hide: 400 }}
@@ -726,7 +726,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                                     Draw
                                                 </Tooltip>
                                             )}
-                                        ><Button variant="link" className="text-dark p-0 mx-3" onClick={handlePenClicked.bind(null, 'excalidraw')}><i className="fa fa-paint-brush" aria-hidden="true"></i></Button></OverlayTrigger> </span>}
+                                        ><Button id="draw-1" variant="link" className="text-dark p-0 mx-3" onClick={handlePenClicked.bind(null, 'excalidraw')}><i className="fa fa-paint-brush" aria-hidden="true"></i></Button></OverlayTrigger> </span>}
                                     </div>
                                     {(editorId === 'content' && draft) &&
                                         <ButtonGroup className='pull-right mx-3' size="sm">
@@ -766,7 +766,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                         </Tooltip>
                                     )}
                                 >
-                                    <Button variant="link" style={{ position: "absolute", top: "0px", right: "-12px", width: "24px", zIndex: "100" }} className="text-dark p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button>
+                                    <Button id="write-2" variant="link" style={{ position: "absolute", top: "0px", right: "-12px", width: "24px", zIndex: "100" }} className="text-dark p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button>
                                 </OverlayTrigger>
                             }
                         </div>

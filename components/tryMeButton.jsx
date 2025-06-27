@@ -4,8 +4,6 @@ import { useRouter } from 'next/router'
 import Button from 'react-bootstrap/Button'
 import TryItemTypeModal from './tryItemTypeModal'
 
-import BSafesStyle from '../styles/BSafes.module.css'
-
 import { debugLog } from '../lib/helper'
 import { setupDemo } from '../lib/demoHelper'
 
@@ -19,14 +17,7 @@ export default function TryMeButton({ forcedType = null, addAnItem, pageOnly = f
     const handleTryMe = () => {
         setShow(true);
     }
-    const handleClicked = () => {
-        if (forcedType) {
-            addAnItem(forcedType, 'addAnItemOnTop');
-        } else {
-            setShow(true);
-        }
-    }
-
+ 
     const optionSelected = (productID) => {
         debugLog(debugOn, productID)
         setShow(false);
