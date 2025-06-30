@@ -1370,7 +1370,9 @@ const getItemFromServiceWorkerDB = (itemId) => {
     return readDataFromServiceWorkerDBTable(params);
 }
 
-const getDemoItemFromServiceWorkerDB = (itemId) => {
+const getDemoItemFromServiceWorkerDB = (dispatch, itemId) => {
+    const productId = itemId.split(productIdDelimiter)[1] || "";
+    dispatch(setCurrentProduct(productId));
     const params = {
         table: 'itemVersions',
         key: itemId
@@ -1547,7 +1549,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     });
                 } else {
                     debugLog(debugOn, "getDemoItemFromServiceWorkerDB: ", containerId);
-                    const result = await getDemoItemFromServiceWorkerDB(containerId);
+                    const result = await getDemoItemFromServiceWorkerDB(dispatch, containerId);
                     if (result.status === 'ok') {
                         debugLog(debugOn, "getContainerData: ", result);
                         if (result.item) {
@@ -1963,7 +1965,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     reject(error);
                 }
             } else {
-                const result = await getDemoItemFromServiceWorkerDB(data.itemId);
+                const result = await getDemoItemFromServiceWorkerDB(dispatch, data.itemId);
                 state = getState().page;
                 if (result.status === 'ok') {
                     if (data.itemId !== state.activeRequest) {
@@ -3045,6 +3047,7 @@ export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async 
 
 export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => async (dispatch, getState) => {
     newActivity(dispatch, pageActivity.SaveTitle, () => {
+        const workspace = getState().container.workspace;
         return new Promise(async (resolve, reject) => {
             let auth, state, titleText, encodedTitle, encryptedTitle, titleTokens, itemKey, keyEnvelope, newPageData, updatedState;
             auth = getState().auth;
@@ -3079,6 +3082,14 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
                         }
 
                         await createANewPage(dispatch, getState, state, newPageData, updatedState);
+                        if (workspace.startsWith("d:")) {
+                            const params = {
+                                action: "INDEX_A_PAGE",
+                                itemId: state.id,
+                                tokens: titleTokens
+                            }
+                            await writeDataToServiceWorkerDB(params);
+                        }
                         resolve();
                     } catch (error) {
                         reject("Failed to create a new page with title.");
@@ -3095,6 +3106,14 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
                     itemCopy.update = "title";
 
                     await createNewItemVersionForPage(itemCopy, dispatch);
+                    if (workspace.startsWith("d:")) {
+                        const params = {
+                            action: "INDEX_A_PAGE",
+                            itemId: state.id,
+                            tokens: titleTokens
+                        }
+                        await writeDataToServiceWorkerDB(params);
+                    }
                     dispatch(newVersionCreated({
                         itemCopy,
                         title,

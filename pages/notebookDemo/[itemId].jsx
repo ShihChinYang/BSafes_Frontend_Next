@@ -28,13 +28,6 @@ export default function Notebook() {
         }
     }, []);
 
-    useEffect(() => {
-        if (router.query.itemId) {
-            const productId = router.query.itemId.split(productIdDelimiter)[1] || "";
-            dispatch(setCurrentProduct(productId));
-        }
-    }, [router.query.itemId])
-
     return (
         <div>
             <NotebookCoverCommon demo={true} />

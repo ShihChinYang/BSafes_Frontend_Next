@@ -73,6 +73,10 @@ export default function Home() {
         clearDemo();
         if (product) {
             router.replace(`/appPreviews/${product}`);
+        } else {
+            if(process.env.NEXT_PUBLIC_platform !== "Web"){
+                router.replace(`/apps/bsafes`);
+            }     
         }
     }, [])
 
@@ -84,7 +88,7 @@ export default function Home() {
 
     return (
         <>
-            {!product &&
+            {(process.env.NEXT_PUBLIC_platform === "Web") && !product &&
                 <ContentPageLayout publicPage={true} publicHooks={{ onOpen: handleUnlock }} showNavbarMenu={false} showPathRow={false}>
                     <div style={{ height: '1px', backgroundColor: 'Grey' }}>
                     </div>
