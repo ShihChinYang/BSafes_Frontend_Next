@@ -30,6 +30,34 @@ function MyApp({ Component, pageProps }) {
     import("bootstrap/dist/js/bootstrap.min.js");
     window.EXCALIDRAW_ASSET_PATH = "/js/excalidraw/";
     if (process.env.NEXT_PUBLIC_platform === 'iOS') {
+      function getAccessKeyFromNative() {
+        return new Promise((resolve) => {
+          let interval = null;
+          const accessKeyWebCall = (data) => {
+            console.log('accessKeyWebCall');
+            accessKeyInfo = data;
+            if (interval) {
+              clearInterval(interval);
+              interval = null;
+            }
+            resolve();
+          }
+    
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.toggleMessageHandler) {
+            function getAccessKey() {
+              console.log('getAccessKey');
+              window.bsafesNative.accessKeyWebCall = accessKeyWebCall;
+              window.webkit.messageHandlers.toggleMessageHandler.postMessage({
+                "action": 'getAccessKey'
+              });
+            }
+            interval = setInterval(getAccessKey, 1000);
+          }
+        });
+      }
+      setTimeout(() => {
+        getAccessKeyFromNative();
+      }, 0)
       const pingFromNative = () => {
         debugLog(debugOn, "pingFromNative");
         return "ok"

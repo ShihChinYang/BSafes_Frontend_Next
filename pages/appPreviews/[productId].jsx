@@ -57,10 +57,9 @@ export default function AppPreivews() {
     }
   };
 
+
   useEffect(() => {
     if (demoReady) {
-
-
     }
   }, [demoReady])
 
