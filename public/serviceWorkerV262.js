@@ -14,6 +14,7 @@ function sleep(ms) {
 const DBName = "streams";
 const mediaChunkStoreName = "mediaChunksStore";
 const streamStoreName = "streamStore";
+const itemTokensStoreName = "itemTokensStore"
 const notebookPagesStoreName = "notebookPagesStore";
 const notebookTokensStoreName = "notebookTokensStore";
 const diaryPagesStoreName = "diaryPagesStore";
@@ -31,7 +32,7 @@ function helloDB() {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = myIndexedDB.open(DBName, 3);
+    const request = myIndexedDB.open(DBName, 4);
     let upgradedNeeded = false;
 
 
@@ -49,21 +50,23 @@ function openDB() {
       upgradedNeeded = true;
       const db = e.target.result;
       const transaction = e.target.transaction;
-      if( !db.objectStoreNames.contains(mediaChunkStoreName))
+      if (!db.objectStoreNames.contains(mediaChunkStoreName))
         db.createObjectStore(mediaChunkStoreName, { keyPath: "chunkId" });
-      if( !db.objectStoreNames.contains(streamStoreName))
+      if (!db.objectStoreNames.contains(streamStoreName))
         db.createObjectStore(streamStoreName, { keyPath: "videoId" });
-      if( !db.objectStoreNames.contains(notebookPagesStoreName))
+      if (!db.objectStoreNames.contains(itemTokensStoreName))
+        db.createObjectStore(itemTokensStoreName, { keyPath: "itemId" });
+      if (!db.objectStoreNames.contains(notebookPagesStoreName))
         db.createObjectStore(notebookPagesStoreName, { keyPath: "itemId" });
-      if( !db.objectStoreNames.contains(notebookTokensStoreName))
+      if (!db.objectStoreNames.contains(notebookTokensStoreName))
         db.createObjectStore(notebookTokensStoreName, { keyPath: "token" });
-      if( !db.objectStoreNames.contains(diaryPagesStoreName))
+      if (!db.objectStoreNames.contains(diaryPagesStoreName))
         db.createObjectStore(diaryPagesStoreName, { keyPath: "month" });
-      if( !db.objectStoreNames.contains(itemVersionsStoreName))
+      if (!db.objectStoreNames.contains(itemVersionsStoreName))
         db.createObjectStore(itemVersionsStoreName, { keyPath: "itemId" });
-      if( !db.objectStoreNames.contains(s3ObjectsStoreName))
+      if (!db.objectStoreNames.contains(s3ObjectsStoreName))
         db.createObjectStore(s3ObjectsStoreName, { keyPath: "s3Key" });
-      if( !db.objectStoreNames.contains(draftStoreName))
+      if (!db.objectStoreNames.contains(draftStoreName))
         db.createObjectStore(draftStoreName, { keyPath: "itemId" });
       transaction.oncomplete = (e) => {
         resolve(db);
@@ -263,6 +266,56 @@ function getStreamFromDB(streamId) {
   })
 }
 
+function setItemTokens(itemId, tokens) {
+  return new Promise((resolve) => {
+    const data = {
+      itemId,
+      tokens
+    }
+    const request = streamDB
+      .transaction(itemTokensStoreName, "readwrite")
+      .objectStore(itemTokensStoreName)
+      .put(data);
+
+    request.onsuccess = (e) => {
+      console.log("setItemTokens succeeded ", e.target.result);
+      resolve();
+    }
+
+    request.onerror = (e) => {
+      console.log("setItemTokens failed: ", e.target.error);
+      if (e.target.error.name == "ConstraintError") {
+        resolve();
+      } else {
+        reject();
+      }
+    }
+  });
+}
+
+function getItemTokens(itemId) {
+  return new Promise((resolve) => {
+    const request = streamDB
+      .transaction(itemTokensStoreName)
+      .objectStore(itemTokensStoreName)
+      .get(itemId);
+
+    request.onsuccess = (e) => {
+      //console.log("got chunk: ", e.target.result );
+      if (e.target.result) {
+        resolve(e.target.result.tokens);
+      } else {
+        resolve(null);
+      }
+    }
+
+    request.onerror = (e) => {
+      console.log("getItemTokens failed: ", e.target.error);
+      resolve(null);
+    }
+  })
+}
+
 function setNotebookPages(itemId, pages) {
   return new Promise((resolve) => {
     const data = {
@@ -290,11 +343,14 @@ function setNotebookPages(itemId, pages) {
   });
 }
 
-const findTheIndexForANumber = (numbersArray, theNumber) => {
+const findTheIndexForANumber = (numbersArray, theNumber, exact=false) => {
   let newArrayStartingIndex = 0, newArrayEndingIndex = numbersArray.length - 1, midIndex;
   let theIndex = 0, found = false;
   while (1) {
-    if (newArrayStartingIndex === newArrayEndingIndex) break;
+    if (newArrayStartingIndex === newArrayEndingIndex) {
+      if(numbersArray[newArrayStartingIndex] === theNumber) found = true;
+      break;
+    }
     if ((newArrayStartingIndex + 1) === newArrayEndingIndex) {
       break;
     }
@@ -317,6 +373,9 @@ const findTheIndexForANumber = (numbersArray, theNumber) => {
     } else {
       theIndex = newArrayStartingIndex + 1;
     }
+    if(exact) return -1;
+  } else {
+    if(exact) return theIndex;
   }
   if (theIndex) {
     if ((theNumber === numbersArray[theIndex - 1]) || (theNumber === numbersArray[theIndex]) || (theNumber === numbersArray[theIndex + 1])) {
@@ -492,12 +551,34 @@ function setNotebookTokenPages(token, pages) {
   });
 }
 
-function indexANotebookPage(container, pageNumber, tokens) {
+function indexANotebookPage(itemId, pageNumber, tokens) {
   return new Promise(async (resolve, reject) => {
     try {
-      let token;
-      for (let i = 0; i < tokens.length; i++) {
-        token = tokens[i];
+      const originalTokens = await getItemTokens(itemId);
+      await setItemTokens(itemId, tokens);
+      let newTokens = [];
+      let deletedTokens = [];
+      if(originalTokens === null){
+        newTokens = tokens;
+      } else {
+        for (let i = 0; i < tokens.length; i++) {
+          let thisToken = tokens[i];
+          let found = false;
+          for (j = 0; j < originalTokens.length; j++) {
+            if (thisToken === originalTokens[j]) {
+              found = true;
+              originalTokens.splice(j, 1)
+            }
+          }
+          if (!found) {
+            newTokens.push(thisToken);
+          }
+        }
+        deletedTokens = originalTokens;
+      }
+      //Add new token index
+      for (let i = 0; i < newTokens.length; i++) {
+        let token = newTokens[i];
         let pages = await getNotebookPagesByAToken(token);
         if (pages) {
           const theIndex = findTheIndexForANumber(pages, pageNumber);
@@ -510,6 +591,22 @@ function indexANotebookPage(container, pageNumber, tokens) {
           pages = [pageNumber];
         }
         await setNotebookTokenPages(token, pages);
+      }
+      //Remove deleted token index
+      for (let i = 0; i < deletedTokens.length; i++) {
+        let token = deletedTokens[i];
+        let pages = await getNotebookPagesByAToken(token);
+        if (pages) {
+          const theIndex = findTheIndexForANumber(pages, pageNumber, true);
+          if (theIndex !== -1) {
+            pages.splice(theIndex, 1);
+            await setNotebookTokenPages(token, pages);
+          } else {
+            continue;
+          }
+        } else {
+          continue;
+        }
       }
       resolve();
     } catch (error) {
@@ -801,20 +898,20 @@ function deleteADraftInDB(itemId) {
       .transaction(draftStoreName, "readwrite")
       .objectStore(draftStoreName)
       .delete(itemId)
-      
+
     request.onsuccess = (e) => {
-        console.log("Draft deleted: ", itemId);
-        resolve();
-      }
+      console.log("Draft deleted: ", itemId);
+      resolve();
+    }
 
     request.onerror = (e) => {
-        console.log("deleteADraftInDB failed: ", e.target.error);
-        if (e.target.error.name == "ConstraintError") {
-          resolve();
-        } else {
-          reject();
-        }
+      console.log("deleteADraftInDB failed: ", e.target.error);
+      if (e.target.error.name == "ConstraintError") {
+        resolve();
+      } else {
+        reject();
       }
+    }
   })
 }
 
@@ -1337,7 +1434,7 @@ self.addEventListener("message", async (event) => {
             if (event.data.itemId.startsWith('np')) {
               try {
                 const pageNumber = parseInt(event.data.itemId.split(':').pop())
-                await indexANotebookPage(event.data.container, pageNumber, event.data.tokens);
+                await indexANotebookPage(event.data.itemId, pageNumber, event.data.tokens);
                 result = { status: 'ok' };
               } catch (error) {
                 result = { status: 'error', error }

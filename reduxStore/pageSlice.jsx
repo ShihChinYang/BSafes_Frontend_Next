@@ -43,8 +43,10 @@ const initialState = {
     itemKey: null,
     itemIV: null,
     tags: [],
+    tagsTokens:[],
     title: null,
     titleText: null,
+    titleTokens:[],
     content: null,
     initialContentRendered: false,
     contentSize: 0,
@@ -1052,6 +1054,12 @@ const pageSlice = createSlice({
         setGenerateDrawingSnapshot: (state, action) => {
             state.generateDrawingSnapshot = action.payload;
         },
+        setTagsTokens:  (state, action) => {
+            state.tagsTokens = action.payload;
+        },
+        setTitleTokens: (state, action) => {
+            state.titleTokens = action.payload;
+        },
     }
 })
 
@@ -1157,7 +1165,9 @@ export const {
     setCheckingLatest,
     setContentUploadProgress,
     setContentDownloadProgress,
-    setGenerateDrawingSnapshot
+    setGenerateDrawingSnapshot,
+    setTagsTokens,
+    setTitleTokens,
 } = pageSlice.actions;
 
 
@@ -2967,6 +2977,19 @@ function createANewPage(dispatch, getState, pageState, newPageData, updatedState
     });
 }
 
+const indexAPage = async (getState) => {
+    const page = getState().page;
+    const tagsTokens = page.tagsTokens;
+    const titleTokens = page.titleTokens;
+    const tokens = tagsTokens.concat(titleTokens);
+    const params = {
+        action: "INDEX_A_PAGE",
+        itemId: page.id,
+        tokens
+    }
+    await writeDataToServiceWorkerDB(params);
+}
+
 export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async (dispatch, getState) => {
     newActivity(dispatch, pageActivity.SaveTags, () => {
         const workspace = getState().container.workspace;
@@ -2980,6 +3003,7 @@ export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async 
                 } else {
                     tagsTokens = tokenfieldToEncryptedTokensCBC(tags, searchKey, searchIV);
                 }
+                dispatch(setTagsTokens(tagsTokens))
                 if (!state.itemCopy) {
                     try {
                         itemKey = generateNewItemKey();
@@ -3001,12 +3025,7 @@ export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async 
                         }
                         await createANewPage(dispatch, getState, state, newPageData, updatedState);
                         if (workspace.startsWith("d:")) {
-                            const params = {
-                                action: "INDEX_A_PAGE",
-                                itemId: state.id,
-                                tokens: tagsTokens
-                            }
-                            await writeDataToServiceWorkerDB(params);
+                           await indexAPage(getState);
                         }
                         resolve();
                     } catch (error) {
@@ -3025,12 +3044,7 @@ export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async 
 
                     await createNewItemVersionForPage(itemCopy, dispatch);
                     if (workspace.startsWith("d:")) {
-                        const params = {
-                            action: "INDEX_A_PAGE",
-                            itemId: state.id,
-                            tokens: tagsTokens
-                        }
-                        await writeDataToServiceWorkerDB(params);
+                        await indexAPage(getState)
                     }
                     dispatch(newVersionCreated({
                         itemCopy,
@@ -3060,7 +3074,7 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
                 } else {
                     titleTokens = stringToEncryptedTokensCBC(titleText, searchKey, searchIV);
                 }
-
+                dispatch(setTitleTokens(titleTokens));
                 if (!state.itemCopy) {
                     try {
                         itemKey = generateNewItemKey();
@@ -3083,12 +3097,7 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
 
                         await createANewPage(dispatch, getState, state, newPageData, updatedState);
                         if (workspace.startsWith("d:")) {
-                            const params = {
-                                action: "INDEX_A_PAGE",
-                                itemId: state.id,
-                                tokens: titleTokens
-                            }
-                            await writeDataToServiceWorkerDB(params);
+                            await indexAPage(getState);
                         }
                         resolve();
                     } catch (error) {
@@ -3107,12 +3116,7 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
 
                     await createNewItemVersionForPage(itemCopy, dispatch);
                     if (workspace.startsWith("d:")) {
-                        const params = {
-                            action: "INDEX_A_PAGE",
-                            itemId: state.id,
-                            tokens: titleTokens
-                        }
-                        await writeDataToServiceWorkerDB(params);
+                        await indexAPage(getState);
                     }
                     dispatch(newVersionCreated({
                         itemCopy,
