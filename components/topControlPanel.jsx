@@ -260,7 +260,6 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
                         <Row>
                             <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
                                 <Card className={searchPanelStyle}>
-
                                     <Form onSubmit={onSearchEntered} className={BSafesStyle.searchBar}>
                                         <InputGroup>
                                             <Form.Control ref={searchInputRef} type="text" className={`${BSafesStyle.searchBarInput}  display-1`}

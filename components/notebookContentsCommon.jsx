@@ -171,10 +171,10 @@ export default function NotebookContentsCommon({ demo = false }) {
                                 <br />
                                 <p className='fs-1 text-center'>Contents</p>
                                 <Row>
-                                    <Col xs={{ span: 2, offset: 1 }} sm={{ span: 2, offset: 1 }} md={{ span: 1, offset: 1 }}>
+                                    <Col xs={{ span: 2, offset: 1 }} sm={{ span: 2, offset: 1 }}>
                                         <p className="fs-5">Page</p>
                                     </Col>
-                                    <Col xs={8} sm={8} md={9}>
+                                    <Col xs={8} sm={8}>
                                         <p className="fs-5">Title</p>
                                     </Col>
                                 </Row>

@@ -75,7 +75,7 @@ function MyApp({ Component, pageProps }) {
     }
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/serviceWorkerV262.js?v262", { //
+      navigator.serviceWorker.register("/serviceWorkerV263.js?v263", { //
         scope: "/",
       }).then(
         function (registration) {

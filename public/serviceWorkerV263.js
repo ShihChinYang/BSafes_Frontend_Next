@@ -626,7 +626,7 @@ function getNotebookPagesByTokens(itemId, tokens) {
         pages = await getNotebookPagesByAToken(token);
       }
       if (pages === null) {
-        resolve({ status: 'ok', hits: { total: 0 } });
+        resolve({ status: 'ok', hits: { hits:[], total: 0 } });
         return;
       }
       const total = pages.length;

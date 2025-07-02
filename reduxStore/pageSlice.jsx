@@ -2977,10 +2977,21 @@ function createANewPage(dispatch, getState, pageState, newPageData, updatedState
     });
 }
 
-const indexAPage = async (getState) => {
+const indexAPage = async (getState, searchKey, searchIV) => {
+    const auth = getState().auth;
     const page = getState().page;
-    const tagsTokens = page.tagsTokens;
-    const titleTokens = page.titleTokens;
+    let tagsTokens;
+    if (auth.accountVersion === 'v1') {
+        tagsTokens = tokenfieldToEncryptedTokensECB(page.tags, searchKey)
+    } else {
+        tagsTokens = tokenfieldToEncryptedTokensCBC(page.tags, searchKey, searchIV);
+    }
+    let titleTokens;
+    if (auth.accountVersion === 'v1') {
+        titleTokens = stringToEncryptedTokensECB(page.titleText, searchKey)
+    } else {
+        titleTokens = stringToEncryptedTokensCBC(page.titleText, searchKey, searchIV);
+    }
     const tokens = tagsTokens.concat(titleTokens);
     const params = {
         action: "INDEX_A_PAGE",
@@ -3025,7 +3036,7 @@ export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async 
                         }
                         await createANewPage(dispatch, getState, state, newPageData, updatedState);
                         if (workspace.startsWith("d:")) {
-                           await indexAPage(getState);
+                           await indexAPage(getState, searchKey, searchIV);
                         }
                         resolve();
                     } catch (error) {
@@ -3043,13 +3054,13 @@ export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async 
                     itemCopy.update = "tags";
 
                     await createNewItemVersionForPage(itemCopy, dispatch);
-                    if (workspace.startsWith("d:")) {
-                        await indexAPage(getState)
-                    }
                     dispatch(newVersionCreated({
                         itemCopy,
                         tags
                     }));
+                    if (workspace.startsWith("d:")) {
+                        await indexAPage(getState, searchKey, searchIV)
+                    }
                     resolve();
                 }
             } catch (error) {
@@ -3097,7 +3108,7 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
 
                         await createANewPage(dispatch, getState, state, newPageData, updatedState);
                         if (workspace.startsWith("d:")) {
-                            await indexAPage(getState);
+                            await indexAPage(getState, searchKey, searchIV);
                         }
                         resolve();
                     } catch (error) {
@@ -3115,14 +3126,14 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
                     itemCopy.update = "title";
 
                     await createNewItemVersionForPage(itemCopy, dispatch);
-                    if (workspace.startsWith("d:")) {
-                        await indexAPage(getState);
-                    }
                     dispatch(newVersionCreated({
                         itemCopy,
                         title,
                         titleText
                     }));
+                    if (workspace.startsWith("d:")) {
+                        await indexAPage(getState, searchKey, searchIV);
+                    }
                     resolve();
                 }
             } catch (error) {
