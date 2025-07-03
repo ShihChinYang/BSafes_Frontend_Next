@@ -17,7 +17,7 @@ import PaginationControl from "./paginationControl";
 
 import { listItemsThunk, searchItemsThunk, getFirstItemInContainer, getLastItemInContainer } from "../reduxStore/containerSlice";
 import { setPageStyle } from "../reduxStore/pageSlice";
-import { productIdDelimiter, NotebookDemo } from "../lib/productID";
+import { NotebookDemo } from "../lib/productID";
 import { debugLog } from "../lib/helper";
 
 

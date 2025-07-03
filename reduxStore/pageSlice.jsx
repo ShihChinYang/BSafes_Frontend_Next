@@ -1693,12 +1693,14 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     const productId = data.itemId.split(productIdDelimiter)[1] || "";
                     dispatch(setCurrentProduct(productId));
                     function getProductemplate() {
+                        const auth = getState().auth;
+                        const space = 'u:' + auth.memberId + ':' + "3" + ':' + '0';
                         const targetContainer = space;
                         const type = getItemType(data.itemId);
                         const title = '<h2></h2>';
                         const encodedTitle = forge.util.encodeUtf8(title);
                         const itemKey = generateNewItemKey();
-                        const workspaceKey = containerSlice.workspaceKey;
+                        const workspaceKey = auth.expandedKey;
                         const keyEnvelope = encryptBinaryString(itemKey, workspaceKey);
                         const encryptedTitle = encryptBinaryString(encodedTitle, itemKey);
                         const template = {

@@ -65,7 +65,7 @@ export default function Safe() {
         currentKeyVersion = 3;
       }
 
-      const workspaceId = 'u:' + memberId + ':' + currentKeyVersion + ':' + '0';;
+      const workspaceId = 'u:' + memberId + ':' + currentKeyVersion + ':' + '0';
       dispatch(initContainer({ container: 'root', workspaceId, workspaceKey, searchKey, searchIV }));
       dispatch(setWorkspaceKeyReady(true));
       setReadyToList(true);

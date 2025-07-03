@@ -8,6 +8,7 @@ import Col from 'react-bootstrap/Col'
 import format from "date-fns/format";
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 
 import ContentPageLayout from './layouts/contentPageLayout';
 import PageItemWrapper from "./pageItemWrapper";
@@ -50,7 +51,16 @@ export default function DiaryContentsCommon({ demo = false }) {
     const showingMonthDate = startDate;
     const currentMonthYear = format(showingMonthDate, 'MMM. yyyy') //=> 'Nov'
 
+    const productId = useSelector(state => state.product.currentProduct);
     const product = demo ? DiaryDemo : 'diary';
+
+    let panelStyle = "";
+    if (productId === "") {
+        panelStyle = `${BSafesStyle.pagePanel} ${BSafesStyle.diaryPanel} ${pageStyle}`;
+    } else {
+        panelStyle = `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
+    }
+
     const items = allItemsInCurrentPage.map((item, index) =>
         <ItemRow itemIndex={index} key={index} item={item} mode={mode} productID={product} />
     );
@@ -154,17 +164,18 @@ export default function DiaryContentsCommon({ demo = false }) {
                         }}
                         onSubmitSearch={handleSubmitSearch} onCancelSearch={handleCancelSearch}
                         datePickerViewMode="monthYear" showSearchIcon />
-                    <Row>
+                    <br/>
+                    <Row id="BSafesPage">
                         <Col lg={{ span: 10, offset: 1 }}>
-                            <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.diaryPanel} ${pageStyle}`}>
+                            <div className={`${panelStyle}`}>
                                 <br />
                                 <br />
                                 <p className='fs-1 text-center'>{currentMonthYear}</p>
                                 <Row>
-                                    <Col xs={{ span: 2, offset: 1 }} sm={{ span: 2, offset: 1 }} xl={{ span: 1, offset: 1 }}>
+                                    <Col xs={{ span: 3, offset: 1 }} sm={{ span: 2, offset: 1 }} xl={{ span: 1, offset: 1 }}>
                                         <p className="fs-5">Day</p>
                                     </Col>
-                                    <Col xs={8} sm={8} xl={9}>
+                                    <Col xs={7} sm={8} xl={9}>
                                         <p className="fs-5">Title</p>
                                     </Col>
                                 </Row>

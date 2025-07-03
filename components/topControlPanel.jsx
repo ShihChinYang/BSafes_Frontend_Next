@@ -181,7 +181,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     }, [itemTrashed]);
 
     return (
-        <>{true &&
+        <>{( productId==='' || productId) &&
             <>
                 <Row>
                     <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>

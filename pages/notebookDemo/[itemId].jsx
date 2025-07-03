@@ -7,12 +7,8 @@ import SampleItemNoticeModal from "../../components/sampleItemNoticeModal"
 import { setupDemo } from "../../lib/demoHelper";
 import { setDemoMode } from "../../reduxStore/auth";
 import { setDemoWorkspace } from "../../reduxStore/containerSlice";
-import { setCurrentProduct } from "../../reduxStore/productSlice";
-
-import { productIdDelimiter } from "../../lib/productID";
 
 export default function Notebook() {
-    const router = useRouter();
     const dispatch = useDispatch();
     const [showNotice, setShowNotice] = useState(false);
 

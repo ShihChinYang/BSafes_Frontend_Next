@@ -749,7 +749,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     }
                     {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div style={{ position: "relative" }}>
-                            <div style={{ paddingTop: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
+                            <div style={{ paddingTop: "7px", marginRight:"7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                                 {(productId !== "") && (!content || content === '<h2></h2>') &&
                                     <h6 className='m-0 text-secondary'>Title</h6>
                                 }
@@ -766,7 +766,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                                         </Tooltip>
                                     )}
                                 >
-                                    <Button id="write-2" variant="link" style={{ position: "absolute", top: "0px", right: "-12px", width: "24px", zIndex: "100" }} className="text-dark p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button>
+                                    <Button id="write-2" variant="link" style={{ position: "absolute", top: "0px", right: "-12px", width: "24px", zIndex: "" }} className="text-dark p-0" onClick={handlePenClicked.bind(null, 'froala')}><i className="fa fa-pencil" aria-hidden="true"></i></Button>
                                 </OverlayTrigger>
                             }
                         </div>

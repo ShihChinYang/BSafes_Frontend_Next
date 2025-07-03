@@ -14,15 +14,27 @@ import ReactDatePicker from 'react-datepicker'
 import FeatureNotAvailableForDemoToast from "./featureNotAvailabeForDemoToast";
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 
-export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", startDate, setStartDate, showListIcon = false, showSearchIcon = false, handleSearch, onCoverClicked, onContentsClicked, onSubmitSearch=null, onCancelSearch=null }) {
+export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", startDate, setStartDate, showListIcon = false, showSearchIcon = false, handleSearch, onCoverClicked, onContentsClicked, onSubmitSearch = null, onCancelSearch = null }) {
     const router = useRouter();
 
     const searchInputRef = useRef(null);
     const [showSearchBar, setShowSearchBar] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [showFeatureNotAvailableForDemoToast, setShowFeatureNotAvailableForDemoToast] = useState(false);
-    const workspace = useSelector(state=>state.container.workspace);
+    const workspace = useSelector(state => state.container.workspace);
+    const productId = useSelector(state => state.product.currentProduct);
+
+    let controlPanelStyle = "";
+    let searchPanelStyle = "";
+    if (productId === "") {
+        controlPanelStyle = BSafesStyle.containerControlPanel;
+        searchPanelStyle = BSafesStyle.containerSearchPanel;
+    } else {
+        controlPanelStyle = BSafesProductsStyle[`${productId}_TopControlPanel`];
+        searchPanelStyle = BSafesProductsStyle[`${productId}_TopSearchPanel`];
+    }
 
     // eslint-disable-next-line react/display-name
     const ExampleCustomInput = forwardRef(({ value, onClick }, ref) => (
@@ -35,7 +47,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
     } : {}
 
     const onShowSearchBarClicked = (e) => {
-        if(workspace && workspace.startsWith("d:")) {
+        if (workspace && workspace.startsWith("d:")) {
             setShowFeatureNotAvailableForDemoToast(true);
         } else {
             setShowSearchBar(true);
@@ -58,69 +70,72 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
         onCancelSearch();
     }
 
-    useEffect(()=>{
-        if(showSearchBar) {
+    useEffect(() => {
+        if (showSearchBar) {
             searchInputRef.current.focus();
         }
     }, [showSearchBar])
 
     return (
-        <>
-            <FeatureNotAvailableForDemoToast show={showFeatureNotAvailableForDemoToast} message="The Search feature is not available for demo!" handleClose={()=>{setShowFeatureNotAvailableForDemoToast(false)}}/>
-            <Row>
-                <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
-                    <Card className={`${BSafesStyle.containerControlPanel}`}>
-                        <Card.Body className={BSafesStyle.diaryControlPanelBody}>
-                            <Row>
-                                <Col xs={4}>
-                                    <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-book fa-lg" aria-hidden="true"></i></Button>
-                                    {showListIcon && <Button variant='link' size='sm' className='text-white' onClick={onContentsClicked}><i className="fa fa-list-ul fa-lg" aria-hidden="true"></i></Button>}
-                                </Col>
-                                <Col xs={4}>
-                                </Col>
-                                <Col xs={4}>
-                                    { router.asPath.includes('\/contents\/') && !showSearchBar &&                            
-                                            <Button variant='link' size='sm' className='text-white pull-right' onClick={onShowSearchBarClicked}><i className="fa fa-search fa-lg" aria-hidden="true"></i></Button>
-                                    }
-                                    <div className='pull-right'>
-                                        <ReactDatePicker
-                                            selected={startDate}                                         
-                                            onChange={(date) => setStartDate(date)}
-                                            customInput={<ExampleCustomInput />}
-                                            showPopperArrow={false}
-                                            {...extraProps}
-                                        />
-                                    </div>
-                                </Col>
-                            </Row>
-                        </Card.Body>   
-                    </Card>
-                </Col>
-            </Row>
-            { showSearchBar &&
+        <> {(productId==='' || productId) &&
             <>
-                <br/>
+                <FeatureNotAvailableForDemoToast show={showFeatureNotAvailableForDemoToast} message="The Search feature is not available for demo!" handleClose={() => { setShowFeatureNotAvailableForDemoToast(false) }} />
                 <Row>
-                    <Col xs={12} sm={{span:10, offset:1}} lg={{span:8, offset:2}}>
-                        <Card className={`${BSafesStyle.containerControlPanel}`}>
-                        
-                            <Form onSubmit={onSearchEntered} className={BSafesStyle.searchBar}>
-                                <InputGroup>
-                                    <Form.Control ref={searchInputRef} type="text" className={`${BSafesStyle.searchBarInput} text-white display-1`}
-                                        value={searchValue} 
-                                        onChange={onSearchValueChanged}
-                                    />
-                                    <Button variant="link">
-                                        <i id="1" className="fa fa-search fa-lg text-white" aria-hidden="true" onClick={onSearchEntered}></i>
-                                    </Button>
-                                    <Button variant="link">
-                                        <i id="1" className="fa fa-times fa-lg text-white" aria-hidden="true" onClick={onCancelSearchClicked}></i>
-                                    </Button>
-                                </InputGroup>
-                            </Form>
+                    <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
+                        <Card className={controlPanelStyle}>
+                            <Card.Body className={BSafesStyle.diaryControlPanelBody}>
+                                <Row>
+                                    <Col xs={4}>
+                                        <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-book fa-lg" aria-hidden="true"></i></Button>
+                                        {showListIcon && <Button variant='link' size='sm' className='text-white' onClick={onContentsClicked}><i className="fa fa-list-ul fa-lg" aria-hidden="true"></i></Button>}
+                                    </Col>
+                                    <Col xs={4}>
+                                    </Col>
+                                    <Col xs={4}>
+                                        {router.asPath.includes('\/contents\/') && !showSearchBar &&
+                                            <Button variant='link' size='sm' className='text-white pull-right' onClick={onShowSearchBarClicked}><i className="fa fa-search fa-lg" aria-hidden="true"></i></Button>
+                                        }
+                                        <div className='pull-right'>
+                                            <ReactDatePicker
+                                                selected={startDate}
+                                                onChange={(date) => setStartDate(date)}
+                                                customInput={<ExampleCustomInput />}
+                                                showPopperArrow={false}
+                                                {...extraProps}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Card.Body>
                         </Card>
-                    </Col> 
+                    </Col>
                 </Row>
+                {showSearchBar &&
+                    <>
+                        <br />
+                        <Row>
+                            <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
+                                <Card className={searchPanelStyle}>
+                                    <Form onSubmit={onSearchEntered} className={BSafesStyle.searchBar}>
+                                        <InputGroup>
+                                            <Form.Control ref={searchInputRef} type="text" className={`${BSafesStyle.searchBarInput} text-black display-1`}
+                                                value={searchValue}
+                                                onChange={onSearchValueChanged}
+                                            />
+                                            <Button variant="link">
+                                                <i id="1" className="fa fa-search fa-lg text-black" aria-hidden="true" onClick={onSearchEntered}></i>
+                                            </Button>
+                                            <Button variant="link">
+                                                <i id="1" className="fa fa-times fa-lg text-black" aria-hidden="true" onClick={onCancelSearchClicked}></i>
+                                            </Button>
+                                        </InputGroup>
+                                    </Form>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </>
+                }
+
             </>
         }
         </>

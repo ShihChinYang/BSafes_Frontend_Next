@@ -22,8 +22,7 @@ import { saveTitleThunk } from "../reduxStore/pageSlice";
 
 import { debugLog } from "../lib/helper";
 import { getCoverAndContentsLink } from "../lib/bSafesCommonUI";
-import { productIdDelimiter } from "../lib/productID";
-import { NotebookDemo } from "../lib/productID";
+import { NotebookDemo, productIdDelimiter } from "../lib/productID";
 
 export default function NotebookCoverCommon({ demo = false }) {
     const debugOn = false;
