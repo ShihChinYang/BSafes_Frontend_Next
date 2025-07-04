@@ -22,7 +22,7 @@ import { getItemLink } from '../lib/bSafesCommonUI';
 
 import { deselectItem, selectItem, dropItemsThunk} from '../reduxStore/containerSlice';
 
-export default function ItemRow({ itemIndex, item , mode='listAll',  onAdd, onSelect, productID=null}) {
+export default function ItemRow({ itemIndex, item , mode='listAll',  onAdd, onSelect, productID=null, diaryDayColStyle="", diaryTitleColStyle=""}) {
     const debugOn = false;
     const router = useRouter();
     const dispatch = useDispatch();
@@ -160,14 +160,14 @@ export default function ItemRow({ itemIndex, item , mode='listAll',  onAdd, onSe
             {item.id.startsWith('dp') &&                
                 <div>                  
                     <Row className={BSafesStyle.contentsItemRow}>
-                        <Col className={`${(day === 0 || day === 6)?BSafesStyle.diaryWeekendItem:''} ${isSameDay(new Date(), date)?BSafesStyle.diaryTodayItem:''}`} xs={{span:3, offset:1}} sm={{span:2, offset:1}} xl={{span:1, offset:1}} onClick={rowClicked} style={{ cursor: 'pointer' }}>
+                        <Col className={`${diaryDayColStyle} ${(day === 0 || day === 6)?BSafesStyle.diaryWeekendItem:''} ${isSameDay(new Date(), date)?BSafesStyle.diaryTodayItem:''}`} onClick={rowClicked} style={{ cursor: 'pointer' }}>
                             { mode==='listAll'?
                                 <span className='fs-5' dangerouslySetInnerHTML={{__html: format(date, 'dd EEEEE')}} />
                                 :
                                 <span className='fs-5' dangerouslySetInnerHTML={{__html: format(date, 'yyyy-LL-dd')}} />
                             }   
                             </Col> 
-                        <Col xs={6} sm={7} xl={8} onClick={rowClicked} style={{ cursor: 'pointer' }}>
+                        <Col className={diaryTitleColStyle} onClick={rowClicked} style={{ cursor: 'pointer' }}>
                             <span className='fs-5' dangerouslySetInnerHTML={{__html: itemText}} />
                         </Col>      
                         <Col xs={1} >

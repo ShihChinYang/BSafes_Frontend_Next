@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import { useRouter } from "next/router";
 
@@ -20,7 +20,7 @@ import PaginationControl from "./paginationControl";
 import { listItemsThunk, searchItemsThunk } from "../reduxStore/containerSlice";
 import { setPageStyle } from "../reduxStore/pageSlice";
 
-import { DiaryDemo } from "../lib/productID";
+import { products, DiaryDemo } from "../lib/productID";
 import { debugLog } from "../lib/helper";
 
 
@@ -29,6 +29,7 @@ export default function DiaryContentsCommon({ demo = false }) {
     debugLog(debugOn, "Rendering Contents");
     const dispatch = useDispatch();
     const router = useRouter();
+    const pageRef = useRef(null);
 
     const [searchValue, setSearchValue] = useState(null);
 
@@ -55,14 +56,26 @@ export default function DiaryContentsCommon({ demo = false }) {
     const product = demo ? DiaryDemo : 'diary';
 
     let panelStyle = "";
+    let dayColStyle = "col-xl-1 col-sm-2 col-3 offset-xl-1 offset-sm-1 offset-1";
+    let titleColStyle = "col-xl-8 col-sm-7 col-6";
     if (productId === "") {
         panelStyle = `${BSafesStyle.pagePanel} ${BSafesStyle.diaryPanel} ${pageStyle}`;
     } else {
         panelStyle = `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
+        if(pageRef && pageRef.current) {
+            const pageWidth = pageRef.current.clientWidth;
+            const theProduct = products[productId];
+            if(theProduct.fixedSize) {
+                if(pageWidth<420){
+                    dayColStyle = "col-3 offset-1";
+                    titleColStyle = "col-6"
+                }
+            }
+        }
     }
 
     const items = allItemsInCurrentPage.map((item, index) =>
-        <ItemRow itemIndex={index} key={index} item={item} mode={mode} productID={product} />
+        <ItemRow itemIndex={index} key={index} item={item} mode={mode} productID={product} diaryDayColStyle={dayColStyle} diaryTitleColStyle={titleColStyle} />
     );
 
     const gotoNextPage = () => {
@@ -167,15 +180,15 @@ export default function DiaryContentsCommon({ demo = false }) {
                     <br/>
                     <Row id="BSafesPage">
                         <Col lg={{ span: 10, offset: 1 }}>
-                            <div className={`${panelStyle}`}>
+                            <div ref={pageRef} className={`${panelStyle}`}>
                                 <br />
                                 <br />
                                 <p className='fs-1 text-center'>{currentMonthYear}</p>
                                 <Row>
-                                    <Col xs={{ span: 3, offset: 1 }} sm={{ span: 2, offset: 1 }} xl={{ span: 1, offset: 1 }}>
+                                    <Col className={dayColStyle}>
                                         <p className="fs-5">Day</p>
                                     </Col>
-                                    <Col xs={7} sm={8} xl={9}>
+                                    <Col className={titleColStyle}>
                                         <p className="fs-5">Title</p>
                                     </Col>
                                 </Row>
