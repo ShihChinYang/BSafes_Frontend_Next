@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux'
+import { useRouter } from "next/router";
 
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -22,9 +23,9 @@ import { debugLog, PostCall, convertUint8ArrayToBinaryString, getBrowserInfo, ar
 import { putS3Object } from "../lib/s3Helper";
 import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryString, encryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync } from "../lib/crypto";
 import { rotateImage, downScaleImage } from '../lib/wnImage';
-import { products, productIdDelimiter } from "../lib/productID";
+import { products } from "../lib/productID";
 
-import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage } from "../reduxStore/pageSlice";
+import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage, setDraftInterval } from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 
 let Excalidraw = null;
@@ -56,13 +57,13 @@ let FontsConfig = null;
 export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null, drawingImageDone = null, drawingSnapshot = null }) {
     const debugOn = false;
     const dispatch = useDispatch();
+    const router = useRouter();
 
     const editorRef = useRef(null);
     const monitorExcalidrawCallback = useRef();
     const bottomBarRectBottomRef = useRef();
 
     const ExcalidrawRef = useRef(null);
-    const [draftInterval, setDraftInterval] = useState(null);
     const [intervalState, setIntervalState] = useState(null);
     const froalaKey = useSelector(state => state.auth.froalaLicenseKey);
     const workspace = useSelector(state => state.container.workspace);
@@ -72,6 +73,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
     const draft = useSelector(state => state.page.draft);
     const contentType = useSelector(state => state.page.contentType) || 'WritingPage';
     const pageTemplate = useSelector(state => state.page.pageTemplate);
+    const draftInterval = useSelector(state => state.page.draftInterval);
     const productId = useSelector(state => state.product.currentProduct);
 
     debugLog(debugOn, `editor key: ${froalaKey}`);
@@ -312,7 +314,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             }
             if (draftInterval) {
                 clearInterval(draftInterval);
-                setDraftInterval(null);
+                dispatch(setDraftInterval(null));
                 setIntervalState(null);
             }
             setOriginalContent(null);
@@ -455,11 +457,11 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     }
 
                 }, 1000);
-                setDraftInterval(interval);
+                dispatch(setDraftInterval(interval));
                 break;
             case 'Stop':
                 clearInterval(draftInterval);
-                setDraftInterval(null);
+                dispatch(setDraftInterval(null));
                 break;
             default:
         }
@@ -749,7 +751,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     }
                     {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div style={{ position: "relative" }}>
-                            <div style={{ paddingTop: "7px", marginRight:"7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
+                            <div style={{ paddingTop: "7px", marginRight: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                                 {(productId !== "") && (!content || content === '<h2></h2>') &&
                                     <h6 className='m-0 text-secondary'>Title</h6>
                                 }

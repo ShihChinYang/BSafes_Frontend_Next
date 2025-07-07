@@ -18,6 +18,7 @@ const itemTokensStoreName = "itemTokensStore"
 const notebookPagesStoreName = "notebookPagesStore";
 const notebookTokensStoreName = "notebookTokensStore";
 const diaryPagesStoreName = "diaryPagesStore";
+const diaryTokensStoreName = "diaryTokensStore";
 const itemVersionsStoreName = "itemVersions";
 const s3ObjectsStoreName = "s3Objects";
 const draftStoreName = "draftStore"
@@ -32,7 +33,7 @@ function helloDB() {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = myIndexedDB.open(DBName, 4);
+    const request = myIndexedDB.open(DBName, 5);
     let upgradedNeeded = false;
 
 
@@ -62,6 +63,8 @@ function openDB() {
         db.createObjectStore(notebookTokensStoreName, { keyPath: "token" });
       if (!db.objectStoreNames.contains(diaryPagesStoreName))
         db.createObjectStore(diaryPagesStoreName, { keyPath: "month" });
+      if (!db.objectStoreNames.contains(diaryTokensStoreName))
+        db.createObjectStore(diaryTokensStoreName, { keyPath: "token" });
       if (!db.objectStoreNames.contains(itemVersionsStoreName))
         db.createObjectStore(itemVersionsStoreName, { keyPath: "itemId" });
       if (!db.objectStoreNames.contains(s3ObjectsStoreName))
@@ -343,12 +346,12 @@ function setNotebookPages(itemId, pages) {
   });
 }
 
-const findTheIndexForANumber = (numbersArray, theNumber, exact=false) => {
+const findTheIndexForANumber = (numbersArray, theNumber, exact = false) => {
   let newArrayStartingIndex = 0, newArrayEndingIndex = numbersArray.length - 1, midIndex;
   let theIndex = 0, found = false;
   while (1) {
     if (newArrayStartingIndex === newArrayEndingIndex) {
-      if(numbersArray[newArrayStartingIndex] === theNumber) found = true;
+      if (numbersArray[newArrayStartingIndex] === theNumber) found = true;
       break;
     }
     if ((newArrayStartingIndex + 1) === newArrayEndingIndex) {
@@ -373,9 +376,9 @@ const findTheIndexForANumber = (numbersArray, theNumber, exact=false) => {
     } else {
       theIndex = newArrayStartingIndex + 1;
     }
-    if(exact) return -1;
+    if (exact) return -1;
   } else {
-    if(exact) return theIndex;
+    if (exact) return theIndex;
   }
   if (theIndex) {
     if ((theNumber === numbersArray[theIndex - 1]) || (theNumber === numbersArray[theIndex]) || (theNumber === numbersArray[theIndex + 1])) {
@@ -551,100 +554,6 @@ function setNotebookTokenPages(token, pages) {
   });
 }
 
-function indexANotebookPage(itemId, pageNumber, tokens) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const originalTokens = await getItemTokens(itemId);
-      await setItemTokens(itemId, tokens);
-      let newTokens = [];
-      let deletedTokens = [];
-      if(originalTokens === null){
-        newTokens = tokens;
-      } else {
-        for (let i = 0; i < tokens.length; i++) {
-          let thisToken = tokens[i];
-          let found = false;
-          for (j = 0; j < originalTokens.length; j++) {
-            if (thisToken === originalTokens[j]) {
-              found = true;
-              originalTokens.splice(j, 1)
-            }
-          }
-          if (!found) {
-            newTokens.push(thisToken);
-          }
-        }
-        deletedTokens = originalTokens;
-      }
-      //Add new token index
-      for (let i = 0; i < newTokens.length; i++) {
-        let token = newTokens[i];
-        let pages = await getNotebookPagesByAToken(token);
-        if (pages) {
-          const theIndex = findTheIndexForANumber(pages, pageNumber);
-          if (theIndex !== -1) {
-            pages.splice(theIndex, 0, pageNumber);
-          } else {
-            continue;
-          }
-        } else {
-          pages = [pageNumber];
-        }
-        await setNotebookTokenPages(token, pages);
-      }
-      //Remove deleted token index
-      for (let i = 0; i < deletedTokens.length; i++) {
-        let token = deletedTokens[i];
-        let pages = await getNotebookPagesByAToken(token);
-        if (pages) {
-          const theIndex = findTheIndexForANumber(pages, pageNumber, true);
-          if (theIndex !== -1) {
-            pages.splice(theIndex, 1);
-            await setNotebookTokenPages(token, pages);
-          } else {
-            continue;
-          }
-        } else {
-          continue;
-        }
-      }
-      resolve();
-    } catch (error) {
-      console.log("indexANotebookPage failed: ", error);
-      reject();
-    }
-  })
-}
-
-function getNotebookPagesByTokens(itemId, tokens) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let token;
-      let pages = null;
-      for (let i = 0; i < 1; i++) {
-        token = tokens[i];
-        pages = await getNotebookPagesByAToken(token);
-      }
-      if (pages === null) {
-        resolve({ status: 'ok', hits: { hits:[], total: 0 } });
-        return;
-      }
-      const total = pages.length;
-      const hits = [];
-      const endingIndex = Math.min(total, 20);
-      for (let i = 0; i < endingIndex; i++) {
-        const pageItemId = itemId.replace("n:", "np:") + `:${pages[i]}`;
-        const item = await getAnItemVersionFromDB(pageItemId);
-        if (item) hits.push(item.item);
-      }
-      resolve({ status: 'ok', hits: { total, hits } });
-    } catch (error) {
-      console.log("getNotebookPagesByTokens failed: ", error);
-      reject();
-    }
-  });
-}
-
 function getDiaryPagesForAMonth(month) {
   return new Promise((resolve) => {
     const request = streamDB
@@ -743,6 +652,172 @@ function getDiaryContents(itemId, month) {
       resolve({ status: 'error', error });
     }
   })
+}
+
+function getDiaryPagesByAToken(token) {
+  return new Promise((resolve) => {
+    const request = streamDB
+      .transaction(diaryTokensStoreName)
+      .objectStore(diaryTokensStoreName)
+      .get(token);
+
+    request.onsuccess = (e) => {
+      //console.log("got chunk: ", e.target.result );
+      if (e.target.result) {
+        resolve(e.target.result.pages);
+      } else {
+        resolve(null);
+      }
+    }
+
+    request.onerror = (e) => {
+      console.log("getDiaryPagesByAToken failed: ", e.target.error);
+      reject();
+    }
+  })
+}
+
+function setDiaryTokenPages(token, pages) {
+  return new Promise((resolve) => {
+    const data = {
+      token,
+      pages
+    }
+    const request = streamDB
+      .transaction(diaryTokensStoreName, "readwrite")
+      .objectStore(diaryTokensStoreName)
+      .put(data);
+
+    request.onsuccess = (e) => {
+      console.log("setDiaryTokenPages succeeded ", e.target.result);
+      resolve();
+    }
+
+    request.onerror = (e) => {
+      console.log("setDiaryTokenPages failed: ", e.target.error);
+      if (e.target.error.name == "ConstraintError") {
+        resolve();
+      } else {
+        reject();
+      }
+    }
+  });
+}
+
+function indexAPage(itemType, itemId, pageNumber, tokens) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const originalTokens = await getItemTokens(itemId);
+      await setItemTokens(itemId, tokens);
+      let newTokens = [];
+      let deletedTokens = [];
+      if (originalTokens === null) {
+        newTokens = tokens;
+      } else {
+        for (let i = 0; i < tokens.length; i++) {
+          let thisToken = tokens[i];
+          let found = false;
+          for (j = 0; j < originalTokens.length; j++) {
+            if (thisToken === originalTokens[j]) {
+              found = true;
+              originalTokens.splice(j, 1)
+            }
+          }
+          if (!found) {
+            newTokens.push(thisToken);
+          }
+        }
+        deletedTokens = originalTokens;
+      }
+      let getPagesByAToken = null, setTokenPages = null;
+      if (itemType === "np") {
+        getPagesByAToken = getNotebookPagesByAToken;
+        setTokenPages = setNotebookTokenPages;
+      } else if (itemType === "dp") {
+        getPagesByAToken = getDiaryPagesByAToken;
+        setTokenPages = setDiaryTokenPages;
+      }
+      //Add new token index
+      for (let i = 0; i < newTokens.length; i++) {
+        let token = newTokens[i];
+        let pages = await getPagesByAToken(token);
+        if (pages) {
+          const theIndex = findTheIndexForANumber(pages, pageNumber);
+          if (theIndex !== -1) {
+            pages.splice(theIndex, 0, pageNumber);
+          } else {
+            continue;
+          }
+        } else {
+          pages = [pageNumber];
+        }
+        await setTokenPages(token, pages);
+      }
+
+      //Remove deleted token index
+      for (let i = 0; i < deletedTokens.length; i++) {
+        let token = deletedTokens[i];
+        let pages = await getPagesByAToken(token);
+        if (pages) {
+          const theIndex = findTheIndexForANumber(pages, pageNumber, true);
+          if (theIndex !== -1) {
+            pages.splice(theIndex, 1);
+            await setTokenPages(token, pages);
+          } else {
+            continue;
+          }
+        } else {
+          continue;
+        }
+      }
+      resolve();
+    } catch (error) {
+      console.log("indexAPage failed: ", error);
+      reject();
+    }
+  })
+}
+
+function getPagesByTokens(itemType, itemId, tokens) {
+  return new Promise(async (resolve, reject) => {
+    let getPagesByAToken = null;
+    if (itemType === "n") {
+      getPagesByAToken = getNotebookPagesByAToken;
+    } else if (itemType === "d") {
+      getPagesByAToken = getDiaryPagesByAToken;
+    }
+    try {
+      let token;
+      let pages = null;
+      for (let i = 0; i < 1; i++) {
+        token = tokens[i];
+        pages = await getPagesByAToken(token);
+      }
+      if (pages === null) {
+        resolve({ status: 'ok', hits: { hits: [], total: 0 } });
+        return;
+      }
+      const total = pages.length;
+      const hits = [];
+      const endingIndex = Math.min(total, 20);
+      for (let i = 0; i < endingIndex; i++) {
+        let pageItemId;
+        if (itemType === "n") {
+          pageItemId = itemId.replace("n:", "np:") + `:${pages[i]}`;
+        } else if (itemType === "d") {
+          let pageNumber = pages[i].toString();
+          let dateStr = pageNumber.substring(0, 4) + '-' + pageNumber.substring(4, 6) + '-' + pageNumber.substring(6);
+          pageItemId = itemId.replace("d:", "dp:") + `:${dateStr}`;
+        }
+        const item = await getAnItemVersionFromDB(pageItemId);
+        if (item) hits.push(item.item);
+      }
+      resolve({ status: 'ok', hits: { total, hits } });
+    } catch (error) {
+      console.log("getNotebookPagesByTokens failed: ", error);
+      reject();
+    }
+  });
 }
 
 function updateAnItemVersion(itemId, item) {
@@ -1434,12 +1509,22 @@ self.addEventListener("message", async (event) => {
             if (event.data.itemId.startsWith('np')) {
               try {
                 const pageNumber = parseInt(event.data.itemId.split(':').pop())
-                await indexANotebookPage(event.data.itemId, pageNumber, event.data.tokens);
+                await indexAPage("np", event.data.itemId, pageNumber, event.data.tokens);
+                result = { status: 'ok' };
+              } catch (error) {
+                result = { status: 'error', error }
+              }
+            } else if (event.data.itemId.startsWith('dp')) {
+              try {
+                const dateParts = event.data.itemId.split(':').pop().split("-");
+                const pageNumber = parseInt(dateParts[0] + dateParts[1] + dateParts[2]);
+                await indexAPage("dp", event.data.itemId, pageNumber, event.data.tokens);
                 result = { status: 'ok' };
               } catch (error) {
                 result = { status: 'error', error }
               }
             }
+
             break;
           default:
             result = { status: 'error', error: "Invalid action." }
@@ -1486,22 +1571,26 @@ self.addEventListener("message", async (event) => {
             }
             break;
           case 'GET_PAGES_BY_TOKENS':
+            let itemType = ""
             if (event.data.container.startsWith('n')) {
-              try {
-                result = await getNotebookPagesByTokens(event.data.container, event.data.tokens);
-              } catch (error) {
-                result = { status: 'error', error }
-              }
+              itemType = "n";
+            } else if (event.data.container.startsWith('d')) {
+              itemType = "d";
+            }
+            try {
+              result = await getPagesByTokens(itemType, event.data.container, event.data.tokens);
+            } catch (error) {
+              result = { status: 'error', error }
             }
             break;
           default:
-            result = { status: 'error', error: "Invalid action." }
         }
-        port = event.ports[0];
-        port.postMessage({ type: "DATA", data: result });
         break;
       default:
+        result = { status: 'error', error: "Invalid action." }
     }
+    port = event.ports[0];
+    port.postMessage({ type: "DATA", data: result });
   }
 })
 

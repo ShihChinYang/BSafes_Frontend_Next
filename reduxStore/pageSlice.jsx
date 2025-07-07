@@ -43,7 +43,6 @@ const initialState = {
     itemKey: null,
     itemIV: null,
     tags: [],
-    tagsTokens:[],
     title: null,
     titleText: null,
     titleTokens:[],
@@ -90,6 +89,7 @@ const initialState = {
     draft: false,
     draftContentType: null,
     draftLoaded: false,
+    draftInterval: null,
     originalContent: null,
     contentType: '',
     contentEditorMode: 'ReadOnly',
@@ -366,6 +366,10 @@ const pageSlice = createSlice({
             state.activityErrorMessages[action.payload.type] = action.payload.error;
         },
         clearPage: (state, action) => {
+            if(state.draftInterval){
+                clearInterval(state.draftInterval);
+                state.draftInterval = null
+            }
             const stateKeys = Object.keys(initialState);
             for (let i = 0; i < stateKeys.length; i++) {
                 let key = stateKeys[i];
@@ -964,6 +968,9 @@ const pageSlice = createSlice({
         setS3SignedUrlForContentUpload: (state, action) => {
             state.S3SignedUrlForContentUpload = action.payload;
         },
+        setDraftInterval: (state, action) => {
+            state.draftInterval = action.payload;
+        },
         setDraft: (state, action) => {
             state.draft = true;
             state.draftContentType = action.payload.draftContentType;
@@ -1054,9 +1061,6 @@ const pageSlice = createSlice({
         setGenerateDrawingSnapshot: (state, action) => {
             state.generateDrawingSnapshot = action.payload;
         },
-        setTagsTokens:  (state, action) => {
-            state.tagsTokens = action.payload;
-        },
         setTitleTokens: (state, action) => {
             state.titleTokens = action.payload;
         },
@@ -1129,6 +1133,7 @@ export const {
     newCommentAdded,
     commentUpdated,
     setS3SignedUrlForContentUpload,
+    setDraftInterval,
     setDraft,
     clearDraft,
     loadDraft,
@@ -1166,7 +1171,6 @@ export const {
     setContentUploadProgress,
     setContentDownloadProgress,
     setGenerateDrawingSnapshot,
-    setTagsTokens,
     setTitleTokens,
 } = pageSlice.actions;
 
@@ -1743,24 +1747,20 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                     debugLog(debugOn, "setNavigationMode ...");
                                     dispatch(setNavigationMode(true));
                                     dispatch(setNavigationInSameContainer(false));
-                                    resolve();
-                                    return;
-                                }
-                                if (!data.navigationInSameContainer && (data.itemId.startsWith('np') || data.itemId.startsWith('dp'))) {
+                                } else if (!data.navigationInSameContainer && (data.itemId.startsWith('np') || data.itemId.startsWith('dp'))) {
                                     try {
                                         const container = await getContainerData(data.itemId);
                                         state = getState().page;
                                         if (data.itemId === state.activeRequest) {
                                             dispatch(containerDataFetched({ itemId: data.itemId, container }));
-                                            resolve();
                                         } else {
                                             reject("Aborted");
+                                            return;
                                         }
                                     } catch (error) {
                                         reject("Failed to get the container data!");
+                                        return;
                                     }
-                                } else {
-                                    reject("Failed to get a page item!!!");
                                 }
                             }
                             const { draftId, draftContentTypeId } = formDraftId(data.itemId);
@@ -3016,7 +3016,6 @@ export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async 
                 } else {
                     tagsTokens = tokenfieldToEncryptedTokensCBC(tags, searchKey, searchIV);
                 }
-                dispatch(setTagsTokens(tagsTokens))
                 if (!state.itemCopy) {
                     try {
                         itemKey = generateNewItemKey();

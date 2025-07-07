@@ -47,7 +47,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
     } : {}
 
     const onShowSearchBarClicked = (e) => {
-        if (workspace && workspace.startsWith("d:")) {
+        if (false/*workspace && workspace.startsWith("d:")*/) {
             setShowFeatureNotAvailableForDemoToast(true);
         } else {
             setShowSearchBar(true);

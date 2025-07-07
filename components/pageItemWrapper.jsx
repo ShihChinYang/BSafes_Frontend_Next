@@ -11,7 +11,7 @@ import format from "date-fns/format";
 import BSafesStyle from '../styles/BSafes.module.css'
 
 import { clearContainer, initContainer, initWorkspaceThunk, changeContainerOnly, clearItems, listItemsThunk, setWorkspaceKeyReady, setStartDateValue, setDiaryContentsPageFirstLoaded, setTurningPage } from '../reduxStore/containerSlice';
-import { abort, clearPage, initPage, setChangingPage, setContainerData, setPageItemId, setPageStyle, decryptPageItemThunk, getPageItemThunk, getPageCommentsThunk } from "../reduxStore/pageSlice";
+import { abort, clearPage, initPage, setChangingPage, setContainerData, setPageItemId, setPageStyle, decryptPageItemThunk, getPageItemThunk, setDraftInterval } from "../reduxStore/pageSlice";
 
 import { debugLog } from "../lib/helper";
 
@@ -47,6 +47,7 @@ const PageItemWrapper = ({ itemId, children }) => {
   const space = useSelector(state => state.page.space);
   const container = useSelector(state => state.page.container);
   const itemCopy = useSelector(state => state.page.itemCopy);
+  const draftInterval = useSelector(state => state.page.draftInterval);
 
   debugLog(debugOn, "aborted: ", aborted);
   debugLog(debugOn, "itemId: ", itemId);
