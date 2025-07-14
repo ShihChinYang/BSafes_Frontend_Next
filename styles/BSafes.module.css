@@ -322,10 +322,28 @@
 /*--****** Container *******/
 /*--**** Container general */
 .containerTitleLabel {
-  min-height: 120px;
+  min-height: 80px;
   border-radius: 5px;
   background-color: white;
   padding: 10px 20px 10px 20px;
+}
+
+@media only screen and (min-width: 400px) {
+  .containerTitleLabel {
+    min-height: 100px;
+    border-radius: 5px;
+    background-color: white;
+    padding: 10px 20px 10px 20px;
+  }
+}
+
+@media only screen and (min-width: 560px) {
+  .containerTitleLabel {
+    min-height: 120px;
+    border-radius: 5px;
+    background-color: white;
+    padding: 10px 20px 10px 20px;
+  }
 }
 
 .containerControlPanel {
@@ -356,29 +374,16 @@
   color: white;
 }
 
-.pagePanel,
-.containerCoverPanel,
-.containerContentsPanel,
-.folderPanel,
-.notebookPanel,
-.diaryPanel,
-.boxPanel {
-  position: relative;
-  max-width: 1024px;
-  min-height: 600px;
-  padding-bottom: 48px;
-  margin: auto
+.pagePanel {
+    position: relative;
+    max-width: 1024px;
+    min-height: 600px;
+    padding-bottom: 48px;
+    margin: auto
 }
 
 @media only screen and (min-width: 400px) {
-
-  .pagePanel,
-  .containerCoverPanel,
-  .containerContentsPanel,
-  .folderPanel,
-  .notebookPanel,
-  .diaryPanel,
-  .boxPanel {
+  .pagePanel {
     position: relative;
     min-height: 640px;
     padding-bottom: 48px;
@@ -386,14 +391,7 @@
 }
 
 @media only screen and (min-width: 560px) {
-
-  .pagePanel,
-  .containerCoverPanel,
-  .containerContentsPanel,
-  .folderPanel,
-  .notebookPanel,
-  .diaryPanel,
-  .boxPanel {
+  .pagePanel {
     position: relative;
     min-height: 975px;
     padding-bottom: 48px;
@@ -401,14 +399,7 @@
 }
 
 @media only screen and (min-width: 992px) {
-
-  .pagePanel,
-  .containerCoverPanel,
-  .containerContentsPanel,
-  .folderPanel,
-  .notebookPanel,
-  .diaryPanel,
-  .boxPanel {
+  .pagePanel {
     position: relative;
     min-height: 975px;
     padding-bottom: 48px;
@@ -416,18 +407,26 @@
 }
 
 @media only screen and (min-width: 1200px) {
-
-  .pagePanel,
-  .containerCoverPanel,
-  .containerContentsPanel,
-  .folderPanel,
-  .notebookPanel,
-  .diaryPanel,
-  .boxPanel {
+  .pagePanel
+ {
     position: relative;
     min-height: 1100px;
     padding-bottom: 48px;
   }
+}
+
+.containerCoverPanel,
+.containerContentsPanel,
+.folderPanel,
+.notebookPanel,
+.diaryPanel,
+.boxPanel {
+  position: relative;
+  width: 100%;
+  max-width: 1024px;
+  aspect-ratio: 3/4;
+  padding-bottom: 48px;
+  margin: auto
 }
 
 .containerOpenBtn {

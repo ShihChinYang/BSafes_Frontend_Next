@@ -138,15 +138,15 @@ export default function NotebookCoverCommon({ demo = false }) {
                         {router.query.itemId && !router.query.itemId.startsWith(`n:${productIdDelimiter}`) &&
                             <Row>
                                 <Col lg={{ span: 10, offset: 1 }}>
-                                    <div className={`${BSafesStyle.notebookPanel} ${BSafesStyle.notebookCoverPanel} ${BSafesStyle.containerCoverPanel}`}>
+                                    <div className={`${BSafesStyle.notebookPanel} ${BSafesStyle.notebookCoverPanel}`}>
                                         <ItemTopRows />
-                                        <br />
-                                        <br />
-                                        <Row className="justify-content-center">
-                                            <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
-                                                <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
-                                            </Col>
-                                        </Row>
+                                        <div className="mt-sm-3 mt-md-5 mt-lg-5">
+                                            <Row className="pt-sm-3 pt-md-3 pt-lg-5 justify-content-center">
+                                                <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
+                                                    <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
+                                                </Col>
+                                            </Row>
+                                        </div>
                                         <br />
                                         <Row>
                                             <Col>
@@ -180,6 +180,6 @@ export default function NotebookCoverCommon({ demo = false }) {
                 </ContentPageLayout>
                 <Scripts />
             </div>
-        </div>
+        </div >
     )
 }

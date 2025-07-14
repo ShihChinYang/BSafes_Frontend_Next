@@ -46,7 +46,7 @@ export default function NotebookContentsCommon({ demo = false }) {
     
     let panelStyle = "";
     if(productId === ""){
-        panelStyle = `${BSafesStyle.pagePanel} ${BSafesStyle.notebookPanel} ${pageStyle}`;
+        panelStyle = `${BSafesStyle.pagePanel} ${pageStyle}`;
     } else {
         panelStyle = `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
     }

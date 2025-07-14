@@ -147,13 +147,13 @@ export default function DiaryCoverCommon({ demo = false }) {
                                     {
                                         <div className={`${BSafesStyle.diaryPanel} ${BSafesStyle.diaryCoverPanel} ${BSafesStyle.containerCoverPanel}`}>
                                             <ItemTopRows />
-                                            <br />
-                                            <br />
-                                            <Row className="justify-content-center">
-                                                <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
-                                                    <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
-                                                </Col>
-                                            </Row>
+                                            <div className="mt-sm-3 mt-md-5 mt-lg-5">
+                                                <Row className="pt-sm-3 pt-md-3 pt-lg-5 justify-content-center">
+                                                    <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
+                                                        <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
+                                                    </Col>
+                                                </Row>
+                                            </div>
                                             <br />
                                             <Row>
                                                 <Col>
@@ -169,8 +169,6 @@ export default function DiaryCoverCommon({ demo = false }) {
                         {router.query.itemId && router.query.itemId.startsWith(`d:${productIdDelimiter}`) &&
                             <div className={`${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Cover`]}`}>
                                 <ItemTopRows />
-                                <br />
-                                <br />
                                 <Row className="justify-content-center">
                                     <div className={`${BSafesProductsStyle[`${productId}_CoverTitle`]}`}>
                                         <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
