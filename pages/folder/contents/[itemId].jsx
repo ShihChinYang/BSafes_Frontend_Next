@@ -148,7 +148,7 @@ export default function FolderContents() {
                     <TopControlPanel onCoverClicked={handleCoverClicked} onGotoFirstItem={handleGoToFirstItem} onGotoLastItem={handleGoToLastItem} onSubmitSearch={handleSubmitSearch} onCancelSearch={handleCancelSearch}></TopControlPanel>
                     <Row>
                         <Col lg={{ span: 10, offset: 1 }}>
-                            <div className={`${BSafesStyle.pagePanel} ${BSafesStyle.folderPanel}`}>
+                            <div className={`${BSafesStyle.pagePanel}`}>
                                 <br />
                                 <br />
                                 <p className='fs-1 text-center'>Contents</p>

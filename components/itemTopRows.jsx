@@ -24,7 +24,7 @@ import FeatureNotAvailableForDemoToast from "./featureNotAvailabeForDemoToast";
 import { clearItemVersions, getItemVersionsHistoryThunk, saveTagsThunk } from "../reduxStore/pageSlice";
 
 import { getItemLink } from "../lib/bSafesCommonUI";
-import { productIdDelimiter } from "../lib/productID";
+import { products } from "../lib/productID";
 
 export default function ItemTopRows() {
     const dispatch = useDispatch();
@@ -35,7 +35,6 @@ export default function ItemTopRows() {
     const workspaceSearchKey = useSelector(state => state.container.searchKey);
     const workspaceSearchIV = useSelector(state => state.container.searchIV);
 
-    const itemId = useSelector(state => state.page.id);
     const oldVersion = useSelector(state => state.page.oldVersion);
     const activity = useSelector(state => state.page.activity);
     const tagsState = useSelector(state => state.page.tags);
@@ -47,11 +46,6 @@ export default function ItemTopRows() {
     const [versionsHistoryModalOpened, setVersionsHistoryModalOpened] = useState(false);
     const [showFeatureNotAvailableForDemoToast, setShowFeatureNotAvailableForDemoToast] = useState(false);
     
-    /*let productId = "";
-    if (itemId && itemId.split(":")[1].startsWith(`${productIdDelimiter}`)) {
-        productId = itemId.split(productIdDelimiter)[1];
-    }*/
-
     const handleChange = (tags) => {
         setTags(tags);
         if (!showTagsConfirmButton) setShowTagsConfirmButton(true);

@@ -211,16 +211,16 @@ export default function Box() {
                         <br />
                         <Row>
                             <Col lg={{ span: 10, offset: 1 }}>
-                                <div className={`${BSafesStyle.boxPanel} ${BSafesStyle.boxCoverPanel} ${BSafesStyle.containerCoverPanel}`}>
+                                <div className={`${BSafesStyle.boxPanel} ${BSafesStyle.boxCoverPanel}`}>
                                     <ItemTopRows />
-                                    <br />
-                                    <br />
                                     <TurningPageControls cover={true} onNextClicked={gotoNextItem} onPreviousClicked={gotoPreviousItem} showAlert={endOfContainer} alertClosed={() => setEndOfContainer(false)} />
-                                    <Row className="justify-content-center">
-                                        <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
-                                            <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
-                                        </Col>
-                                    </Row>
+                                    <div className="mt-sm-3 mt-md-5 mt-lg-5">
+                                        <Row className="pt-sm-3 pt-md-3 pt-lg-5 justify-content-center">
+                                            <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
+                                                <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
+                                            </Col>
+                                        </Row>
+                                    </div>
                                     <br />
                                     <Row>
                                         <Col>

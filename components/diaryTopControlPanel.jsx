@@ -15,6 +15,7 @@ import FeatureNotAvailableForDemoToast from "./featureNotAvailabeForDemoToast";
 
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
+import { products } from '../lib/productID';
 
 export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", startDate, setStartDate, showListIcon = false, showSearchIcon = false, handleSearch, onCoverClicked, onContentsClicked, onSubmitSearch = null, onCancelSearch = null }) {
     const router = useRouter();
@@ -23,12 +24,14 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
     const [showSearchBar, setShowSearchBar] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [showFeatureNotAvailableForDemoToast, setShowFeatureNotAvailableForDemoToast] = useState(false);
-    const workspace = useSelector(state => state.container.workspace);
     const productId = useSelector(state => state.product.currentProduct);
-
+    let theProduct = {};
+    if(productId !== ""){
+        theProduct = products[productId];
+    }
     let controlPanelStyle = "";
     let searchPanelStyle = "";
-    if (productId === "") {
+    if ((productId === "") || theProduct.fixedSize === undefined) {
         controlPanelStyle = BSafesStyle.containerControlPanel;
         searchPanelStyle = BSafesStyle.containerSearchPanel;
     } else {

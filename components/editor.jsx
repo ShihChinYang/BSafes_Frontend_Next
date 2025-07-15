@@ -706,12 +706,12 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                         <>
                             <Row>
                                 <Col xs={6}>
-                                    {(productId === "") && (editorId === 'title' && (!content || (content === '<h2></h2>'))) && <h6 className='m-0 text-secondary'>Title</h6>}
+                                    {((productId === "")||(product.fixedSize === undefined)) && (editorId === 'title' && (!content || (content === '<h2></h2>'))) && <h6 className='m-0 text-secondary'>Title</h6>}
                                     {(editorId === 'content' && content === null) && <div className="px-3 pt-1"><h6 className='m-0 text-secondary'>Write {showDrawIcon ? `or Draw` : ``}</h6></div>}
                                 </Col>
                                 <Col xs={6}>
                                     <div className={`${editorId === "content" ? "px-3 pt-1" : ""}`}>
-                                        {(editorId === "content" || (productId === "")) && showWriteIcon && <OverlayTrigger
+                                        {(editorId === "content" || ((productId === "")||(product.fixedSize === undefined))) && showWriteIcon && <OverlayTrigger
                                             placement="top"
                                             delay={{ show: 250, hide: 400 }}
                                             overlay={(props) => (
@@ -752,13 +752,13 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     {(editorId === 'title' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div style={{ position: "relative" }}>
                             <div style={{ paddingTop: "7px", marginRight: "7px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
-                                {(productId !== "") && (!content || content === '<h2></h2>') &&
+                                {((productId !== "") && (product.fixedSize)) && (!content || content === '<h2></h2>') &&
                                     <h6 className='m-0 text-secondary'>Title</h6>
                                 }
                                 <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
                                 </div>
                             </div>
-                            {showPen && editable && productId !== "" && showWriteIcon &&
+                            {showPen && editable && productId !== "" && product.fixedSize && showWriteIcon &&
                                 <OverlayTrigger
                                     placement="top"
                                     delay={{ show: 250, hide: 400 }}

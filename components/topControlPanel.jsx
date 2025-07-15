@@ -16,7 +16,7 @@ import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 import NewItemModal from "./newItemModal";
 
 import { debugLog } from "../lib/helper";
-import { productIdDelimiter } from "../lib/productID";
+import { products } from "../lib/productID";
 
 import { createANewItemThunk, clearNewItem, selectItem, clearReoloadAPage, setItemTrashed } from "../reduxStore/containerSlice";
 import { getItemLink, isItemAContainer } from "../lib/bSafesCommonUI";
@@ -55,10 +55,13 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     const reloadAPage = useSelector(state => state.container.reloadAPage);
     const itemTrashed = useSelector(state => state.container.itemTrashed);
     const productId = useSelector(state=>state.product.currentProduct);
-
+    let theProduct = {};
+    if(productId !== ""){
+        theProduct = products[productId];
+    }
     let controlPanelStyle = "";
     let searchPanelStyle = "";
-    if (productId === "") {
+    if ((productId === "") || (theProduct.fixedSize === undefined)) {
         controlPanelStyle = BSafesStyle.containerControlPanel;
         searchPanelStyle = BSafesStyle.containerSearchPanel;
     } else {

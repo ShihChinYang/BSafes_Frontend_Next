@@ -982,10 +982,10 @@ export default function PageCommons() {
             <div className="pageCommons">
                 {!(contentType === 'DrawingPage' && contentEditorMode === "Writing") &&
                     <>
-                        {productId === "" ?
+                        {((productId === "") || product.fixedSize === undefined) ?
                             <Row className="justify-content-center">
                                 <Col sm="10">
-                                    <hr />
+                                    <hr className="mx-3"/>
                                 </Col>
                             </Row>
                             :
@@ -997,7 +997,7 @@ export default function PageCommons() {
                                 <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />
                             </div>
                         </Row>
-                        {productId === "" ?
+                        {((productId === "" || product.fixedSize === undefined)) ?
                             <Row className="justify-content-center mx-2">
                                 <Col sm="10">
                                     <hr />
@@ -1024,7 +1024,7 @@ export default function PageCommons() {
                             <div className="videos">
                                 <input ref={videoFilesInputRef} onChange={handleVideoFiles} type="file" accept="video/*" multiple className="d-none editControl" id="videos" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
-                                    <Col id="videos" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.videosDragDropZoneActive : BSafesStyle.videosDragDropZone}`}>
+                                    <Col id="videos" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} xs={{ span: 10, offset: 1 }} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.videosDragDropZoneActive : BSafesStyle.videosDragDropZone}`}>
                                         <Button id="videos" onClick={handleVideoButton} variant="link" className="text-dark btn btn-labeled">
                                             <h4><i id="videos" className="fa fa-video-camera fa-lg" aria-hidden="true"></i></h4>
                                         </Button>
@@ -1042,7 +1042,7 @@ export default function PageCommons() {
                             <div className="images">
                                 <input ref={imageFilesInputRef} onChange={handleImageFiles} type="file" multiple accept="image/*" className="d-none editControl" id="images" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
-                                    <Col id="images" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${imagesDragActive ? BSafesStyle.imagesDragDropZoneActive : BSafesStyle.imagesDragDropZone}`}>
+                                    <Col id="images" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} xs={{ span: 10, offset: 1 }} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${imagesDragActive ? BSafesStyle.imagesDragDropZoneActive : BSafesStyle.imagesDragDropZone}`}>
                                         <Button id="images" onClick={handleImageButton} variant="link" className="text-dark btn btn-labeled">
                                             <h4><i id="images" className="fa fa-picture-o fa-lg" aria-hidden="true"></i></h4>
                                         </Button>
@@ -1060,7 +1060,7 @@ export default function PageCommons() {
                             <div className="audios">
                                 <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/mp3, audio/wav" multiple className="d-none editControl" id="audios" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
-                                    <Col id="audios" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.audiosDragDropZoneActive : BSafesStyle.audiosDragDropZone}`}>
+                                    <Col id="audios" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} xs={{ span: 10, offset: 1 }} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.audiosDragDropZoneActive : BSafesStyle.audiosDragDropZone}`}>
                                         <Button id="audios" onClick={handleAudioButton} variant="link" className="text-dark btn btn-labeled">
                                             <h4><i id="audios" className="fa fa-volume-up fa-lg" aria-hidden="true"></i></h4>
                                         </Button>
@@ -1078,7 +1078,7 @@ export default function PageCommons() {
                             <div className="attachments">
                                 <input ref={attachmentsInputRef} onChange={handleAttachments} type="file" multiple className="d-none editControl" id="attachments" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
-                                    <Col id="attachments" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${attachmentsDragActive ? BSafesStyle.attachmentsDragDropZoneActive : BSafesStyle.attachmentsDragDropZone}`}>
+                                    <Col id="attachments" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} xs={{ span: 10, offset: 1 }} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${attachmentsDragActive ? BSafesStyle.attachmentsDragDropZoneActive : BSafesStyle.attachmentsDragDropZone}`}>
                                         <Button id="attachments" onClick={handleAttachmentButton} variant="link" className="text-dark btn btn-labeled">
                                             <h4><i id="attachments" className="fa fa-paperclip fa-lg" aria-hidden="true"></i></h4>
                                         </Button>

@@ -1,23 +1,35 @@
 /*--- Classic ---*/
 ._TagsLable {
-    margin-top:2px;
+    margin-top: 2px;
     font-size: 2.0em;
 }
+
 ._TagsInput {
-    margin-top:6px;
-    margin-bottom:32px;
-    font-size:18px;
+    margin-top: 6px;
+    margin-bottom: 32px;
+    font-size: 18px;
 }
+
 /*--- End of Classic ---*/
+
 /*--- A001 ---*/
-.A001_Cover {
+.A001_General {
     position: relative;
-    width: 360px;
-    height: 480px;
-    background-color: brown;
-    margin: auto;
+    width: 100%;
+    max-width: 1024px;
+    aspect-ratio: 3/4;
+    padding-bottom: 48px;
+    margin: auto
+}
+
+.A001_Cover {
+    background-color: #d4a5a5;
     border-left: 30px solid #000;
     border-radius: 0 20px 20px 0;
+}
+
+.A001_Contents {
+    background-color: #fff;
 }
 
 .A001_CoverTitle {
@@ -25,6 +37,44 @@
     height: 48px;
     border-radius: 5px;
     background-color: white;
+}
+
+.A001_PagePanel {
+    background-color: #fff;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 48px;
+}
+
+.A001_TagsLable {
+    margin-top: 2px;
+    font-size: 2.0em;
+}
+
+.A001_TagsInput {
+    margin-top: 6px;
+    margin-bottom: 32px;
+    font-size: 18px;
+}
+
+.A001_TopControlPanel {
+    background-color: black;
+    margin: auto;
+    max-width: 360px;
+    min-height: 61px;
+}
+
+.A001_TopSearchPanel {
+    color: black;
+    background-color: white;
+    margin: auto;
+    max-width: 360px;
+    min-height: 61px;
+}
+
+.A001_RowXMargins {
+    margin-left: 1em;
+    margin-right: 1em;
 }
 
 /*--- End of A001 ---*/
@@ -42,43 +92,51 @@
     border-left: 30px solid #000;
     border-radius: 0 20px 20px 0;
 }
+
 .A002_Contents {
     background-color: #fff;
 }
+
 .A002_CoverTitle {
     width: 280px;
     height: 48px;
     border-radius: 5px;
     background-color: white;
 }
+
 .A002_PagePanel {
     background-color: #fff;
     margin-top: 20px;
     margin-bottom: 20px;
     padding-bottom: 48px;
 }
+
 .A002_TagsLable {
     font-size: inherit;
 }
+
 .A002_TagsInput {
-    margin-top:2px;
+    margin-top: 2px;
 }
+
 .A002_TopControlPanel {
     background-color: black;
     margin: auto;
     max-width: 360px;
     min-height: 61px;
 }
+
 .A002_TopSearchPanel {
-    color:black;
+    color: black;
     background-color: white;
     margin: auto;
     max-width: 360px;
     min-height: 61px;
 }
+
 .A002_RowXMargins {
     margin-left: 1em;
-    margin-right:1em;
+    margin-right: 1em;
 }
 
 /*--- End of A002 ---*/
@@ -96,43 +154,118 @@
     border-left: 30px solid #000;
     border-radius: 0 20px 20px 0;
 }
+
 .D001_Contents {
     background-color: #fff;
 }
+
 .D001_CoverTitle {
     width: 280px;
     height: 48px;
     border-radius: 5px;
     background-color: white;
 }
+
 .D001_PagePanel {
     background-color: #fff;
     margin-top: 20px;
     margin-bottom: 20px;
     padding-bottom: 48px;
 }
+
 .D001_TagsLable {
     font-size: inherit;
 }
+
 .D001_TagsInput {
-    margin-top:2px;
+    margin-top: 2px;
 }
+
 .D001_TopControlPanel {
     background-color: black;
     margin: auto;
     max-width: 360px;
     min-height: 61px;
 }
+
 .D001_TopSearchPanel {
-    color:black;
+    color: black;
     background-color: white;
     margin: auto;
     max-width: 360px;
     min-height: 61px;
 }
+
 .D001_RowXMargins {
     margin-left: 1em;
-    margin-right:1em;
+    margin-right: 1em;
+}
+
+/*--- End of D001 ---*/
+
+/*--- D002 ---*/
+.D002_General {
+    position: relative;
+    width: 100%;
+    max-width: 1024px;
+    aspect-ratio: 3/4;
+    padding-bottom: 48px;
+    margin: auto
+}
+
+.D002_Cover {
+    background-color: #d4a5a5;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+
+.D002_Contents {
+    background-color: #fff;
+}
+
+.D002_CoverTitle {
+    width: 280px;
+    height: 48px;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.D002_PagePanel {
+    background-color: #fff;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 48px;
+}
+
+.D002_TagsLable {
+    margin-top: 2px;
+    font-size: 2.0em;
+}
+
+.D002_TagsInput {
+    margin-top: 6px;
+    margin-bottom: 32px;
+    font-size: 18px;
+}
+
+.D002_TopControlPanel {
+    background-color: black;
+    margin: auto;
+    max-width: 360px;
+    min-height: 61px;
+}
+
+.D002_TopSearchPanel {
+    color: black;
+    background-color: white;
+    margin: auto;
+    max-width: 360px;
+    min-height: 61px;
+}
+
+.D002_RowXMargins {
+    margin-left: 1em;
+    margin-right: 1em;
 }
 
 /*--- End of D001 ---*/

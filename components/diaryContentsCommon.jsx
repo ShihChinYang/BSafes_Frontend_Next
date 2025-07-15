@@ -54,11 +54,14 @@ export default function DiaryContentsCommon({ demo = false }) {
 
     const productId = useSelector(state => state.product.currentProduct);
     const product = demo ? DiaryDemo : 'diary';
-
+    let theProduct = {};
+    if(productId !== ""){
+        theProduct = products[productId];
+    }
     let panelStyle = "";
     let dayColStyle = "col-xl-1 col-sm-2 col-3 offset-xl-1 offset-sm-1 offset-1";
     let titleColStyle = "col-xl-8 col-sm-7 col-6";
-    if (productId === "") {
+    if ((productId === "") || (theProduct.fixedSize === undefined)) {
         panelStyle = `${BSafesStyle.pagePanel} ${pageStyle}`;
     } else {
         panelStyle = `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`

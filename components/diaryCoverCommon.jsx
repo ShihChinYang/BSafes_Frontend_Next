@@ -20,7 +20,7 @@ import PageCommonControls from "./pageCommonControls";
 
 import { saveTitleThunk } from "../reduxStore/pageSlice";
 
-import { DiaryDemo, productIdDelimiter } from "../lib/productID";
+import { DiaryDemo, productIdDelimiter, products } from "../lib/productID";
 import { debugLog } from "../lib/helper";
 import { getCoverAndContentsLink, getDiaryPageIndexForToday } from "../lib/bSafesCommonUI";
 
@@ -46,8 +46,10 @@ export default function DiaryCoverCommon({ demo = false }) {
 
     const product = demo ? DiaryDemo : 'diary';
     let productId = ""
+    let theProduct = {};
     if (router.query.itemId && router.query.itemId.startsWith(`d:${productIdDelimiter}`)) {
         productId = router.query.itemId.split(productIdDelimiter)[1];
+        theProduct = products[productId];
     }
 
     const handlePenClicked = (editorId) => {
@@ -169,11 +171,13 @@ export default function DiaryCoverCommon({ demo = false }) {
                         {router.query.itemId && router.query.itemId.startsWith(`d:${productIdDelimiter}`) &&
                             <div className={`${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Cover`]}`}>
                                 <ItemTopRows />
-                                <Row className="justify-content-center">
-                                    <div className={`${BSafesProductsStyle[`${productId}_CoverTitle`]}`}>
-                                        <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
-                                    </div>
-                                </Row>
+                                <div className={theProduct.fixedSize ? "" : "mt-2 mt-sm-3 mt-md-5 mt-lg-5 pt-2 pt-sm-3 pt-md-5 pt-lg-5"}>
+                                    <Row className="justify-content-center">
+                                    <div className={theProduct.fixedSize ? `${BSafesProductsStyle[`${productId}_CoverTitle`]}` : `col-md-8 col-sm-10 col-10 ${BSafesStyle.containerTitleLabel}`}>
+                                            <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
+                                        </div>
+                                    </Row>
+                                </div>
                                 <br />
                                 <Row>
                                     <Col>

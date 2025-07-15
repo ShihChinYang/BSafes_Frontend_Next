@@ -17,7 +17,7 @@ import PaginationControl from "./paginationControl";
 
 import { listItemsThunk, searchItemsThunk, getFirstItemInContainer, getLastItemInContainer } from "../reduxStore/containerSlice";
 import { setPageStyle } from "../reduxStore/pageSlice";
-import { NotebookDemo } from "../lib/productID";
+import { NotebookDemo, products } from "../lib/productID";
 import { debugLog } from "../lib/helper";
 
 
@@ -41,11 +41,14 @@ export default function NotebookContentsCommon({ demo = false }) {
     const pageItemId = useSelector(state => state.page.id);
     const pageStyle = useSelector(state => state.page.style);
     const productId = useSelector(state=>state.product.currentProduct);
-
+    let theProduct = {};
+    if(productId !== ""){
+        theProduct = products[productId];
+    }
     const product = demo ? NotebookDemo : 'notebook';
     
     let panelStyle = "";
-    if(productId === ""){
+    if((productId === "") || product.fixedSize === undefined){
         panelStyle = `${BSafesStyle.pagePanel} ${pageStyle}`;
     } else {
         panelStyle = `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`

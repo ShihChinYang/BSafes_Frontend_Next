@@ -22,7 +22,7 @@ import { setNavigationInSameContainer } from "../../reduxStore/containerSlice";
 import { saveTitleThunk, setChangingPage } from "../../reduxStore/pageSlice";
 
 import { debugLog } from "../../lib/helper";
-import { getCoverAndContentsLink, getAnotherItem} from "../../lib/bSafesCommonUI";
+import { getCoverAndContentsLink, getAnotherItem } from "../../lib/bSafesCommonUI";
 
 export default function Folder() {
     const debugOn = false;
@@ -37,13 +37,13 @@ export default function Folder() {
     const container = useSelector(state => state.page.container);
     const position = useSelector(state => state.page.position);
 
-    const workspaceKey = useSelector( state => state.container.workspaceKey);
+    const workspaceKey = useSelector(state => state.container.workspaceKey);
 
-    const workspaceSearchKey = useSelector( state => state.container.searchKey);
-    const workspaceSearchIV = useSelector( state => state.container.searchIV);
+    const workspaceSearchKey = useSelector(state => state.container.searchKey);
+    const workspaceSearchIV = useSelector(state => state.container.searchIV);
 
-    const activity = useSelector( state => state.page.activity);
-    const activityErrors = useSelector( state => state.page.activityErrors);
+    const activity = useSelector(state => state.page.activity);
+    const activityErrors = useSelector(state => state.page.activityErrors);
     const [editingEditorId, setEditingEditorId] = useState(null);
 
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
@@ -51,14 +51,14 @@ export default function Folder() {
 
     async function gotoAnotherItem(anotherItemNumber) {
         debugLog(debugOn, `gotoAnotherItem ${changingPage} ${pageItemId} ${container} ${position}`);
-        if(changingPage || !(pageItemId || !container || !position)) return;
+        if (changingPage || !(pageItemId || !container || !position)) return;
         setChangingPage(true);
         let anotherItemId, anotherItemLink = null;
-        
+
         const getAnotherItemLink = (itemId) => {
             const itemType = itemId.split(':')[0];
             let itemLink;
-            switch(itemType) {
+            switch (itemType) {
                 case 'b':
                     itemLink = '/box/' + itemId;
                     break;
@@ -75,26 +75,26 @@ export default function Folder() {
 
         switch (anotherItemNumber) {
             case '-1':
-                try{
+                try {
                     anotherItemId = await getAnotherItem('getPreviousItem', container, position, dispatch);
                     if (anotherItemId === 'EndOfContainer') {
                         setEndOfContainer(true);
                     } else {
-                        anotherItemLink = getAnotherItemLink(anotherItemId); 
+                        anotherItemLink = getAnotherItemLink(anotherItemId);
                     }
-                } catch(error) {
+                } catch (error) {
 
                 }
                 break;
             case '+1':
-                try{
+                try {
                     anotherItemId = await getAnotherItem('getNextItem', container, position, dispatch);
                     if (anotherItemId === 'EndOfContainer') {
                         setEndOfContainer(true);
                     } else {
-                        anotherItemLink = getAnotherItemLink(anotherItemId); 
+                        anotherItemLink = getAnotherItemLink(anotherItemId);
                     }
-                } catch(error) {
+                } catch (error) {
 
                 }
                 break;
@@ -122,27 +122,27 @@ export default function Folder() {
 
     const handlePenClicked = (editorId) => {
         debugLog(debugOn, `pen ${editorId} clicked`);
-        if(editorId === 'title') {
+        if (editorId === 'title') {
             setTitleEditorMode("Writing");
             setEditingEditorId("title");
-        } 
+        }
     }
 
     const handleContentChanged = (editorId, content) => {
         debugLog(debugOn, `editor-id: ${editorId} content: ${content}`);
-        
-        if(editingEditorId === "title") {
-            if(content !== titleEditorContent) {
+
+        if (editingEditorId === "title") {
+            if (content !== titleEditorContent) {
                 dispatch(saveTitleThunk(content, workspaceKey, workspaceSearchKey, workspaceSearchIV));
             } else {
                 setEditingEditorMode("ReadOnly");
                 setEditingEditorId(null);
             }
-        }  
+        }
     }
 
     const setEditingEditorMode = (mode) => {
-        switch(editingEditorId) {
+        switch (editingEditorId) {
             case 'title':
                 setTitleEditorMode(mode);
                 break;
@@ -150,7 +150,7 @@ export default function Folder() {
         }
     }
 
-    const handleWrite = () =>{
+    const handleWrite = () => {
         debugLog(debugOn, "handleWrite");
         setTitleEditorMode("Writing");
         setEditingEditorId("title");
@@ -172,69 +172,69 @@ export default function Folder() {
 
         const link = `/folder/contents/${pageItemId}`;
         router.push(link);
-            
+
     }
 
     const handleCoverClicked = () => {
-        if(!container) return;
+        if (!container) return;
         let newLink = getCoverAndContentsLink(container).converLink;
         router.push(newLink);
     }
 
     const handleContentsClicked = () => {
-        if(!container) return;
+        if (!container) return;
         let newLink = getCoverAndContentsLink(container).contentsLink;
         router.push(newLink);
     }
-    
-    
+
+
     useEffect(() => {
-        if(activity === 0) {
-            if((activityErrors === 0) && editingEditorId) {
+        if (activity === 0) {
+            if ((activityErrors === 0) && editingEditorId) {
                 setEditingEditorMode("ReadOnly");
                 setEditingEditorId(null);
-            } else if(editingEditorId) {
+            } else if (editingEditorId) {
                 setEditingEditorMode("Writing");
             }
-        } 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activity]);
 
     return (
         <div>
             <div className={BSafesStyle.pageBackground}>
                 <ContentPageLayout>
-                    <PageItemWrapper itemId={router.query.itemId}> 
+                    <PageItemWrapper itemId={router.query.itemId}>
                         <br />
                         <TopControlPanel onCoverClicked={handleCoverClicked} onContentsClicked={handleContentsClicked} ></TopControlPanel>
                         <br />
                         <Row>
-                            <Col lg={{span:10, offset:1}}>                       
-                            { 
-                                <div className={`${BSafesStyle.folderPanel} ${BSafesStyle.folderCoverPanel} ${BSafesStyle.containerCoverPanel}`}>
-                                    <div className={BSafesStyle.folderTab}>
-				                    </div>
-                                    <ItemTopRows />
-                                    <br />
-                                    <br />
-                                    <TurningPageControls cover={true} onNextClicked={gotoNextItem} onPreviousClicked={gotoPreviousItem} showAlert={endOfContainer} alertClosed={()=>setEndOfContainer(false)}/>
-                                    <Row className="justify-content-center">
-                                        <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
-                                            <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
-                                        </Col>
-                                    </Row>
-                                    <br />
-                                    <Row>
-                                        <Col>
-                                            <ContainerOpenButton handleOpen={handleOpen} />
-                                        </Col>
-                                    </Row>
-                                    <PageCommonControls showWriteBtn={false} isEditing={editingEditorId} onWrite={handleWrite} onSave={handleSave} onCancel={handleCancel} />
-                                </div>
-                            }
+                            <Col lg={{ span: 10, offset: 1 }}>
+                                {
+                                    <div className={`${BSafesStyle.folderPanel} ${BSafesStyle.folderCoverPanel}`}>
+                                       <div hidden className={BSafesStyle.folderTab}>
+                                       </div> 
+                                        <ItemTopRows />
+                                        <TurningPageControls cover={true} onNextClicked={gotoNextItem} onPreviousClicked={gotoPreviousItem} showAlert={endOfContainer} alertClosed={() => setEndOfContainer(false)} />
+                                        <div className="mt-sm-3 mt-md-5 mt-lg-5">
+                                            <Row className="pt-sm-3 pt-md-3 pt-lg-5 justify-content-center">
+                                                <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
+                                                    <Editor showWriteIcon={true} editorId="title" mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0)} />
+                                                </Col>
+                                            </Row>
+                                        </div>
+                                        <br />
+                                        <Row>
+                                            <Col>
+                                                <ContainerOpenButton handleOpen={handleOpen} />
+                                            </Col>
+                                        </Row>
+                                        <PageCommonControls showWriteBtn={false} isEditing={editingEditorId} onWrite={handleWrite} onSave={handleSave} onCancel={handleCancel} />
+                                    </div>
+                                }
                             </Col>
                         </Row>
-                    </PageItemWrapper> 
+                    </PageItemWrapper>
                 </ContentPageLayout>
                 <Scripts />
             </div>
