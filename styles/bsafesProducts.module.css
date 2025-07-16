@@ -1,3 +1,19 @@
+/*--- General ---*/
+._General {
+    position: relative;
+    width: 100%;
+    max-width: 1024px;
+    aspect-ratio: 3/4;
+    padding-bottom: 48px;
+    margin: auto
+}
+
+._RowXMargins {
+    margin-left: 1em;
+    margin-right: 1em;
+}
+/*--- End of General ---*/
+
 /*--- Classic ---*/
 ._TagsLable {
     margin-top: 2px;
@@ -13,68 +29,10 @@
 /*--- End of Classic ---*/
 
 /*--- A001 ---*/
-.A001_General {
-    position: relative;
-    width: 100%;
-    max-width: 1024px;
-    aspect-ratio: 3/4;
-    padding-bottom: 48px;
-    margin: auto
-}
-
 .A001_Cover {
     background-color: #d4a5a5;
     border-left: 30px solid #000;
     border-radius: 0 20px 20px 0;
-}
-
-.A001_Contents {
-    background-color: #fff;
-}
-
-.A001_CoverTitle {
-    width: 280px;
-    height: 48px;
-    border-radius: 5px;
-    background-color: white;
-}
-
-.A001_PagePanel {
-    background-color: #fff;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    padding-bottom: 48px;
-}
-
-.A001_TagsLable {
-    margin-top: 2px;
-    font-size: 2.0em;
-}
-
-.A001_TagsInput {
-    margin-top: 6px;
-    margin-bottom: 32px;
-    font-size: 18px;
-}
-
-.A001_TopControlPanel {
-    background-color: black;
-    margin: auto;
-    max-width: 360px;
-    min-height: 61px;
-}
-
-.A001_TopSearchPanel {
-    color: black;
-    background-color: white;
-    margin: auto;
-    max-width: 360px;
-    min-height: 61px;
-}
-
-.A001_RowXMargins {
-    margin-left: 1em;
-    margin-right: 1em;
 }
 
 /*--- End of A001 ---*/
@@ -140,6 +98,58 @@
 }
 
 /*--- End of A002 ---*/
+
+/*--- APxx Palette Jounral Series ---*/
+/*--- AP01 ---*/
+.AP01_Cover {
+    background-color: #d4a5a5;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of AP01 ---*/
+/*--- AP02 ---*/
+.AP02_Cover {
+    background-color: #e4c4a0;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of AP02 ---*/
+/*--- AP03 ---*/
+.AP03_Cover {
+    background-color: #e4d5a0;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of AP03 ---*/
+/*--- AP04 ---*/
+.AP04_Cover {
+    background-color: #a8c4a2;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of AP04 ---*/
+/*--- AP05 ---*/
+.AP05_Cover {
+    background-color: #a8c4d6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of AP05 ---*/
+/*--- AP06 ---*/
+.AP06_Cover {
+    background-color: #a8a8d6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of AP06 ---*/
+/*--- AP07 ---*/
+.AP07_Cover {
+    background-color: #c4a8d6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of AP07 ---*/
+/*--- End of APxx Palette Jounral Series ---*/
 
 /*--- D001 ---*/
 .D001_General {
@@ -269,3 +279,54 @@
 }
 
 /*--- End of D001 ---*/
+/*--- DPxx Palette Diary Series ---*/
+/*--- DP01 ---*/
+.DP01_Cover {
+    background-color: #d4a5a5;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of DP01 ---*/
+/*--- DP02 ---*/
+.DP02_Cover {
+    background-color: #e4c4a0;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of DP02 ---*/
+/*--- DP03 ---*/
+.DP03_Cover {
+    background-color: #e4d5a0;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of DP03 ---*/
+/*--- DP04 ---*/
+.DP04_Cover {
+    background-color: #a8c4a2;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of DP04 ---*/
+/*--- DP05 ---*/
+.DP05_Cover {
+    background-color: #a8c4d6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of DP05 ---*/
+/*--- DP06 ---*/
+.DP06_Cover {
+    background-color: #a8a8d6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of DP06 ---*/
+/*--- DP07 ---*/
+.DP07_Cover {
+    background-color: #c4a8d6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of DP07 ---*/
+/*--- End of APxx Palette Jounral Series ---*/

@@ -25,7 +25,7 @@ export default function DiaryPagePanel({pageStyle="", distance="", pageDate}) {
     if ((productId === "") || theProduct.fixedSize === undefined) {
         pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesStyle.pagePanel}`;
     } else {
-        pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_PagePanel`]} ${pageStyle}`;
+        pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_PagePanel`]} ${pageStyle}`;
     }
     
     return (

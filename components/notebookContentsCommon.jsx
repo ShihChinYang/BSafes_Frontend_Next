@@ -51,7 +51,7 @@ export default function NotebookContentsCommon({ demo = false }) {
     if((productId === "") || product.fixedSize === undefined){
         panelStyle = `${BSafesStyle.pagePanel} ${pageStyle}`;
     } else {
-        panelStyle = `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
+        panelStyle = `${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
     }
 
     const items = itemsState.map((item, index) =>

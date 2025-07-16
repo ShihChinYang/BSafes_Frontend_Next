@@ -169,7 +169,7 @@ export default function DiaryCoverCommon({ demo = false }) {
                             </Row>
                         }
                         {router.query.itemId && router.query.itemId.startsWith(`d:${productIdDelimiter}`) &&
-                            <div className={`${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Cover`]}`}>
+                            <div className={`${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_Cover`]}`}>
                                 <ItemTopRows />
                                 <div className={theProduct.fixedSize ? "" : "mt-2 mt-sm-3 mt-md-5 mt-lg-5 pt-2 pt-sm-3 pt-md-5 pt-lg-5"}>
                                     <Row className="justify-content-center">

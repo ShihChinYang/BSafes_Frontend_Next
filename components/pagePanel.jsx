@@ -21,7 +21,7 @@ export default function PagePanel() {
     if ((productId === "") || (theProduct.fixedSize === undefined)) {
         pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesStyle.pagePanel} ${pageStyle}`;
     } else {
-        pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_PagePanel`]} ${pageStyle}`;
+        pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_PagePanel`]} ${pageStyle}`;
     }
 
     return (

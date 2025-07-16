@@ -64,7 +64,7 @@ export default function DiaryContentsCommon({ demo = false }) {
     if ((productId === "") || (theProduct.fixedSize === undefined)) {
         panelStyle = `${BSafesStyle.pagePanel} ${pageStyle}`;
     } else {
-        panelStyle = `${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
+        panelStyle = `${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_Contents`]} ${pageStyle}`
         if(pageRef && pageRef.current) {
             const pageWidth = pageRef.current.clientWidth;
             const theProduct = products[productId];

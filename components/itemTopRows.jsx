@@ -98,9 +98,9 @@ export default function ItemTopRows() {
                             </Tooltip>
                         }
                     ><Button variant="link" className="text-dark p-0 pull-right"><i className="fa fa-question" aria-hidden="true"></i></Button></OverlayTrigger>
-                    <label className="mx-1 pull-right"><span><i className={`fa fa-tags ${BSafesProductsStyle[`${productId}_TagsLable`]}`} aria-hidden="true"></i></span></label>
+                    <label className="mx-1 pull-right"><span><i className={`fa fa-tags ${BSafesProductsStyle[`${productId}_TagsLable`] || BSafesProductsStyle[`_TagsLable`]}`} aria-hidden="true"></i></span></label>
                 </Col>
-                <Col xs="8" className={`${BSafesProductsStyle[`${productId}_TagsInput`]}`}>
+                <Col xs="8" className={`${BSafesProductsStyle[`${productId}_TagsInput`] || BSafesProductsStyle[`_TagsInput`]}`}>
                     {oldVersion ?
                         <TagsInput value={tags} onChange={handleChange} disabled />
                         :

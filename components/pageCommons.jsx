@@ -992,7 +992,7 @@ export default function PageCommons() {
                             <hr className="mx-3 my-0" />
 
                         }
-                        <Row className={`${BSafesProductsStyle[`${productId}_RowXMargins`]} justify-content-center`}>
+                        <Row className={`${BSafesProductsStyle[`_RowXMargins`]} justify-content-center`}>
                             <div className={product.fixedSize ? "" : "col-sm-10 col-12"}>
                                 <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />
                             </div>

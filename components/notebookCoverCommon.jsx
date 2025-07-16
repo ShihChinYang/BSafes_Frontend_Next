@@ -161,7 +161,7 @@ export default function NotebookCoverCommon({ demo = false }) {
                             </Row>
                         }
                         {router.query.itemId && router.query.itemId.startsWith(`n:${productIdDelimiter}`) &&
-                            <div className={`${BSafesProductsStyle[`${productId}_General`]} ${BSafesProductsStyle[`${productId}_Cover`]}`}>
+                            <div className={`${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_Cover`]}`}>
                                 <ItemTopRows />
                                 <div className={theProduct.fixedSize ? "" : "mt-1 mt-sm-3 mt-md-5 mt-lg-5 pt-1 pt-sm-3 pt-md-5 pt-lg-5"}>
                                     <Row className="justify-content-center">
