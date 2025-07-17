@@ -14,7 +14,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import BSafesStyle from '../../styles/BSafes.module.css'
 
 import { debugLog } from '../../lib/helper';
-import { products } from '../../lib/productID';
+import { products, getDemoUrl } from '../../lib/productID';
 import { setupDemo } from '../../lib/demoHelper';
 
 export default function AppPreivews() {
@@ -49,7 +49,7 @@ export default function AppPreivews() {
       setDemoReady(true);
       setTimeout(() => {
         debugLog(debugOn, `ProductId: ${productId}`);
-        let productLink = products[productId].demoUrl;
+        let productLink = getDemoUrl(productId); //products[productId].demoUrl;
         if (productLink) {
           router.push(productLink)
         }

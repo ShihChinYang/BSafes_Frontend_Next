@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 
-import { products } from "../../lib/productID";
+import { products, getDemoUrl } from "../../lib/productID";
 import { debugLog } from "../../lib/helper";
 
 export default function PRODUCT() {
@@ -13,7 +13,7 @@ export default function PRODUCT() {
     useEffect(() => {
         if (productId) {
             debugLog(debugOn, `ProductId: ${productId}`);
-            let productLink = products[productId].demoUrl;
+            let productLink = getDemoUrl(productId); //products[productId].demoUrl;
             if (productLink) {
                 router.push(productLink)
             }

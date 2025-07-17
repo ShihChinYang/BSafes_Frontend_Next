@@ -150,7 +150,189 @@
 }
 /*--- End of AP07 ---*/
 /*--- End of APxx Palette Jounral Series ---*/
-
+/*--- AFxx Fabric Jounral Series ---*/
+/*--- AF01 ---*/
+.AF01_Cover {
+    background-color: #d4a5a5;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/45-degree-fabric-dark.png");
+}
+/*--- End of AF01 ---*/
+/*--- AF02 ---*/
+.AF02_Cover {
+    background-color: #e4c4a0;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/45-degree-fabric-dark.png");
+}
+/*--- End of AF02 ---*/
+/*--- AF03 ---*/
+.AF03_Cover {
+    background-color: #e4d5a0;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/45-degree-fabric-dark.png");
+}
+/*--- End of AF03 ---*/
+/*--- AF04 ---*/
+.AF04_Cover {
+    background-color: #a8c4a2;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/45-degree-fabric-dark.png");
+}
+/*--- End of AF04 ---*/
+/*--- AF05 ---*/
+.AF05_Cover {
+    background-color: #a8c4d6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/45-degree-fabric-dark.png");
+}
+/*--- End of AF05 ---*/
+/*--- AF06 ---*/
+.AF06_Cover {
+    background-color: #a8a8d6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/45-degree-fabric-dark.png");
+}
+/*--- End of AF06 ---*/
+/*--- AF07 ---*/
+.AF07_Cover {
+    background-color: #c4a8d6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/45-degree-fabric-dark.png");
+}
+/*--- End of AF07 ---*/
+/*--- AF08 ---*/
+.AF08_Cover {
+    background-color: #000000;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/45-degree-fabric-light.png");
+}
+/*--- End of AF08 ---*/
+/*--- AF09 ---*/
+.AF09_Cover {
+    background-color: #ffffff;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/45-degree-fabric-dark.png");
+}
+/*--- End of AF09 ---*/
+/*--- End of AFxx Fabric Jounral Series ---*/
+/*--- ALxx Leather Jounral Series ---*/
+/*--- AL01 ---*/
+.AL01_Cover {
+    background-color: #8b0000;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/large-leather.png");
+}
+/*--- End of AL01 ---*/
+/*--- AL02 ---*/
+.AL02_Cover {
+    background-color: #d2691e;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/large-leather.png");
+}
+/*--- End of AL02 ---*/
+/*--- AL03 ---*/
+.AL03_Cover {
+    background-color: #daa520;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/large-leather.png");
+}
+/*--- End of AL03 ---*/
+/*--- AL04 ---*/
+.AL04_Cover {
+    background-color: #228b22;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/large-leather.png");
+}
+/*--- End of AL04 ---*/
+/*--- AL05 ---*/
+.AL05_Cover {
+    background-color: #191970;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/large-leather.png");
+}
+/*--- End of AL05 ---*/
+/*--- AL06 ---*/
+.AL06_Cover {
+    background-color: #4b0082;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/large-leather.png");
+}
+/*--- End of AL06 ---*/
+/*--- AL07 ---*/
+.AL07_Cover {
+    background-color: #663399;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/large-leather.png");
+}
+/*--- End of AL07 ---*/
+/*--- AL08 ---*/
+.AL08_Cover {
+    background-color: #000000;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/large-leather.png");
+}
+/*--- End of AL08 ---*/
+/*--- AL09 ---*/
+.AL09_Cover {
+    background-color: #ffffff;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/large-leather.png");
+}
+/*--- End of AL09 ---*/
+/*--- End of ALxx Leather Jounral Series ---*/
+/*--- ASxx Special Jounral Series ---*/
+/*--- AS01 ---*/
+.AS01_Cover {
+    background-color: #c9a9a6;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/gray-floral.png");
+}
+/*--- End of AS01 ---*/
+/*--- AS02 ---*/
+.AS02_Cover {
+    background-color: #6f8faf;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/foggy-birds.png");
+}
+/*--- End of AS02 ---*/
+/*--- AS03 ---*/
+.AS03_Cover {
+    background-color: #5f8575;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/food.png");
+}
+/*--- End of AS03 ---*/
+/*--- AS04 ---*/
+.AS04_Cover {
+    background-color: #988558;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/argyle.png");
+}
+/*--- End of AS04 ---*/
+/*--- End of ASxx Special Jounral Series ---*/
+/*--- AL01 ---*/
 /*--- D001 ---*/
 .D001_General {
     position: relative;
@@ -329,4 +511,4 @@
     border-radius: 0 20px 20px 0;
 }
 /*--- End of DP07 ---*/
-/*--- End of APxx Palette Jounral Series ---*/
+/*--- End of DPxx Palette Diary Series ---*/
