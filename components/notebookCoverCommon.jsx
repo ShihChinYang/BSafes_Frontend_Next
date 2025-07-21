@@ -52,6 +52,14 @@ export default function NotebookCoverCommon({ demo = false }) {
         theProduct = products[productId];
     }
 
+    let coverSticker = theProduct.coverSticker;
+    let stickerWidth, stickerMargin, stickerBottom;
+    if(coverSticker){
+        stickerWidth = theProduct.stickerWidth?`${theProduct.stickerWidth}%`:"30%";
+        stickerMargin = (theProduct.stickerMargin!== undefined)?`${theProduct.stickerMargin}%`:(theProduct.stickerWidth?`${(100-theProduct.stickerWidth)/2}%`:"35%");
+        stickerBottom = (theProduct.stickerBottom !== undefined)?`${theProduct.stickerBottom}%`:stickerMargin;
+    }
+
     const handlePenClicked = (editorId) => {
         debugLog(debugOn, `pen ${editorId} clicked`);
         if (editorId === 'title') {
@@ -177,6 +185,9 @@ export default function NotebookCoverCommon({ demo = false }) {
                                     </Col>
                                 </Row>
                                 <PageCommonControls showWriteBtn={false} isEditing={editingEditorId} onWrite={handleWrite} onSave={handleSave} onCancel={handleCancel} />
+                                {theProduct && theProduct.coverSticker && <div>
+                                    <img className={BSafesProductsStyle._coverSticker} style={{width:stickerWidth, bottom:stickerBottom, marginLeft:stickerMargin}} src={theProduct.coverSticker} />
+                                </div>}
                             </div>
                         }
 
