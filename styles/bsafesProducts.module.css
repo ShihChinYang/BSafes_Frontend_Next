@@ -2,11 +2,21 @@
 ._General {
     position: relative;
     width: 100%;
-    max-width: 1024px;
+    max-width: 768px;
     aspect-ratio: 3/4;
     padding-bottom: 48px;
     margin: auto
 }
+
+._PagePanelGeneral {
+    /*background-color:faf5f1*/
+    background-color: #fff;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 48px;
+  }
 
 ._RowXMargins {
     margin-left: 1em;
@@ -355,6 +365,42 @@
     border-radius: 0 20px 20px 0;
 }
 /*--- End of AS05 ---*/
+/*--- AS06 ---*/
+.AS06_Cover {
+    background-color: #F3F2ED;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/shutterstock_2594679019_cover.png");
+    background-size: cover;
+    background-position-x: center;
+    background-position-y: center;
+}
+/*--- End of AS06 ---*/
+/*--- AS07 ---*/
+.AS07_Cover {
+    background-color: #F3F2ED;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+    background-image: url("/images/covers/shutterstock_2559844481_cover.jpg");
+    background-size: cover;
+    background-position-x: center;
+    background-position-y: center;
+}
+/*--- End of AS07 ---*/
+/*--- AS08 ---*/
+.AS08_Cover {
+    background-color: #F3F2ED;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of AS08 ---*/
+/*--- AS09 ---*/
+.AS09_Cover {
+    background-color: #F3F2ED;
+    border-left: 30px solid #000;
+    border-radius: 0 20px 20px 0;
+}
+/*--- End of AS09 ---*/
 /*--- End of ASxx Special Jounral Series ---*/
 /*--- AL01 ---*/
 /*--- D001 ---*/

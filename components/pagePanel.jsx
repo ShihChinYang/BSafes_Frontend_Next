@@ -18,10 +18,10 @@ export default function PagePanel() {
         theProduct = products[productId];
     }
     let pagePanelStyle = "";
-    if ((productId === "") || (theProduct.fixedSize === undefined)) {
+    if ((productId === "")) {
         pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesStyle.pagePanel} ${pageStyle}`;
     } else {
-        pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_PagePanel`]} ${pageStyle}`;
+        pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_PagePanel`] || BSafesProductsStyle[`_PagePanelGeneral`]} ${pageStyle}`;
     }
 
     return (
