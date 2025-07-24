@@ -29,7 +29,7 @@ const BestSellingProduct = () => {
             </div>
           </div>
           <div className="row gy-4">
-            <div className="col-lg-4 col-md-6">
+            <div className="col-lg-4 col-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img double-img">
                   <Link legacyBehavior href="/test/product-thumb-bottom">
@@ -105,10 +105,8 @@ const BestSellingProduct = () => {
                 </div>
                 <span className="for-border" />
               </div>
-            </div>
-         
-           
-            <div className="col-lg-4 col-md-6">
+            </div>        
+            <div className="col-lg-4 col-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img double-img">
                   <Link legacyBehavior href="/test/product-thumb-bottom">
@@ -167,7 +165,7 @@ const BestSellingProduct = () => {
                 <span className="for-border" />
               </div>
             </div>
-            <div className="col-lg-4 col-md-6">
+            <div className="col-lg-4 col-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img">
                   <Link legacyBehavior href="/test/product-thumb-bottom">
@@ -221,7 +219,7 @@ const BestSellingProduct = () => {
                 <span className="for-border" />
               </div>
             </div>
-            <div className="col-lg-4 col-md-6">
+            <div className="col-lg-4 col-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img">
                   <Link legacyBehavior href="/test/product-thumb-bottom">
@@ -282,7 +280,7 @@ const BestSellingProduct = () => {
                 <span className="for-border" />
               </div>
             </div>
-            <div className="col-lg-4 col-md-6">
+            <div className="col-lg-4 col-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img double-img">
                   <Link legacyBehavior href="/test/product-thumb-bottom">
@@ -341,7 +339,7 @@ const BestSellingProduct = () => {
                 <span className="for-border" />
               </div>
             </div>
-            <div className="col-lg-4 col-md-6">
+            <div className="col-lg-4 col-6">
               <div className="product-card hover-btn">
                 <div className="product-card-img double-img">
                   <Link legacyBehavior href="/test/product-thumb-bottom">
