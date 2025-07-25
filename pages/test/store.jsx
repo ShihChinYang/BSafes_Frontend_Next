@@ -8,7 +8,8 @@ import BestSellingProduct from "../../components/beautico/components/Home/BestSe
 import FeatureProduct from "../../components/beautico/components/home2/FeatureProduct";
 import LatestArticle from "../../components/beautico/components/home2/LatestArticle";
 import { useCountdownTimer } from "../../components/beautico/hooks/useCountdownTimer";
-import { Nav } from "react-bootstrap";
+import ProductSeriesSlides from "../../components/productSeriesSlides"
+
 export default function Store() {
     const endTime = "2023-10-23";
     const { days, hours, minutes, seconds } = useCountdownTimer(endTime)
@@ -51,6 +52,18 @@ export default function Store() {
             prevEl: ".face-prev",
         },
     }
+    const bodyNav = {
+        navigation: {
+            nextEl: ".body-next",
+            prevEl: ".body-prev",
+        },
+    }
+    const hairNav = {
+        navigation: {
+            nextEl: ".hair-next",
+            prevEl: ".hair-prev",
+        },
+    }
     const makeupNav = {
         navigation: {
             nextEl: ".makeup-next",
@@ -61,6 +74,9 @@ export default function Store() {
         <div className="bsafesStore">
             <StoreLayout>
                 <MakeupSection />
+                <ProductSeriesSlides index={1} seriesName="Designers Series" items={["AS06", "AS07", "AS08", "AS09", "AS10", "AS11", "AS01", "AS02", "AS03", "AS04", "AS05"]}/>
+                <ProductSeriesSlides index={2} seriesName="Fabric Series" items={["AF08", "AF09", "AF01", "AF02", "AF03", "AF04", "AF05", "AF06", "AF07"]}/>
+                <ProductSeriesSlides index={3} seriesName="Leather Series" items={["AL08", "AL09", "AL01", "AL02", "AL03", "AL04", "AL05", "AL06", "AL07"]}/>
                 <BestSellingProduct />
                 <div className="banner-footer mb-110">
                     <div className="container-fluid p-0">
@@ -163,7 +179,7 @@ export default function Store() {
                             </div>
                         </div>
                     </div>
-                </div>  
+                </div>
                 <FeatureProduct />
                 <LatestArticle />
             </StoreLayout>
