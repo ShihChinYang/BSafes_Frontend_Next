@@ -1,9 +1,5 @@
-import { useMemo } from "react";
-import Link from "next/link";
-import { Navigation, Pagination } from 'swiper/modules';
-import { Swiper, SwiperSlide } from "swiper/react"
 import StoreLayout from "../../components/layouts/storeLayout";
-import MakeupSection from "../../components/beautico/components/Home/MakeupSection";
+import StoreTopSection from "../../components/storeTopSection";
 import BestSellingProduct from "../../components/beautico/components/Home/BestSellingProduct";
 import FeatureProduct from "../../components/beautico/components/home2/FeatureProduct";
 import LatestArticle from "../../components/beautico/components/home2/LatestArticle";
@@ -12,68 +8,11 @@ import ProductSeriesSlides from "../../components/productSeriesSlides"
 
 export default function Store() {
     const endTime = "2023-10-23";
-    const { days, hours, minutes, seconds } = useCountdownTimer(endTime)
-    const slideSettings = useMemo(() => {
-        return {
-            modules: [Navigation, Pagination],
-            slidesPerView: "auto",
-            spaceBetween: 30,
-            loop: true,
-            breakpoints: {
-                280: {
-                    slidesPerView: 1,
-                    spaceBetween: 15,
-                },
-                350: {
-                    slidesPerView: 2,
-                    spaceBetween: 15,
-                },
-                500: {
-                    slidesPerView: 3,
-                },
-                768: {
-                    slidesPerView: 4,
-                },
-                992: {
-                    slidesPerView: 4,
-                },
-                1200: {
-                    slidesPerView: 4,
-                },
-                1400: {
-                    slidesPerView: 4,
-                },
-            },
-        }
-    }, [])
-    const faceNav = {
-        navigation: {
-            nextEl: ".face-next",
-            prevEl: ".face-prev",
-        },
-    }
-    const bodyNav = {
-        navigation: {
-            nextEl: ".body-next",
-            prevEl: ".body-prev",
-        },
-    }
-    const hairNav = {
-        navigation: {
-            nextEl: ".hair-next",
-            prevEl: ".hair-prev",
-        },
-    }
-    const makeupNav = {
-        navigation: {
-            nextEl: ".makeup-next",
-            prevEl: ".makeup-prev",
-        },
-    }
+    
     return (
         <div className="bsafesStore">
             <StoreLayout>
-                <MakeupSection />
+                <StoreTopSection />
                 <ProductSeriesSlides index={1} seriesName="Designers Series" items={["AS06", "AS07", "AS08", "AS09", "AS10", "AS11", "AS01", "AS02", "AS03", "AS04", "AS05"]}/>
                 <ProductSeriesSlides index={2} seriesName="Fabric Series" items={["AF08", "AF09", "AF01", "AF02", "AF03", "AF04", "AF05", "AF06", "AF07"]}/>
                 <ProductSeriesSlides index={3} seriesName="Leather Series" items={["AL08", "AL09", "AL01", "AL02", "AL03", "AL04", "AL05", "AL06", "AL07"]}/>
