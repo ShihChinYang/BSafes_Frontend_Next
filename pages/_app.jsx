@@ -19,6 +19,7 @@ import '../styles/complianceBadge.css'
 import 'swiper/css'
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
 
 import { debugLog } from '../lib/helper';
 import { setServiceWorkerRegistered } from '../reduxStore/auth';
