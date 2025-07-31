@@ -6,21 +6,23 @@ const StoreTopSection = () => {
         <div className="makeup-section">
             <div className="container">
                 <div className="">
-                    <div className="row align-items-center justify-content-center g-0 gy-4">
+                    <div className="row  g-0 gy-4">
                         <div className="col-lg-6">
-                            <div className="makeup-content">
-                                <h2>Every BSafes Journal is its own app.</h2>
+                            <div className="p-2">
+                                <h1 className="display-3">One App per Journal for the AI age -- </h1>
+                                <p style={{fontSize:"1.5rem", lineHeight:"1.25"}}>Privacy + Creativity + Prodcutivity, Reimagined.</p>
                             </div>
                             {false &&
                                 <div className="makeup-img hover-img">
                                     <img src="/images/storeBanner_1.jpg" alt="" />
                                 </div>}
                         </div>
-                        {true &&
+                        {false &&
                             <div className="col-lg-6">
-                                <div className="makeup-content">
-                                <p>You can <strong>open multiple journal apps</strong> at once to <strong>write, doodle, draw, and add audio, video, or other files</strong>. → <em>Productivity</em></p>
-                                <p>Access your thoughts from any device, anytime. Everything is <strong>end-to-end encrypted</strong> to keep your privacy fully protected. → <em>Privacy</em></p>
+                                <div className="p-2">
+                                <p style={{fontSize:"1.05rem", lineHeight:"1.25"}} >You can <strong>open multiple journal apps</strong> at once to <strong>write, doodle, draw, and add audio, video, or other files</strong>. → <em>Productivity</em></p>
+                                <br/>
+                                <p style={{fontSize:"1.05rem", lineHeight:"1.25"}} >Access your thoughts from any device, anytime. Everything is <strong>end-to-end encrypted</strong> to keep your privacy fully protected. → <em>Privacy</em></p>
                                 </div>
                             </div>
                         }

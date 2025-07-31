@@ -5,7 +5,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 
 import { products } from "../lib/productID";
 
-export default function ProductSeriesSlides({ index, seriesName, items = ["AS01"] }) {
+export default function StoreProductSeriesSlides({ index, seriesName, items = ["AS01"] }) {
 
     const slideSettings = useMemo(() => {
         return {
@@ -95,7 +95,7 @@ export default function ProductSeriesSlides({ index, seriesName, items = ["AS01"
 
     return (
         <div>
-            <div className="face-product-section slider mt-25 mb-20">
+            <div className="face-product-section slider mt-25">
                 <div className="container-md container-fluid">
                     <div className="section-title2 style-4">
                         <h3>{seriesName}</h3>
