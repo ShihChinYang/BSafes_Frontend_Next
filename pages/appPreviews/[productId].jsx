@@ -85,7 +85,7 @@ export default function AppPreivews() {
                     <SwiperSlide key={13} className="swiper-slide">
                       <div className={BSafesStyle.appPreviewImageWrapper}>
                         <h2>Dusty Rose</h2>
-                        <p>It is beautiful, isn't it?</p>
+                        <p>{`It is beautiful, isn't it?`}</p>
                       </div>
                     </SwiperSlide>
                   </div>

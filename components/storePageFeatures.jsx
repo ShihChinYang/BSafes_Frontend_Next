@@ -45,7 +45,7 @@ const StorePageFeatures = () => {
 
 
     return (
-        <div className="top-selling-section mb-110 py-5" style={{backgroundColor:"#f8f6f1"}}>
+        <div className="top-selling-section pt-3 pb-5" style={{backgroundColor:"#f8f6f1"}}>
             <div className="container">
                 <div className="section-title3">
                     <h3>Creative Freedom <span>on Every Page</span></h3>

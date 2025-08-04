@@ -1,7 +1,7 @@
 import StoreLayout from "../../components/layouts/storeLayout";
 import StoreTopSection from "../../components/storeTopSection";
 import StoreJouralFeatures from "../../components/storeJouralFeatures";
-import StoreOneOfAKind from "../../components/storeOneOfAKind";
+import StoreWhyBSafes from "../../components/storeWhyBSafes";
 import StorePageFeatures from "../../components/storePageFeatures";
 import StoreFeaturesSection from "../../components/storeFeaturesSection";
 
@@ -20,6 +20,7 @@ export default function Store() {
                 <br/>
                 <StoreJouralFeatures/>
                 <StorePageFeatures/>
+                <StoreWhyBSafes/>
                 <StoreFeaturesSection/>
             </StoreLayout>
         </div>
