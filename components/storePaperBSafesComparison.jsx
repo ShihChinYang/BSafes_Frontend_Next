@@ -18,8 +18,8 @@ const StorePaperBSafesComparision = () => {
                                         <table className="table total-table2">
                                             <tbody>
                                                 <tr>
-                                                    <th>Paper Journals</th>
-                                                    <th>BSafes Journals</th>
+                                                    <th>Paper Notebooks</th>
+                                                    <th>BSafes Notebooks</th>
                                                 </tr>
                                                 <tr>
                                                     <td>Calming & tactile</td>
@@ -48,8 +48,8 @@ const StorePaperBSafesComparision = () => {
                             </div>
                             <div className="col-lg-6">
                                 <div className="px-5">
-                                    <h3>Each BSafes Journal is a Separate App</h3>
-                                    <p style={{ fontSize: "1.05rem", lineHeight: "1.25" }} >You can <strong>open multiple journal apps</strong> at once to <strong>write, doodle, draw, and add audio, video, or other files</strong>. → <em>Productivity</em></p>
+                                    <h3>Each BSafes Notebook is a Separate App</h3>
+                                    <p style={{ fontSize: "1.05rem", lineHeight: "1.25" }} >You can <strong>open multiple notebook apps</strong> at once to <strong>write, doodle, draw, and add audio, video, or other files</strong>. → <em>Productivity</em></p>
                                     <hr />
                                     <p style={{ fontSize: "1.05rem", lineHeight: "1.25" }} >Access your thoughts from any device, anytime. Everything is <strong>end-to-end encrypted</strong> to keep your privacy fully protected. → <em>Privacy</em></p>
                                     <hr />
