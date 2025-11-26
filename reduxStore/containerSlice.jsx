@@ -10,6 +10,7 @@ import { containerActivity } from '../lib/activities';
 import { getDemoWorkspaceInfo } from '../lib/demoHelper';
 import { readDataFromServiceWorkerDB } from '../lib/serviceWorkerDBHelper';
 
+import { setSignedUrlForBackup, backupAnItemVersionToS3 } from './productSlice';
 import { getTeamData } from './teamSlice';
 
 const debugOn = false;
@@ -295,7 +296,7 @@ const containerSlice = createSlice({
             state.searchKey = demoWorkspaceInfo.demoWorkspaceSearchKey;
             state.searchIV = demoWorkspaceInfo.demoWorkspaceSearchIV;
         },
-        setTurningPage:(state, action) => {
+        setTurningPage: (state, action) => {
             state.turningPage = action.payload;
         }
     }
@@ -370,6 +371,8 @@ export const createANewItemThunk = (data) => async (dispatch, getState) => {
                 debugLog(debugOn, data);
                 if (data.status === 'ok') {
                     debugLog(debugOn, `${addAction} succeeded`);
+                    dispatch(setSignedUrlForBackup(data.signedUrlForBackup));
+                    const backupPromise = backupAnItemVersionToS3(data.item, dispatch, getState);
                     dispatch(setNewItem(data.item))
                     resolve()
                 } else {
@@ -484,7 +487,7 @@ export const listItemsThunk = (data) => async (dispatch, getState) => {
                 pageNumber = 1;
                 selectedDiaryContentStartPosition = parseInt(startDate + '00');
                 selectedDiaryContentEndPosition = parseInt(startDate + '31');
-                if (!workspace.startsWith("d:")){
+                if (!workspace.startsWith("d:")) {
                     body = {
                         container: state.container,
                         size: 31,
@@ -500,7 +503,7 @@ export const listItemsThunk = (data) => async (dispatch, getState) => {
                         month: startDate
                     }
                 }
-                
+
             } else if (state.container.startsWith('f') || state.container.startsWith('b') || state.container.startsWith('t')) {
                 pageNumber = data.pageNumber;
                 body = {

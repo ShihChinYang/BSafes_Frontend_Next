@@ -4,7 +4,7 @@ const forge = require('node-forge');
 const DOMPurify = require('dompurify');
 
 import { setNavigationInSameContainer } from './containerSlice';
-import { setCurrentProduct } from './productSlice';
+import { setCurrentProduct, setSignedUrlForBackup } from './productSlice';
 
 import { getBrowserInfo, usingServiceWorker, convertBinaryStringToUint8Array, debugLog, PostCall, extractHTMLElementText, requestAppleReview } from '../lib/helper'
 import { generateNewItemKey, decryptBinaryString, encryptBinaryString, encryptLargeBinaryString, decryptChunkBinaryStringToBinaryStringAsync, decryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync, stringToEncryptedTokensCBC, stringToEncryptedTokensECB, tokenfieldToEncryptedArray, tokenfieldToEncryptedTokensCBC, tokenfieldToEncryptedTokensECB } from '../lib/crypto';
@@ -1738,6 +1738,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                 return;
                             }
                             if (result.item) {
+                                dispatch(setSignedUrlForBackup(result.signedUrlForBackup))
                                 await processResultItem(result);
                                 dispatch(setGetPageContentDone(true));
                                 await addItemToServiceWorkerDB(data.itemId, result.item);
@@ -2776,6 +2777,7 @@ async function createNewItemVersion(itemCopy, dispatch) {
             }).then(async data => {
                 debugLog(debugOn, data);
                 if (data.status === 'ok') {
+                    dispatch(setSignedUrlForBackup(data.signedUrlForBackup));
                     debugLog(debugOn, `createNewItemVersion succeeded`);
                     const params = {
                         table: 'itemVersions',
@@ -2827,7 +2829,7 @@ function createNewItemVersionForPage(itemCopy, dispatch) {
     })
 };
 
-function prepareAnIndexedPage(type, data, getState) {
+function prepareAnIndexedPageBackup(type, data, getState) {
     let itemIdPrefix;
     let itemType;
     let isContainer = false;
@@ -2948,10 +2950,11 @@ function prepareAnIndexedPage(type, data, getState) {
     return item;
 }
 
-function createANotebookPage(data, dispatch) {
+function createANotebookPage(data, dispatch, getState) {
     return new Promise(async (resolve, reject) => {
         const workspace = data.space;
         if (!workspace.startsWith("d:")) {
+            const backupItem = prepareAnIndexedPageBackup('NotebookPage', data, getState);
             PostCall({
                 api: '/memberAPI/createANotebookPage',
                 body: data,
@@ -2961,6 +2964,7 @@ function createANotebookPage(data, dispatch) {
 
                 if (result.status === 'ok') {
                     if (result.item) {
+                        dispatch(setSignedUrlForBackup(result.signedUrlForBackup));
                         const params = {
                             table: 'itemVersions',
                             key: result.item.id,
@@ -2997,10 +3001,11 @@ function createANotebookPage(data, dispatch) {
     });
 }
 
-function createADiaryPage(data, dispatch) {
+function createADiaryPage(data, dispatch, getState) {
     return new Promise(async (resolve, reject) => {
         const workspace = data.space;
         if (!workspace.startsWith("d:")) {
+            const backupItem = prepareAnIndexedPageBackup('DiaryPage', data, getState);
             PostCall({
                 api: '/memberAPI/createADiaryPage',
                 body: data,
@@ -3010,6 +3015,7 @@ function createADiaryPage(data, dispatch) {
 
                 if (result.status === 'ok') {
                     if (result.item) {
+                        dispatch(setSignedUrlForBackup(result.signedUrlForBackup));
                         const params = {
                             table: 'itemVersions',
                             key: result.item.id,
@@ -3073,7 +3079,7 @@ function createANewPage(dispatch, getState, pageState, newPageData, updatedState
 
         } else if (pageState.container.substring(0, 1) === 'n') {
             try {
-                item = await createANotebookPage(newPageData, dispatch);
+                item = await createANotebookPage(newPageData, dispatch, getState);
                 dispatch(newItemCreated({
                     ...updatedState,
                     itemCopy: item
@@ -3085,7 +3091,7 @@ function createANewPage(dispatch, getState, pageState, newPageData, updatedState
             }
         } else if (pageState.container.substring(0, 1) === 'd') {
             try {
-                item = await createADiaryPage(newPageData, dispatch);
+                item = await createADiaryPage(newPageData, dispatch, getState);
                 dispatch(newItemCreated({
                     ...updatedState,
                     itemCopy: item
