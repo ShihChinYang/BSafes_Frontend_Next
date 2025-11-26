@@ -2827,203 +2827,125 @@ function createNewItemVersionForPage(itemCopy, dispatch) {
     })
 };
 
-function prepareAnIndexedPage(type, data) {
-    return new Promise(async (resolve, reject) => {
-        const type = req.body.type;
-        let itemIdPrefix;
-        let itemType;
-        let isContainer = false;
-
-        switch (type) {
-            case 'Page':
-                itemIdPrefix = 'p:';
-                itemType = 'P';
-                break;
-            case 'Notebook':
-                itemIdPrefix = 'n:';
-                itemType = 'N';
-                isContainer = true;
-                break;
-            case 'NotebookPage':
-                itemIdPrefix = 'np:'
-                itemType = 'NP';
-                break;
-            case 'Diary':
-                itemIdPrefix = 'd:';
-                itemType = 'D';
-                isContainer = true;
-                break;
-            case 'DiaryPage':
-                itemIdPrefix = 'dp:'
-                itemType = 'DP';
-                break;
-            case 'Folder':
-                itemIdPrefix = 'f:';
-                itemType = 'F';
-                isContainer = true;
-                break;
-            case 'Box':
-                itemIdPrefix = 'b:';
-                itemType = 'B';
-                isContainer = true;
-                break;
-            default:
-                reject('Wrong type');
-        }
-
-        const createdTime = Date.now();
-        let owner = req.session.member.id;
-        let currentKeyVersion;
-        if (req.session.member.currentKeyVersion === 1) {
-            currentKeyVersion = 1;
-        } else {
-            currentKeyVersion = 3;
-        }
-
-        let id;
-        if (itemId) {
-            id = itemId;
-        } else {
-            id = itemIdPrefix + owner + ':' + currentKeyVersion + ':' + createdTime;
-        }
-        let container = req.body.targetContainer;
-        let displayName;
-        if (req.session.member.currentKeyVersion === 1) {
-            if (req.session.member.id.startsWith('m')) {
-                displayName = forge.util.decodeUtf8(ECBDecryptBinaryString(forge.util.decode64(req.session.member.memberName), bSafesDynamodDBKey));
-            } else {
-                displayName = req.session.member.displayName;
+function prepareAnIndexedPage(type, data, getState) {
+    let itemIdPrefix;
+    let itemType;
+    let isContainer = false;
+    switch (type) {
+        case 'NotebookPage':
+            itemIdPrefix = 'np:'
+            itemType = 'NP';
+            break;
+        case 'DiaryPage':
+            itemIdPrefix = 'dp:'
+            itemType = 'DP';
+            break;
+        default:
+            return { status: 'error', error: 'Invalid type.' };
+    }
+    const createdTime = Date.now();
+    const authState = getState().auth;
+    let owner = authState.memberId;
+    let currentKeyVersion;
+    if (authState.currentKeyVersion === 1) {
+        currentKeyVersion = 1;
+    } else {
+        currentKeyVersion = 3;
+    }
+    const id = data.itemId;
+    const container = data.container;
+    const displayName = authState.displayName;
+    let item = {
+        id: id,
+        version: 1,
+        owner: owner,
+        displayName: displayName,
+        createdTime: createdTime,
+        updatedBy: owner,
+        update: "creation",
+        keyVersion: currentKeyVersion,
+        keyEnvelope: data.keyEnvelope,
+        type: itemType,
+        space: data.space,
+        container: container,
+        position: 0,
+        videos: [],
+        audios: [],
+        images: [],
+        attachments: ["Zero"],
+        usage: {
+            totalItemSize: 0,
+            dbSize: 0,
+            addedSize: 0,
+            accumulatedContentObjects: {
+                "Zero": "Zero"
+            },
+            accumulatedS3ObjectsInContent: {
+                "Zero": "Zero"
+            },
+            accumulatedAttachments: {
+                "Zero": "Zero"
+            },
+            accumulatedVideos: {
+                "Zero": "Zero"
+            },
+            accumulatedAudios: {
+                "Zero": "Zero"
+            },
+            accumulatedGalleryImages: {
+                "Zero": "Zero"
             }
-        } else {
-            displayName = getDisplayName(owner);
         }
+    };
 
-        let thisObj = {
-            id: id,
-            version: 1,
-            owner: owner,
-            displayName: displayName,
-            createdTime: createdTime,
-            updatedBy: owner,
-            update: "creation",
-            keyVersion: currentKeyVersion,
-            keyEnvelope: req.body.keyEnvelope,
-            type: itemType,
-            space: req.body.space,
-            container: container,
-            position: isFeatureProduct ? createdTime * 1 : createdTime,
-            videos: [],
-            audios: [],
-            images: [],
-            attachments: ["Zero"],
-            usage: {
-                totalItemSize: 0,
-                dbSize: 0,
-                addedSize: 0,
-                accumulatedContentObjects: {
-                    "Zero": "Zero"
-                },
-                accumulatedS3ObjectsInContent: {
-                    "Zero": "Zero"
-                },
-                accumulatedAttachments: {
-                    "Zero": "Zero"
-                },
-                accumulatedVideos: {
-                    "Zero": "Zero"
-                },
-                accumulatedAudios: {
-                    "Zero": "Zero"
-                },
-                accumulatedGalleryImages: {
-                    "Zero": "Zero"
-                }
-            }
+    /*if (req.session.member.id.startsWith('m')) {
+        item.masterId = req.session.member.masterId;
+        item.memberName = req.session.member.memberName;
+    }*/
+
+    if (data.title) {
+        item.title = data.title;
+        item.titleTokens = JSON.parse(data.titleTokens);
+    }
+    if (data.tags) {
+        item.tags = JSON.parse(data.tags);
+        item.tagsTokens = JSON.parse(data.tagsTokens);
+    }
+    if (data.content) {
+        item.content = data.content;
+        item.contentSize = data.contentSize;
+        item.s3ObjectsInContent = JSON.parse(data.s3ObjectsInContent);
+        item.s3ObjectsSizeInContent = data.s3ObjectsSizeInContent;
+    }
+
+    if (data.videos) {
+        item.videos = JSON.parse(data.videos);
+    }
+    if (data.audios) {
+        item.audios = JSON.parse(data.audios);
+    }
+    if (data.images) {
+        item.images = JSON.parse(data.images);
+    }
+
+    if (data.s3KeyPrefix) {
+        const size = parseInt(data.size);
+        const fileName = data.fileName;
+        const fileType = data.fileType;
+        const fileSize = data.fileSize;
+        const s3KeyPrefix = data.s3KeyPrefix;
+        const numberOfChunks = data.numberOfChunks;
+        const attachment = {
+            s3KeyPrefix,
+            fileName,
+            fileType,
+            fileSize,
+            size,
+            numberOfChunks
         };
-
-        if (isContainer) {
-            thisObj.totalItemVersions = 0;
-            thisObj.totalStorage = 0;
-        }
-
-        let item = new ItemVersion(thisObj);
-
-        if (req.session.member.id.startsWith('m')) {
-            item.masterId = req.session.member.masterId;
-            item.memberName = req.session.member.memberName;
-        }
-
-        if (req.body.title) {
-            item.title = req.body.title;
-            item.titleTokens = JSON.parse(req.body.titleTokens);
-        }
-        if (req.body.tags) {
-            item.tags = JSON.parse(req.body.tags);
-            item.tagsTokens = JSON.parse(req.body.tagsTokens);
-        }
-        if (req.body.content) {
-            item.content = req.body.content;
-            item.contentSize = req.body.contentSize;
-            item.s3ObjectsInContent = JSON.parse(req.body.s3ObjectsInContent);
-            item.s3ObjectsSizeInContent = req.body.s3ObjectsSizeInContent;
-        }
-
-        if (req.body.videos) {
-            item.videos = JSON.parse(req.body.videos);
-        }
-        if (req.body.audios) {
-            item.audios = JSON.parse(req.body.audios);
-        }
-        if (req.body.images) {
-            item.images = JSON.parse(req.body.images);
-        }
-
-        if (req.body.s3KeyPrefix) {
-            const size = parseInt(req.body.size);
-            const fileName = req.body.fileName;
-            const fileType = req.body.fileType;
-            const fileSize = req.body.fileSize;
-            const s3KeyPrefix = req.body.s3KeyPrefix;
-            const numberOfChunks = req.body.numberOfChunks;
-            const attachment = {
-                s3KeyPrefix,
-                fileName,
-                fileType,
-                fileSize,
-                size,
-                numberOfChunks
-            };
-            item.attachments = ["Zero", attachment];
-        }
-
-        if (container.startsWith('u:') || container.startsWith('t1:') || container.startsWith('t2:')) {
-            item.space = container;
-            if (0) {
-                item.path = [container];
-            }
-            resolve(item);
-        } else {
-            item.space = req.body.space;
-            resolve(item);
-            if (0) {
-                try {
-                    const containerItem = await ItemVersion.getById(container)
-                    if (containerItem) {
-                        const containerPath = containerItem.path;
-                        const containerSpace = containerItem.space;
-                        containerPath.push(container);
-                        item.space = containerSpace;
-                        item.path = containerPath;
-                        resolve(item);
-                    } else {
-                        reject("The container was not found.");
-                    }
-                } catch (error) {
-                    reject(error);
-                }
-            }
-        }
-    })
+        item.attachments = ["Zero", attachment];
+    }
+    return item;
 }
 
 function createANotebookPage(data, dispatch) {

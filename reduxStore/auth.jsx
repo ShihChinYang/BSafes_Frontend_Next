@@ -26,6 +26,7 @@ const initialState = {
     accountVersion: '',
     memberId: null,
     displayName: null,
+    currentKeyVersion: null,
     isLoggedIn: false,
     keySalt: null,
     expandedKey: null,
@@ -97,6 +98,7 @@ const authSlice = createSlice({
             state.isLoggedIn = true;
             state.accountVersion = credentials.accountVersion;
             state.memberId = credentials.memberId;
+            state.currentKeyVersion = credentials.currentKeyVersion;
             state.displayName = forge.util.decodeUtf8(credentials.displayName);
             state.keySalt = credentials.secret.keySalt;
             state.expandedKey = credentials.secret.expandedKey;
@@ -178,6 +180,7 @@ export const keySetupAsyncThunk = (data) => async (dispatch, getState) => {
                         localStorage.setItem("authToken", data.authToken);
                         credentials.memberId = data.memberId;
                         credentials.displayName = data.displayName;
+                        credentials.currentKeyVersion = data.currentKeyVersion;
                         saveLocalCredentials(credentials, data.sessionKey, data.sessionIV);
                         localStorage.setItem("authState", "Unlocked");
                         dispatch(setNewAccountCreated({ accountRecoveryPhrase }));
@@ -271,6 +274,7 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
                             if (data.status == "ok") {
                                 credentials.memberId = data.memberId;
                                 credentials.displayName = data.displayName;
+                                credentials.currentKeyVersion = data.currentKeyVersion;
                                 dispatch(setAccountVersion('v2'));
                                 if (data.nextStep) {
                                     saveLocalCredentials(credentials, data.sessionKey, data.sessionIV);
