@@ -372,7 +372,7 @@ export const createANewItemThunk = (data) => async (dispatch, getState) => {
                 if (data.status === 'ok') {
                     debugLog(debugOn, `${addAction} succeeded`);
                     dispatch(setSignedUrlForBackup(data.signedUrlForBackup));
-                    const backupPromise = backupAnItemVersionToS3(data.item, dispatch, getState);
+                    backupAnItemVersionToS3(data.item, dispatch, getState);
                     dispatch(setNewItem(data.item))
                     resolve()
                 } else {
@@ -766,16 +766,18 @@ export const getLastItemInContainer = async (container, dispatch, workspace = nu
     });
 }
 
-function dropAnItem(api, payload, dispatch) {
+function dropAnItem(api, payload, dispatch, getState) {
 
     return new Promise(async (resolve, reject) => {
         PostCall({
             api,
             body: payload,
             dispatch
-        }).then(data => {
+        }).then(async data => {
             debugLog(debugOn, data);
             if (data.status === 'ok') {
+                dispatch(setSignedUrlForBackup(data.signedUrlForBackup));
+                await backupAnItemVersionToS3(data.newItem, dispatch, getState);
                 resolve();
             } else {
                 debugLog(debugOn, "dropAnItem failed: ", data.error);
@@ -847,7 +849,7 @@ export const dropItemsThunk = (data) => async (dispatch, getState) => {
                     itemPayload.targetContainersPath = payload.targetContainersPath;
                 }
                 try {
-                    await dropAnItem(api, itemPayload, dispatch);
+                    await dropAnItem(api, itemPayload, dispatch, getState);
                     dispatch(deselectItem(item.id));
                     if (fromTopControlPanel) {
                         dispatch(setReloadAPage());
@@ -879,15 +881,17 @@ export const dropItemsThunk = (data) => async (dispatch, getState) => {
     });
 }
 
-function trashAnItem(api, payload, dispatch) {
+function trashAnItem(api, payload, dispatch, getState) {
     return new Promise(async (resolve, reject) => {
         PostCall({
             api,
             body: payload,
             dispatch
-        }).then(data => {
+        }).then(async data => {
             debugLog(debugOn, data);
             if (data.status === 'ok') {
+                dispatch(setSignedUrlForBackup(data.signedUrlForBackup));
+                await backupAnItemVersionToS3(data.newItem, dispatch, getState);
                 resolve();
             } else {
                 debugLog(debugOn, "trashAnItem failed: ", data.error);
@@ -930,7 +934,7 @@ export const trashItemsThunk = (data) => async (dispatch, getState) => {
                 }
 
                 try {
-                    await trashAnItem(api, itemPayload, dispatch);
+                    await trashAnItem(api, itemPayload, dispatch, getState);
                     dispatch(deselectItem(item.id));
                     if (fromTopControlPanel) {
                         dispatch(setItemTrashed(true));
@@ -1060,15 +1064,17 @@ export const emptyTrashBoxItemsThunk = (data) => async (dispatch, getState) => {
     });
 }
 
-function restoreAnItemFromTrash(api, payload, dispatch) {
+function restoreAnItemFromTrash(api, payload, dispatch, getState) {
     return new Promise(async (resolve, reject) => {
         PostCall({
             api,
             body: payload,
             dispatch
-        }).then(data => {
+        }).then(async data => {
             debugLog(debugOn, data);
             if (data.status === 'ok') {
+                dispatch(setSignedUrlForBackup(data.signedUrlForBackup));
+                await backupAnItemVersionToS3(data.newItem, dispatch, getState);
                 resolve();
             } else {
                 debugLog(debugOn, "restoreAnItemFromTrash failed: ", data.error);
@@ -1117,7 +1123,7 @@ export const restoreItemsFromTrashThunk = (data) => async (dispatch, getState) =
                 }
 
                 try {
-                    await restoreAnItemFromTrash(api, itemPayload, dispatch);
+                    await restoreAnItemFromTrash(api, itemPayload, dispatch, getState);
                     dispatch(deselectItem(item.id));
                     dispatch(completedMovingAnItem(item));
                 } catch (error) {

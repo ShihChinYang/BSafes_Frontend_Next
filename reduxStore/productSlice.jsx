@@ -38,7 +38,7 @@ export const backupAnItemVersionToS3 = (item, dispatch, getState) => {
             const productState = getState().product;
             let signedUrlForBackup = productState.signedUrlForBackup;
 
-            const s3Key = signedUrlForBackup.key;
+            const s3Key = signedUrlForBackup.s3Key;
             const signedURL = signedUrlForBackup.url;
 
             const config = {

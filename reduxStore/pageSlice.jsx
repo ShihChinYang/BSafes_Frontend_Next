@@ -4,7 +4,7 @@ const forge = require('node-forge');
 const DOMPurify = require('dompurify');
 
 import { setNavigationInSameContainer } from './containerSlice';
-import { setCurrentProduct, setSignedUrlForBackup } from './productSlice';
+import { setCurrentProduct, setSignedUrlForBackup, backupAnItemVersionToS3 } from './productSlice';
 
 import { getBrowserInfo, usingServiceWorker, convertBinaryStringToUint8Array, debugLog, PostCall, extractHTMLElementText, requestAppleReview } from '../lib/helper'
 import { generateNewItemKey, decryptBinaryString, encryptBinaryString, encryptLargeBinaryString, decryptChunkBinaryStringToBinaryStringAsync, decryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync, stringToEncryptedTokensCBC, stringToEncryptedTokensECB, tokenfieldToEncryptedArray, tokenfieldToEncryptedTokensCBC, tokenfieldToEncryptedTokensECB } from '../lib/crypto';
@@ -2761,12 +2761,13 @@ export const downloadAudioThunk = (data) => async (dispatch, getState) => {
     });
 }
 
-async function createNewItemVersion(itemCopy, dispatch) {
+async function createNewItemVersion(itemCopy, dispatch, getState) {
     return new Promise(async (resolve, reject) => {
         const workspace = itemCopy.space;
         itemCopy.version = itemCopy.version + 1;
         debugLog(debugOn, "item copy version: ", itemCopy.version);
         if (!workspace.startsWith("d:")) {
+            backupAnItemVersionToS3(itemCopy, dispatch, getState);
             PostCall({
                 api: '/memberAPI/createNewItemVersion',
                 body: {
@@ -2811,10 +2812,10 @@ async function createNewItemVersion(itemCopy, dispatch) {
 };
 
 
-function createNewItemVersionForPage(itemCopy, dispatch) {
+function createNewItemVersionForPage(itemCopy, dispatch, getState) {
     return new Promise(async (resolve, reject) => {
         try {
-            const data = await createNewItemVersion(itemCopy, dispatch);
+            const data = await createNewItemVersion(itemCopy, dispatch, getState);
             if (data.status === 'ok') {
                 const usage = JSON.parse(data.usage);
                 itemCopy.usage = usage;
@@ -2830,16 +2831,12 @@ function createNewItemVersionForPage(itemCopy, dispatch) {
 };
 
 function prepareAnIndexedPageBackup(type, data, getState) {
-    let itemIdPrefix;
     let itemType;
-    let isContainer = false;
     switch (type) {
         case 'NotebookPage':
-            itemIdPrefix = 'np:'
             itemType = 'NP';
             break;
         case 'DiaryPage':
-            itemIdPrefix = 'dp:'
             itemType = 'DP';
             break;
         default:
@@ -2955,6 +2952,7 @@ function createANotebookPage(data, dispatch, getState) {
         const workspace = data.space;
         if (!workspace.startsWith("d:")) {
             const backupItem = prepareAnIndexedPageBackup('NotebookPage', data, getState);
+            backupAnItemVersionToS3(backupItem, dispatch, getState);
             PostCall({
                 api: '/memberAPI/createANotebookPage',
                 body: data,
@@ -3006,6 +3004,7 @@ function createADiaryPage(data, dispatch, getState) {
         const workspace = data.space;
         if (!workspace.startsWith("d:")) {
             const backupItem = prepareAnIndexedPageBackup('DiaryPage', data, getState);
+            backupAnItemVersionToS3(backupItem, dispatch, getState);
             PostCall({
                 api: '/memberAPI/createADiaryPage',
                 body: data,
@@ -3180,7 +3179,7 @@ export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async 
                     itemCopy.tagsTokens = tagsTokens;
                     itemCopy.update = "tags";
 
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy,
                         tags
@@ -3252,7 +3251,7 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
                     itemCopy.titleTokens = titleTokens;
                     itemCopy.update = "title";
 
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy,
                         title,
@@ -3661,7 +3660,7 @@ export const saveContentThunk = (data) => async (dispatch, getState) => {
                     itemCopy.s3ObjectsSizeInContent = s3ObjectsSize;
                     itemCopy.update = "content";
 
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy,
                         content
@@ -3952,7 +3951,7 @@ export const uploadVideosThunk = (data) => async (dispatch, getState) => {
                 try {
                     itemCopy.videos = videos;
                     itemCopy.update = "videos";
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy
                     }));
@@ -4058,7 +4057,7 @@ export const deleteAVideoThunk = (data) => async (dispatch, getState) => {
             try {
                 itemCopy.videos = newVideos;
                 itemCopy.update = "videos";
-                await createNewItemVersionForPage(itemCopy, dispatch);
+                await createNewItemVersionForPage(itemCopy, dispatch, getState);
 
                 videoPanels = state.videoPanels.filter((panel) => {
                     return data.panel.s3KeyPrefix !== panel.s3KeyPrefix;
@@ -4330,7 +4329,7 @@ export const uploadAudiosThunk = (data) => async (dispatch, getState) => {
                 try {
                     itemCopy.audios = audios;
                     itemCopy.update = "audios";
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy
                     }));
@@ -4395,7 +4394,7 @@ export const deleteAnAudioThunk = (data) => async (dispatch, getState) => {
             try {
                 itemCopy.audios = newAudios;
                 itemCopy.update = "audios";
-                await createNewItemVersionForPage(itemCopy, dispatch);
+                await createNewItemVersionForPage(itemCopy, dispatch, getState);
                 audioPanels = state.audioPanels.filter((panel) => {
                     return data.panel.s3KeyPrefix !== panel.s3KeyPrefix;
                 })
@@ -4698,7 +4697,7 @@ export const uploadImagesThunk = (data) => async (dispatch, getState) => {
                 try {
                     itemCopy.images = images;
                     itemCopy.update = "images";
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy
                     }));
@@ -4730,7 +4729,7 @@ export const deleteAnImageThunk = (data) => async (dispatch, getState) => {
 
                 itemCopy.images = newImages;
                 itemCopy.update = "images";
-                await createNewItemVersionForPage(itemCopy, dispatch);
+                await createNewItemVersionForPage(itemCopy, dispatch, getState);
 
                 imagePanels = state.imagePanels.filter((panel) => {
                     return data.panel.s3Key !== panel.s3Key;
@@ -4913,7 +4912,7 @@ const uploadAnAttachment = (dispatch, getState, state, attachment, workspaceKey)
                 try {
                     itemCopy.attachments = newAttachments;
                     itemCopy.update = "attachments";
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy
                     }));
@@ -5398,7 +5397,7 @@ export const deleteAnAttachmentThunk = (data) => async (dispatch, getState) => {
 
                 itemCopy.attachments = newAttachments;
                 itemCopy.update = "attachments";
-                await createNewItemVersionForPage(itemCopy, dispatch);
+                await createNewItemVersionForPage(itemCopy, dispatch, getState);
 
                 attachmentPanels = state.attachmentPanels.filter((panel) => {
                     return data.panel.s3KeyPrefix !== panel.s3KeyPrefix;
@@ -5444,7 +5443,7 @@ export const saveVideoWordsThunk = (data) => async (dispatch, getState) => {
                     }
                     videoPanels[index].words = content;
 
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy,
                         videoPanels
@@ -5483,7 +5482,7 @@ export const saveAudioWordsThunk = (data) => async (dispatch, getState) => {
                         audioPanels[i].play = state.audioPanels[i].play;
                     }
                     audioPanels[index].words = content;
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy,
                         audioPanels
@@ -5524,7 +5523,7 @@ export const saveImageWordsThunk = (data) => async (dispatch, getState) => {
                     }
                     imagePanels[index].words = content;
 
-                    await createNewItemVersionForPage(itemCopy, dispatch);
+                    await createNewItemVersionForPage(itemCopy, dispatch, getState);
                     dispatch(newVersionCreated({
                         itemCopy,
                         imagePanels
