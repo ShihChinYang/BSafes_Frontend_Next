@@ -56,9 +56,9 @@ const authSlice = createSlice({
             }
         },
         resetAuthActivity: (state, action) => {
-            state.activity = 0,
-                state.activityErrors = 0,
-                state.activityErrorCodes = {};
+            state.activity = 0;
+            state.activityErrors = 0;
+            state.activityErrorCodes = {};
         },
         activityStart: (state, action) => {
             state.activityErrors &= ~action.payload;
@@ -148,7 +148,7 @@ const authSlice = createSlice({
     }
 });
 
-export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey, setGotoFirstPagetAfterLoggedIn} = authSlice.actions;
+export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey, setGotoFirstPagetAfterLoggedIn } = authSlice.actions;
 
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
@@ -218,7 +218,7 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
                         reject("102");
                         return;
                     }
-                    
+
                     // Verify if public key matches private key to ensure public key is not replaced by threat actors
                     let privateKey = forge.util.decode64(data.privateKeyEnvelope);
                     privateKey = decryptBinaryString(privateKey, credentials.secret.expandedKey);
@@ -459,7 +459,7 @@ export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
                     if (data.error === 'SessionNotExisted') {
                         clearLocalData();
                         dispatch(loggedOut());
-                        dispatch(setFroalaLicenseKey({froalaLicenseKey: data.froalaLicenseKey}))
+                        dispatch(setFroalaLicenseKey({ froalaLicenseKey: data.froalaLicenseKey }))
                     }
                 }
                 dispatch(setClientEncryptionKey(data.clientEncryptionKey));
@@ -480,7 +480,7 @@ export const createCheckSessionIntervalThunk = () => (dispatch, getState) => {
         const authState = localStorage.getItem("authState");
         const demoMode = localStorage.getItem("demoMode");
         debugLog(debugOn, "demoMode: ", demoMode);
-        return { demoMode: demoMode?true:false, sessionExists: authToken ? true : false, authState, unlocked: (authState === 'Unlocked') };
+        return { demoMode: demoMode ? true : false, sessionExists: authToken ? true : false, authState, unlocked: (authState === 'Unlocked') };
     }
     const state = getState().auth;
     let contextId = state.contextId;

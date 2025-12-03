@@ -41,5 +41,6 @@ runForWeb
 runForWebProduct
 runForAndroidBSafes
 runForWebColors
+runForBackup
 public/js/excalidraw/custom-fonts
 resolved_fonts.json

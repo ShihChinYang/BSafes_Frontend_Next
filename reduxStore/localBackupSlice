@@ -1,0 +1,75 @@
+import { createSlice } from '@reduxjs/toolkit';
+import { debugLog } from '../lib/helper';
+import { localBackupActivity } from '../lib/activities';
+import { PostCall } from '../lib/helper';
+
+const debugOn = false;
+
+const initialState = {
+    activity: 0,
+    activityErrors: 0,
+    activityErrorCodes: {},
+    error: null,
+}
+
+const localBackupSlice = createSlice({
+    name: 'localBackup',
+    initialState,
+    reducers: {
+        resetLocalBackupActivity: (state, action) => {
+            state.activity = 0;
+            state.activityErrors = 0;
+            state.activityErrorCodes = {};
+        },
+        activityStart: (state, action) => {
+            state.activityErrors &= ~action.payload;
+            state.activityErrorCodes[action.payload] = '';
+            state.activity |= action.payload;
+        },
+        activityDone: (state, action) => {
+            state.activity &= ~action.payload;
+        },
+        activityError: (state, action) => {
+            state.activity &= ~action.payload.type;
+            state.activityErrors |= action.payload.type;
+            state.activityErrorCodes[action.payload.type] = action.payload.error;
+        },
+    }
+})
+
+
+export const { resetAuthActivity, activityStart, activityDone, activityError } = localBackupSlice.actions;
+export const localBackupReducer = localBackupSlice.reducer;
+const newActivity = async (dispatch, type, activity) => {
+    dispatch(activityStart(type));
+    try {
+        await activity();
+        dispatch(activityDone(type));
+    } catch (error) {
+        dispatch(activityError({ type, error }));
+    }
+}
+export const getBackupTokenThunk = (data) => async (dispatch, getState) => {
+    newActivity(dispatch, localBackupActivity.getBackupToken, () => {
+        return new Promise(async (resolve, reject) => {
+            PostCall({
+                api: '/memberAPI/getBackupToken',
+                body: {},
+                dispatch
+            }).then(data => {
+                debugLog(debugOn, data);
+                if (data.status === 'ok') {
+                    resolve();
+                } else {
+                    debugLog(debugOn, "woo... failed to get the backup token:", data.error);
+                    reject("Failed to get the backup token.");
+                }
+            }).catch(error => {
+                debugLog(debugOn, "woo... ailed to get the backup token:", error);
+                reject("Failed to get the backup token.");
+            })
+            resolve();
+        });
+    })
+}
+export default localBackupSlice;

@@ -36,6 +36,7 @@ import { resetContainerActivity, initContainer } from '../../reduxStore/containe
 import { resetPageActivity } from '../../reduxStore/pageSlice';
 import { resetTeamActivity } from '../../reduxStore/teamSlice';
 import { resetV1AccountActivity } from '../../reduxStore/v1AccountSlice';
+import { getBackupTokenThunk } from '../../reduxStore/localBackupSlice';
 
 import { setNextAuthStep, lockAsyncThunk, signOutAsyncThunk, signedOut } from '../../reduxStore/v1AccountSlice';
 
@@ -103,6 +104,10 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     const refresh = (e) => {
         router.reload();
+    }
+
+    const localBackup = (e) => {
+        dispatch(getBackupTokenThunk());
     }
 
     const mfaSetup = (e) => {
@@ -557,6 +562,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                                 <>
                                     <a href="https://support.bsafes.com" target='_blank' className='' style={{ color: "#000000" }}><i className="fa fa-lg fa-question" aria-hidden="true"></i></a>
                                     <Button variant='link' size='md' className='' onClick={refresh} style={{ color: 'black' }}><i className="fa fa-refresh" aria-hidden="true"></i></Button>
+                                    <Button variant='link' size='md' className='' onClick={localBackup} style={{ color: 'black' }}><i className="fa fa-download" aria-hidden="true"></i></Button>
                                     <Button variant='dark' size='sm' onClick={logOut}>Lock</Button>
                                 </>
                             }
