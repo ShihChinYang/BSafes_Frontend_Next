@@ -49,27 +49,81 @@ const newActivity = async (dispatch, type, activity) => {
         dispatch(activityError({ type, error }));
     }
 }
+
+export const getBackupToken = (dispatch) => {
+    return new Promise(async (resolve, reject) => {
+        PostCall({
+            api: '/memberAPI/getBackupToken',
+            body: {},
+            dispatch
+        }).then(data => {
+            debugLog(debugOn, data);
+            if (data.status === 'ok') {
+                localStorage.setItem("backupToken", data.token);
+                localStorage.setItem("registeredDataCenter", data.registeredDataCenter)
+                resolve();
+            } else {
+                debugLog(debugOn, "woo... failed to get the backup token:", data.error);
+                reject("Failed to get the backup token.");
+            }
+        }).catch(error => {
+            debugLog(debugOn, "woo... ailed to get the backup token:", error);
+            reject("Failed to get the backup token.");
+        })
+        resolve();
+    });
+}
 export const getBackupTokenThunk = (data) => async (dispatch, getState) => {
-    newActivity(dispatch, localBackupActivity.getBackupToken, () => {
+    newActivity(dispatch, localBackupActivity.downloadItemVersionsBackup, () => {
         return new Promise(async (resolve, reject) => {
-            PostCall({
-                api: '/memberAPI/getBackupToken',
-                body: {},
-                dispatch
-            }).then(data => {
-                debugLog(debugOn, data);
-                if (data.status === 'ok') {
+            try {
+                if (localStorage.getItem("backupToken")) {
                     resolve();
                 } else {
-                    debugLog(debugOn, "woo... failed to get the backup token:", data.error);
-                    reject("Failed to get the backup token.");
+                    await getBackupToken(dispatch);
+                    resolve();
                 }
-            }).catch(error => {
-                debugLog(debugOn, "woo... ailed to get the backup token:", error);
-                reject("Failed to get the backup token.");
-            })
-            resolve();
+            } catch (error) {
+                reject(error);
+            }
         });
     })
 }
+export const getItemVersionsBackupList = (data) => async (dispatch, getState) => {
+    newActivity(dispatch, localBackupActivity.downloadItemVersionsBackup, () => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (!localStorage.getItem("backupToken")) {
+                    await getBackupToken(dispatch);
+                }
+                const memberId = getState().auth.memberId;
+                const dataCenter = localStorage.getItem("registeredDataCenter");
+                PostCall({
+                    api: '/memberAPI/getItemVersionsBackupList',
+                    body: {
+                        dataCenter,
+                        memberId,
+                    },
+                    dispatch,
+                    tinybird: true
+                }).then(data => {
+                    debugLog(debugOn, data);
+                    if (data.status === 'ok') {
+                        resolve();
+                    } else {
+                        debugLog(debugOn, "woo... getItemVersionsBackupList failed:", data.error);
+                        reject("Failed to get the itemVersions backup list.");
+                    }
+                }).catch(error => {
+                    debugLog(debugOn, "woo... getItemVersionsBackupList failed:", error);
+                    reject("Failed to get the itemVersions backup list.");
+                })
+            } catch (error) {
+                debugLog(debugOn, "getItemVersionsBackupList failed:", error)
+                reject(error);
+            }
+        });
+    });
+}
+
 export default localBackupSlice;

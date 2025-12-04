@@ -36,7 +36,7 @@ import { resetContainerActivity, initContainer } from '../../reduxStore/containe
 import { resetPageActivity } from '../../reduxStore/pageSlice';
 import { resetTeamActivity } from '../../reduxStore/teamSlice';
 import { resetV1AccountActivity } from '../../reduxStore/v1AccountSlice';
-import { getBackupTokenThunk } from '../../reduxStore/localBackupSlice';
+import { getBackupTokenThunk, getItemVersionsBackupList } from '../../reduxStore/localBackupSlice';
 
 import { setNextAuthStep, lockAsyncThunk, signOutAsyncThunk, signedOut } from '../../reduxStore/v1AccountSlice';
 
@@ -107,7 +107,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     }
 
     const localBackup = (e) => {
-        dispatch(getBackupTokenThunk());
+        dispatch(getItemVersionsBackupList());
     }
 
     const mfaSetup = (e) => {
