@@ -3,6 +3,7 @@ import { debugLog } from '../lib/helper';
 import { putS3Object } from '../lib/s3Helper';
 
 const debugOn = false;
+const ITEM_VERSIONS_BACKUP_FEATURE = true;
 
 const initialState = {
     currentProduct: "",
@@ -17,6 +18,7 @@ const productSlice = createSlice({
             state.currentProduct = action.payload;
         },
         setSignedUrlForBackup: (state, action) => {
+            if(!ITEM_VERSIONS_BACKUP_FEATURE) return;
             if (action.payload !== null) {
                 const signedUrlForBackup = action.payload;
                 signedUrlForBackup.expiration = Date.now() + (signedUrlForBackup.expiresIn - 600) * 1000;
@@ -35,6 +37,10 @@ export const productReducer = productSlice.reducer;
 export const backupAnItemVersionToS3 = (item, dispatch, getState) => {
     return new Promise(async (resolve, reject) => {
         try {
+            if(!ITEM_VERSIONS_BACKUP_FEATURE) {
+                resolve();
+                return;
+            }
             const productState = getState().product;
             let signedUrlForBackup = productState.signedUrlForBackup;
 

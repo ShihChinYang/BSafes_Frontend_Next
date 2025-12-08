@@ -1,7 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { parseString } from 'xml2js';
 import { debugLog } from '../lib/helper';
 import { localBackupActivity } from '../lib/activities';
 import { PostCall } from '../lib/helper';
+import { parse } from 'date-fns';
 
 const debugOn = false;
 
@@ -70,7 +72,30 @@ export const getBackupToken = (dispatch) => {
             debugLog(debugOn, "woo... ailed to get the backup token:", error);
             reject("Failed to get the backup token.");
         })
-        resolve();
+    });
+}
+
+export const getBackupSignedUrl = (s3Key, dispatch) => {
+    return new Promise(async (resolve, reject) => {
+        PostCall({
+            api: '/memberAPI/getDownloadSignedUrl',
+            body: {
+                s3Key
+            },
+            dispatch,
+            tinybird: true
+        }).then(data => {
+            debugLog(debugOn, data);
+            if (data.status === 'ok') {
+
+            } else {
+                debugLog(debugOn, "woo... getBackupSignedUrl failed:", data.error);
+                reject("Failed to get the itemVersions backup list.");
+            }
+        }).catch(error => {
+            debugLog(debugOn, "woo... getBackupSignedUrl failed:", error);
+            reject("Failed to get the backup signed url.");
+        })
     });
 }
 export const getBackupTokenThunk = (data) => async (dispatch, getState) => {
@@ -89,7 +114,7 @@ export const getBackupTokenThunk = (data) => async (dispatch, getState) => {
         });
     })
 }
-export const getItemVersionsBackupList = (data) => async (dispatch, getState) => {
+export const getItemVersionsBackupListThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, localBackupActivity.downloadItemVersionsBackup, () => {
         return new Promise(async (resolve, reject) => {
             try {
@@ -97,19 +122,39 @@ export const getItemVersionsBackupList = (data) => async (dispatch, getState) =>
                     await getBackupToken(dispatch);
                 }
                 const memberId = getState().auth.memberId;
+                const currentKeyVersion = getState().auth.currentKeyVersion;
                 const dataCenter = localStorage.getItem("registeredDataCenter");
                 PostCall({
                     api: '/memberAPI/getItemVersionsBackupList',
                     body: {
                         dataCenter,
                         memberId,
+                        currentKeyVersion,
                     },
                     dispatch,
                     tinybird: true
                 }).then(data => {
                     debugLog(debugOn, data);
                     if (data.status === 'ok') {
-                        resolve();
+                        parseString(data.response, async (error, result) => {
+                            if (!error) {
+                                const itemsList = result;
+                                if(result.ListBucketResult.KeyCount[0]){
+                                    const key = result.ListBucketResult.Contents[0].Key[0];
+                                    const s3Key = `${dataCenter}:${key}`;
+                                    try{
+                                        const signedUrl = await getBackupSignedUrl(s3Key, dispatch);
+                                        resolve();
+                                    } catch(error){
+                                        reject(error);
+                                    }
+                                }
+                                resolve();
+                            } else {
+                                reject("woo... getItemVersionsBackupList failed:", error)
+                            }
+                        })
+
                     } else {
                         debugLog(debugOn, "woo... getItemVersionsBackupList failed:", data.error);
                         reject("Failed to get the itemVersions backup list.");
@@ -125,5 +170,6 @@ export const getItemVersionsBackupList = (data) => async (dispatch, getState) =>
         });
     });
 }
+
 
 export default localBackupSlice;
