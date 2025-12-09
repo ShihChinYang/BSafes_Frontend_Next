@@ -1,17 +1,20 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { parseString } from 'xml2js';
-import { debugLog } from '../lib/helper';
-import { localBackupActivity } from '../lib/activities';
-import { PostCall } from '../lib/helper';
-import { parse } from 'date-fns';
 
-const debugOn = false;
+import { debugLog, PostCall } from '../lib/helper';
+import { localBackupActivity } from '../lib/activities';
+import { putS3Object } from '../lib/s3Helper';
+
+
+const debugOn = true;
+const ITEM_VERSIONS_BACKUP_FEATURE = true;
 
 const initialState = {
     activity: 0,
     activityErrors: 0,
     activityErrorCodes: {},
     error: null,
+    signedUrlForBackup: null,
 }
 
 const localBackupSlice = createSlice({
@@ -36,11 +39,21 @@ const localBackupSlice = createSlice({
             state.activityErrors |= action.payload.type;
             state.activityErrorCodes[action.payload.type] = action.payload.error;
         },
+        setSignedUrlForBackup: (state, action) => {
+            if (!ITEM_VERSIONS_BACKUP_FEATURE) return;
+            if (action.payload !== null) {
+                const signedUrlForBackup = action.payload;
+                signedUrlForBackup.expiration = Date.now() + (signedUrlForBackup.expiresIn - 600) * 1000;
+                state.signedUrlForBackup = signedUrlForBackup;
+            } else {
+                state.signedUrlForBackup = null;
+            }
+        }
     }
 })
 
 
-export const { resetAuthActivity, activityStart, activityDone, activityError } = localBackupSlice.actions;
+export const { resetAuthActivity, activityStart, activityDone, activityError, setSignedUrlForBackup } = localBackupSlice.actions;
 export const localBackupReducer = localBackupSlice.reducer;
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
@@ -50,6 +63,39 @@ const newActivity = async (dispatch, type, activity) => {
     } catch (error) {
         dispatch(activityError({ type, error }));
     }
+}
+
+export const backupAnItemVersionToS3 = (item, dispatch, getState) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!ITEM_VERSIONS_BACKUP_FEATURE) {
+                resolve();
+                return;
+            }
+            const localBackupState = getState().localBackup;
+            let signedUrlForBackup = localBackupState.signedUrlForBackup;
+
+            const s3Key = signedUrlForBackup.s3Key;
+            const signedURL = signedUrlForBackup.url;
+
+            const config = {
+                onUploadProgress: async (progressEvent) => {
+                    let percentCompleted = Math.ceil(progressEvent.loaded * 100 / progressEvent.total);
+                    debugLog(debugOn, `Upload progress: ${progressEvent.loaded}/${progressEvent.total} ${percentCompleted} `);
+
+                },
+                headers: {
+                    'Content-Type': 'binary/octet-stream'
+                }
+            }
+            dispatch(setSignedUrlForBackup(null));
+            await putS3Object(s3Key, signedURL, JSON.stringify(item), config, dispatch);
+            resolve();
+        } catch (error) {
+            debugLog(debugOn, "backupAnItemVersionToS3 failed: ", error);
+            reject("backupAnItemVersionToS3 error.");
+        }
+    });
 }
 
 export const getBackupToken = (dispatch) => {
@@ -74,7 +120,6 @@ export const getBackupToken = (dispatch) => {
         })
     });
 }
-
 export const getBackupSignedUrl = (s3Key, dispatch) => {
     return new Promise(async (resolve, reject) => {
         PostCall({
@@ -139,18 +184,19 @@ export const getItemVersionsBackupListThunk = (data) => async (dispatch, getStat
                         parseString(data.response, async (error, result) => {
                             if (!error) {
                                 const itemsList = result;
-                                if(result.ListBucketResult.KeyCount[0]){
+                                if (result.ListBucketResult.KeyCount[0]) {
                                     const key = result.ListBucketResult.Contents[0].Key[0];
                                     const s3Key = `${dataCenter}:${key}`;
-                                    try{
+                                    try {
                                         const signedUrl = await getBackupSignedUrl(s3Key, dispatch);
+                                        debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
                                         resolve();
-                                    } catch(error){
+                                    } catch (error) {
                                         reject(error);
                                     }
                                 }
-                                resolve();
                             } else {
+                                debugLog(debugOn, "woo... getItemVersionsBackupList failed:", data.error);
                                 reject("woo... getItemVersionsBackupList failed:", error)
                             }
                         })

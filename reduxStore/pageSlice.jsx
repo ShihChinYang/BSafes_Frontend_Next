@@ -4,8 +4,8 @@ const forge = require('node-forge');
 const DOMPurify = require('dompurify');
 
 import { setNavigationInSameContainer } from './containerSlice';
-import { setCurrentProduct, setSignedUrlForBackup, backupAnItemVersionToS3 } from './productSlice';
-
+import { setCurrentProduct } from './productSlice';
+import { setSignedUrlForBackup, backupAnItemVersionToS3 } from './localBackupSlice';
 import { getBrowserInfo, usingServiceWorker, convertBinaryStringToUint8Array, debugLog, PostCall, extractHTMLElementText, requestAppleReview } from '../lib/helper'
 import { generateNewItemKey, decryptBinaryString, encryptBinaryString, encryptLargeBinaryString, decryptChunkBinaryStringToBinaryStringAsync, decryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync, stringToEncryptedTokensCBC, stringToEncryptedTokensECB, tokenfieldToEncryptedArray, tokenfieldToEncryptedTokensCBC, tokenfieldToEncryptedTokensECB } from '../lib/crypto';
 import { pageActivity } from '../lib/activities';

@@ -10,7 +10,7 @@ import { containerActivity } from '../lib/activities';
 import { getDemoWorkspaceInfo } from '../lib/demoHelper';
 import { readDataFromServiceWorkerDB } from '../lib/serviceWorkerDBHelper';
 
-import { setSignedUrlForBackup, backupAnItemVersionToS3 } from './productSlice';
+import { setSignedUrlForBackup, backupAnItemVersionToS3 } from './localBackupSlice';
 import { getTeamData } from './teamSlice';
 
 const debugOn = false;
