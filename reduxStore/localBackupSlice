@@ -4,6 +4,8 @@ import { parseString } from 'xml2js';
 import { debugLog, PostCall } from '../lib/helper';
 import { localBackupActivity } from '../lib/activities';
 import { putS3Object } from '../lib/s3Helper';
+import { max } from 'date-fns';
+import { contentImageDownloadFailed } from './pageSlice';
 
 
 const debugOn = true;
@@ -162,55 +164,91 @@ export const getBackupTokenThunk = (data) => async (dispatch, getState) => {
 export const getItemVersionsBackupListThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, localBackupActivity.downloadItemVersionsBackup, () => {
         return new Promise(async (resolve, reject) => {
-            try {
-                if (!localStorage.getItem("backupToken")) {
-                    await getBackupToken(dispatch);
-                }
-                const memberId = getState().auth.memberId;
-                const currentKeyVersion = getState().auth.currentKeyVersion;
-                const dataCenter = localStorage.getItem("registeredDataCenter");
-                PostCall({
-                    api: '/memberAPI/getItemVersionsBackupList',
-                    body: {
-                        dataCenter,
-                        memberId,
-                        currentKeyVersion,
-                    },
-                    dispatch,
-                    tinybird: true
-                }).then(data => {
-                    debugLog(debugOn, data);
-                    if (data.status === 'ok') {
-                        parseString(data.response, async (error, result) => {
-                            if (!error) {
-                                const itemsList = result;
-                                if (result.ListBucketResult.KeyCount[0]) {
-                                    const key = result.ListBucketResult.Contents[0].Key[0];
-                                    const s3Key = `${dataCenter}:${key}`;
-                                    try {
-                                        const signedUrl = await getBackupSignedUrl(s3Key, dispatch);
-                                        debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
-                                        resolve();
-                                    } catch (error) {
-                                        reject(error);
+            /*const response = await window.desktopAPI.ping()
+            console.log(response) // prints out 'pong'*/
+            if (!localStorage.getItem("backupToken")) {
+                await getBackupToken(dispatch);
+            }
+            const getItemVersionsBackupList = (startAfter = 0, continuationToken = 0, maxKeys = 0) => {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        const memberId = getState().auth.memberId;
+                        const currentKeyVersion = getState().auth.currentKeyVersion;
+                        const dataCenter = localStorage.getItem("registeredDataCenter");
+                        const body = {
+                            dataCenter,
+                            memberId,
+                            currentKeyVersion,
+                            startAfter,
+                            continuationToken,
+                            maxKeys
+                        };
+
+                        PostCall({
+                            api: '/memberAPI/getItemVersionsBackupList',
+                            body,
+                            dispatch,
+                            tinybird: true
+                        }).then(data => {
+                            debugLog(debugOn, data);
+                            if (data.status === 'ok') {
+                                parseString(data.response, async (error, result) => {
+                                    if (!error) {
+                                        const listBucketResult = result.ListBucketResult;
+                                        const itemList = {
+                                            numberOfItems: listBucketResult.KeyCount[0]
+                                        }
+                                        if (listBucketResult.KeyCount[0]) {
+                                            let items = [];
+                                            for (let i = 0; i < itemList.numberOfItems; i++) {
+                                                let theItem = listBucketResult.Contents[i].Key[0];
+                                                items.push(theItem);
+                                            }
+                                            itemList.items = items;
+                                            if (listBucketResult.IsTruncated[0] === "true") {
+                                                itemList.isTruncated = true;
+                                                itemList.continuationToken = listBucketResult.NextContinuationToken[0]
+                                            } else {
+                                                itemList.isTruncated = false;
+                                            }
+                                            /*
+                                            const signedUrl = await getBackupSignedUrl(s3Key, dispatch);
+                                            debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
+                                            */
+                                        }
+                                        resolve(itemList);
+                                    } else {
+                                        debugLog(debugOn, "woo... getItemVersionsBackupList failed:", data.error);
+                                        reject("woo... getItemVersionsBackupList failed:", error)
                                     }
-                                }
+                                })
                             } else {
                                 debugLog(debugOn, "woo... getItemVersionsBackupList failed:", data.error);
-                                reject("woo... getItemVersionsBackupList failed:", error)
+                                reject("Failed to get the itemVersions backup list.");
                             }
+                        }).catch(error => {
+                            debugLog(debugOn, "woo... getItemVersionsBackupList failed:", error);
+                            reject("Failed to get the itemVersions backup list.");
                         })
-
-                    } else {
-                        debugLog(debugOn, "woo... getItemVersionsBackupList failed:", data.error);
-                        reject("Failed to get the itemVersions backup list.");
+                    } catch (error) {
+                        debugLog(debugOn, "getItemVersionsBackupList failed:", error)
+                        reject(error);
                     }
-                }).catch(error => {
-                    debugLog(debugOn, "woo... getItemVersionsBackupList failed:", error);
-                    reject("Failed to get the itemVersions backup list.");
-                })
+                });
+            }
+            try {
+                let continuationToken = 0;
+                let isTruncated = false;
+                do {
+                    const result = await getItemVersionsBackupList(0, continuationToken, 4,);
+                    const response = await window.desktopAPI.addItemKeys(result);
+                    console.log(response) // prints out 'pong'
+                    isTruncated = result.isTruncated;
+                    if (isTruncated) continuationToken = result.continuationToken;
+                } while (isTruncated)
+                resolve();
             } catch (error) {
-                debugLog(debugOn, "getItemVersionsBackupList failed:", error)
+                debugLog(debugOn, "getItemVersionsBackupListThunk failed: ", error);
                 reject(error);
             }
         });

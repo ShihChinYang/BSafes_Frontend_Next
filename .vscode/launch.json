@@ -14,5 +14,13 @@
         "request": "launch",
         "url": "https://localbsafes.com:8443"
       },
+      {
+        "type": "chrome",
+        "request": "attach",
+        "name": "Electron: Renderer Process",
+        "port": 9223, // Must match the port in the main process config
+        "webRoot": "${workspaceFolder}",
+        "sourceMaps": true
+      }
     ]
   }
