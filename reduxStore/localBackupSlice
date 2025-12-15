@@ -259,34 +259,51 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
             const downloadItemObjects = () => {
                 return new Promise(async (resolve, reject) => {
                     try {
-                        const response = await window.desktopAPI.getAnItemKeyForDwonload();
-                        if (response.key) {
-                            const key = response.key;
-                            const dataCenter = localStorage.getItem("registeredDataCenter");
-                            const s3Key = `${dataCenter}:${key}`;
-                            const signedUrl = await getBackupDownloadSignedUrl(s3Key, dispatch);
-                            debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
-                            const progress = (evt) => {
-                                if (evt.lengthComputable) {
-                                    let percentComplete = evt.loaded / evt.total * 100;
-                                    debugLog(debugOn, "Download progress: ", `${evt.loaded}/${evt.total} ${percentComplete} %`);
+                        while (1) {
+                            const response = await window.desktopAPI.getAnItemKeyForDwonload();
+                            if (response.key) {
+                                const key = response.key;
+                                const dataCenter = localStorage.getItem("registeredDataCenter");
+                                const s3Key = `${dataCenter}:${key}`;
+                                const signedUrl = await getBackupDownloadSignedUrl(s3Key, dispatch);
+                                debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
+                                const progress = (evt) => {
+                                    if (evt.lengthComputable) {
+                                        let percentComplete = evt.loaded / evt.total * 100;
+                                        debugLog(debugOn, "Download progress: ", `${evt.loaded}/${evt.total} ${percentComplete} %`);
+                                    }
                                 }
+                                const data = await getS3Object(signedUrl, progress);
+                                const itemVersion = JSON.parse(data);
+                                const respone = await window.desktopAPI.addAnItemVersion(key, itemVersion);
+                            } else {
+                                break;
                             }
-                            const data = await getS3Object(signedUrl, progress);
-                            const itemVersion = JSON.parse(data);
-                            await window.desktopAPI.addAnItemVersion(itemVersion);
-                            resolve();
                         }
+                        resolve();
                     } catch (error) {
                         debugLog(debugOn, "downloadItemObjects failed: ", error);
                         reject(error);
                     }
                 });
             }
+            const downloadObjectsInAnItem = () => {
+                return new Promise(async (resolve, reject) => {
+                    while (1) {
+                        const workspace = getState().container.workspace;
+                        const response = await window.desktopAPI.getAnItemForDownloadingObjects(workspace);
+                        if(response.item){
 
+                        } else {
+                            break;
+                        }
+                    }
+                });
+            }
             try {
                 await updateItemKeys();
                 await downloadItemObjects();
+                await downloadObjectsInAnItem();
                 resolve();
             } catch (error) {
                 debugLog(debugOn, "getItemVersionsBackupThunk failed: ", error)
