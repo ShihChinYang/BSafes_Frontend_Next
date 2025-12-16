@@ -291,9 +291,10 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                 return new Promise(async (resolve, reject) => {
                     while (1) {
                         const workspace = getState().container.workspace;
-                        const response = await window.desktopAPI.getAnItemForDownloadingObjects(workspace);
+                        let response = await window.desktopAPI.getAnItemForDownloadingObjects(workspace);
                         if(response.item){
-
+                            const item = response.item;
+                            response = await window.desktopAPI.finishedDownloadingObjectsForAnItem(item.id, item.version);
                         } else {
                             break;
                         }
