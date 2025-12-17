@@ -1,10 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { parseString } from 'xml2js';
+const forge = require('node-forge');
 
 import { debugLog, PostCall } from '../lib/helper';
 import { localBackupActivity } from '../lib/activities';
 import { putS3Object, getS3Object } from '../lib/s3Helper';
-
+import { decryptBinaryString } from '../lib/crypto';
 const debugOn = true;
 const ITEM_VERSIONS_BACKUP_FEATURE = true;
 
@@ -267,14 +268,8 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                                 const s3Key = `${dataCenter}:${key}`;
                                 const signedUrl = await getBackupDownloadSignedUrl(s3Key, dispatch);
                                 debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
-                                const progress = (evt) => {
-                                    if (evt.lengthComputable) {
-                                        let percentComplete = evt.loaded / evt.total * 100;
-                                        debugLog(debugOn, "Download progress: ", `${evt.loaded}/${evt.total} ${percentComplete} %`);
-                                    }
-                                }
-                                const data = await getS3Object(signedUrl, progress);
-                                const itemVersion = JSON.parse(data);
+                                const data = await getS3Object(signedUrl);
+                                const itemVersion = JSON.parse(data.binaryString);
                                 const respone = await window.desktopAPI.addAnItemVersion(key, itemVersion);
                             } else {
                                 break;
@@ -289,11 +284,85 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
             }
             const downloadObjectsInAnItem = () => {
                 return new Promise(async (resolve, reject) => {
+                    const downloadContentObjects = (item) => {
+                        return new Promise(async (resolve, reject) => {
+                            const getItemKey = () => {
+                                const getWorkspaceKey = (workspace) => {
+                                    return new Promise(async (resolve, reject) => {
+                                        if (workspace.substring(0, 1) === 'u') {
+                                            const workspaceKey = getState().auth.expandedKey;
+                                            resolve(workspaceKey);
+                                        } else {
+                                        }
+                                    });
+                                }
+                                return new Promise(async (resolve, reject) => {
+                                    let workspace = JSON.parse(item.space);
+                                    let workspaceKey = await getWorkspaceKey(workspace);
+                                    let itemKey;
+                                    const decoded = forge.util.decode64(JSON.parse(item.keyEnvelope));
+                                    itemKey = decryptBinaryString(decoded, workspaceKey);
+                                    resolve(itemKey);
+                                });
+                            }
+                            const content = JSON.parse(item.content);
+                            if (content.startsWith('s3Object/')) {
+                                const downloadObjectsInContent = (content) => {
+                                    return new Promise(async (resolve, reject) => {
+                                        resolve();
+                                    });
+                                }
+                                const s3Key = forge.util.decode64(content.substring(9));
+                                const fsS3Key = s3Key.split('/').at(-1);
+                                const signedUrl = await getBackupDownloadSignedUrl(s3Key, dispatch);
+                                const downloadedBinaryString = (await getS3Object(signedUrl)).binaryString;
+                                let response = await window.desktopAPI.putS3Object(fsS3Key, downloadedBinaryString);
+                                if(response.status === "ok"){
+                                    response = await window.desktopAPI.getS3Object(fsS3Key);
+                                    if(response.data === downloadedBinaryString){
+                                        response = {};
+                                    }
+                                }
+                                const itemKey = await getItemKey();
+                                const decryptedContent = decryptBinaryString(downloadedBinaryString, itemKey)
+                                debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
+                                const decodedContent = forge.util.decodeUtf8(decryptedContent);
+                                await downloadObjectsInAnItem(decodedContent);
+                                resolve();
+                            } else if (item.content && item.content.startsWith('s3DrawingObject/')) {
+                                const s3Key = forge.util.decode64(result.item.content.substring(16));
+                                const signedUrl = await getBackupDownloadSignedUrl(s3Key, dispatch);
+                                const downloadedBinaryString = await (getS3Object(signedUrl)).binaryString;
+                                resolve();
+                            }
+                        });
+                    }
+    
+                    const downloadVideos = () => {
+                        return new Promise(async (resolve, reject) => {
+                        });
+                    }
+
+                    const downloadImages = () => {
+
+                    }
+
+                    const downloadAudios = () => {
+
+                    }
+
+                    const downloadAttachments = () => {
+
+                    }
+
                     while (1) {
                         const workspace = getState().container.workspace;
                         let response = await window.desktopAPI.getAnItemForDownloadingObjects(workspace);
-                        if(response.item){
+                        if (response.item) {
                             const item = response.item;
+                            if(item.content){
+                                await downloadContentObjects(response.item);
+                            }
                             response = await window.desktopAPI.finishedDownloadingObjectsForAnItem(item.id, item.version);
                         } else {
                             break;
