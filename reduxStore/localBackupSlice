@@ -6,6 +6,7 @@ import { debugLog, PostCall } from '../lib/helper';
 import { localBackupActivity } from '../lib/activities';
 import { putS3Object, getS3Object } from '../lib/s3Helper';
 import { decryptBinaryString } from '../lib/crypto';
+import { getEditorConfig } from '../lib/bSafesCommonUI';
 const debugOn = true;
 const ITEM_VERSIONS_BACKUP_FEATURE = true;
 
@@ -287,15 +288,30 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                     const downloadAnObject = (s3Key) => {
                         return new Promise(async (resolve, reject) => {
                             const fsS3Key = s3Key.split('/').at(-1);
-                            const signedUrl = await getBackupDownloadSignedUrl(s3Key, dispatch);
-                            const downloadedBinaryString = (await getS3Object(signedUrl)).binaryString;
-                            let response = await window.desktopAPI.putS3Object(fsS3Key, downloadedBinaryString);
+                            let response = await window.desktopAPI.isS3ObjectExisted(fsS3Key);
                             if (response.status === "ok") {
-                                resolve({ status: "ok", downloadedBinaryString });
-                                response = await window.desktopAPI.getS3Object(fsS3Key);
-                                if (response.data === downloadedBinaryString) {
-                                    response = {};
+                                let downloadedBinaryString;
+                                if (!response.existed) {
+                                    const signedUrl = await getBackupDownloadSignedUrl(s3Key, dispatch);
+                                    downloadedBinaryString = (await getS3Object(signedUrl)).binaryString;
+                                    response = await window.desktopAPI.putS3Object(fsS3Key, downloadedBinaryString);
+                                    if (response.status === "ok") {
+                                        resolve({ status: "ok", downloadedBinaryString });
+                                        response = await window.desktopAPI.getS3Object(fsS3Key);
+                                        if (response.data === downloadedBinaryString) {
+                                            response = {};
+                                        }
+                                    } else {
+                                        resolve(response);
+                                        return;
+                                    }
+                                } else {
+                                    console.log("The object already existed.s3Key: ", fsS3Key)
+                                    response = await window.desktopAPI.getS3Object(fsS3Key);
+                                    downloadedBinaryString = response.data;
+                                    resolve({ status: "ok", downloadedBinaryString });
                                 }
+
                             } else {
                                 resolve(response);
                             }
@@ -419,17 +435,71 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                             resolve({ status: "ok" });
                         });
                     }
-
-                    const downloadImageObjects = () => {
-
+                    const downloadImageObjects = (item) => {
+                        return new Promise(async (resolve, reject) => {
+                            const images = JSON.parse(item.images);
+                            let s3Objects = [];
+                            for (let i = 0; i < images.length; i++) {
+                                let image = images[i];
+                                let s3Key = image.s3Key;
+                                s3Objects.push(s3Key);
+                            }
+                            for (let i = 0; i < s3Objects.length; i++) {
+                                let s3Key = s3Objects[i];
+                                let response = await downloadAnObject(s3Key);
+                                if (response.status !== "ok") {
+                                    resolve(response);
+                                    break;
+                                }
+                            }
+                            resolve({ status: "ok" });
+                        });
                     }
-
-                    const downloadAudioObjects = () => {
-
+                    const downloadAudioObjects = (item) => {
+                        return new Promise(async (resolve, reject) => {
+                            const audios = JSON.parse(item.audios);
+                            let s3Objects = [];
+                            for (let i = 0; i < audios.length; i++) {
+                                let audio = audios[i];
+                                let chunks = audio.numberOfChunks;
+                                for (let i = 0; i < chunks; i++) {
+                                    let s3Key = audio.s3KeyPrefix + '_chunk_' + i;
+                                    s3Objects.push(s3Key);
+                                }
+                            }
+                            for (let i = 0; i < s3Objects.length; i++) {
+                                let s3Key = s3Objects[i];
+                                let response = await downloadAnObject(s3Key);
+                                if (response.status !== "ok") {
+                                    resolve(response);
+                                    break;
+                                }
+                            }
+                            resolve({ status: "ok" });
+                        });
                     }
-
-                    const downloadAttachmentObjects = () => {
-
+                    const downloadAttachmentObjects = (item) => {
+                        return new Promise(async (resolve, reject) => {
+                            const attachments = JSON.parse(item.attachments);
+                            let s3Objects = [];
+                            for (let i = 1; i < attachments.length; i++) {
+                                let attachment = attachments[i];
+                                let chunks = attachment.numberOfChunks;
+                                for (let i = 0; i < chunks; i++) {
+                                    let s3Key = attachment.s3KeyPrefix + '_chunk_' + i;
+                                    s3Objects.push(s3Key);
+                                }
+                            }
+                            for (let i = 0; i < s3Objects.length; i++) {
+                                let s3Key = s3Objects[i];
+                                let response = await downloadAnObject(s3Key);
+                                if (response.status !== "ok") {
+                                    resolve(response);
+                                    break;
+                                }
+                            }
+                            resolve({ status: "ok" });
+                        });
                     }
 
                     while (1) {
@@ -446,6 +516,15 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                             }
                             if (item.videos) {
                                 response = await downloadVideoObjects(item)
+                            }
+                            if (item.images) {
+                                response = await downloadImageObjects(item)
+                            }
+                            if (item.audios) {
+                                response = await downloadAudioObjects(item)
+                            }
+                            if (item.attachments) {
+                                response = await downloadAttachmentObjects(item)
                             }
                             if (finished) {
                                 response = await window.desktopAPI.finishedDownloadingObjectsForAnItem(item.id, item.version);
