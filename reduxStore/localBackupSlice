@@ -7,6 +7,9 @@ import { localBackupActivity } from '../lib/activities';
 import { putS3Object, getS3Object } from '../lib/s3Helper';
 import { decryptBinaryString } from '../lib/crypto';
 import { getEditorConfig } from '../lib/bSafesCommonUI';
+
+import { pageLoaded, setListingDone, setListingItems, setMode, } from './containerSlice';
+
 const debugOn = true;
 const ITEM_VERSIONS_BACKUP_FEATURE = true;
 
@@ -16,6 +19,7 @@ const initialState = {
     activityErrorCodes: {},
     error: null,
     signedUrlForBackup: null,
+    newLocalItemUpdated: false,
 }
 
 const localBackupSlice = createSlice({
@@ -49,12 +53,15 @@ const localBackupSlice = createSlice({
             } else {
                 state.signedUrlForBackup = null;
             }
+        },
+        setNewLocalItemUpdated: (state, action) => {
+            state.newLocalItemUpdated = action.payload;
         }
     }
 })
 
 
-export const { resetAuthActivity, activityStart, activityDone, activityError, setSignedUrlForBackup } = localBackupSlice.actions;
+export const { resetAuthActivity, activityStart, activityDone, activityError, setSignedUrlForBackup, setNewLocalItemUpdated } = localBackupSlice.actions;
 export const localBackupReducer = localBackupSlice.reducer;
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
@@ -98,7 +105,6 @@ export const backupAnItemVersionToS3 = (item, dispatch, getState) => {
         }
     });
 }
-
 export const getBackupToken = (dispatch) => {
     return new Promise(async (resolve, reject) => {
         PostCall({
@@ -161,10 +167,8 @@ export const getBackupTokenThunk = (data) => async (dispatch, getState) => {
     })
 }
 export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) => {
-    newActivity(dispatch, localBackupActivity.downloadItemVersionsBackup, () => {
+    newActivity(dispatch, localBackupActivity.DownloadItemVersionsBackup, () => {
         return new Promise(async (resolve, reject) => {
-            /*const response = await window.desktopAPI.ping()
-            console.log(response) // prints out 'pong'*/
             if (!localStorage.getItem("backupToken")) {
                 await getBackupToken(dispatch);
             }
@@ -271,7 +275,10 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                                 debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
                                 const data = await getS3Object(signedUrl);
                                 const itemVersion = JSON.parse(data.binaryString);
-                                const respone = await window.desktopAPI.addAnItemVersion(key, itemVersion);
+                                const result = await window.desktopAPI.addAnItemVersion(key, itemVersion);
+                                if (result.status === "ok") {
+                                    dispatch(setNewLocalItemUpdated(true));
+                                }
                             } else {
                                 break;
                             }
@@ -549,6 +556,69 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
         });
     });
 }
-
+export const listLocalItemsThunk = (data) => async (dispatch, getState) => {
+    newActivity(dispatch, localBackupActivity.ListLocalItems, () => {
+        return new Promise(async (resolve, reject) => {
+            const workspace = getState().container.workspace;
+            let state, pageNumber;
+            dispatch(setListingDone(false));
+            dispatch(setListingItems(true));
+            dispatch(setMode("listAll"));
+            state = getState().container;
+            if (!state.container) {
+                reject('container is null!');
+                return;
+            }
+            let body;
+            if (state.container.startsWith('n')) {
+                pageNumber = data.pageNumber;
+                body = {
+                    container: state.container,
+                    size: state.itemsPerPage,
+                    from: (pageNumber - 1) * state.itemsPerPage,
+                }
+            } else if (state.container.startsWith('d')) {
+                let selectedDiaryContentStartPosition, selectedDiaryContentEndPosition;
+                const startDate = data.startDate;
+                pageNumber = 1;
+                selectedDiaryContentStartPosition = parseInt(startDate + '00');
+                selectedDiaryContentEndPosition = parseInt(startDate + '31');
+                body = {
+                    container: state.container,
+                    size: 31,
+                    from: 0,
+                    selectedDiaryContentStartPosition,
+                    selectedDiaryContentEndPosition
+                }
+            } else if (state.container.startsWith('f') || state.container.startsWith('b') || state.container.startsWith('t')) {
+                pageNumber = data.pageNumber;
+                body = {
+                    container: state.container,
+                    size: state.itemsPerPage,
+                    from: (pageNumber - 1) * state.itemsPerPage,
+                }
+            } else {
+                pageNumber = data.pageNumber;
+                body = {
+                    container: state.workspace,
+                    size: state.itemsPerPage,
+                    from: (pageNumber - 1) * state.itemsPerPage,
+                }
+            }
+            let response = await window.desktopAPI.listItems(body);
+            if (response.status === "ok") {
+                const total = response.hits.total;
+                const hits = response.hits.hits;
+                dispatch(pageLoaded({ pageNumber, total, hits }));
+                dispatch(setListingDone(true));
+                resolve();
+            } else {
+                debugLog(debugOn, "listItems failed: ", data.error);
+                reject("Failed to list items.");
+            }
+            dispatch(setListingItems(false));
+        });
+    });
+}
 
 export default localBackupSlice;

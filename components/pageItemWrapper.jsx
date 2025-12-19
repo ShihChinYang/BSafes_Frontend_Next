@@ -12,6 +12,7 @@ import BSafesStyle from '../styles/BSafes.module.css'
 
 import { clearContainer, initContainer, initWorkspaceThunk, changeContainerOnly, clearItems, listItemsThunk, setWorkspaceKeyReady, setStartDateValue, setDiaryContentsPageFirstLoaded, setTurningPage } from '../reduxStore/containerSlice';
 import { abort, clearPage, initPage, setChangingPage, setContainerData, setPageItemId, setPageStyle, decryptPageItemThunk, getPageItemThunk, setDraftInterval } from "../reduxStore/pageSlice";
+import { setNewLocalItemUpdated }  from "../reduxStore/localBackupSlice";
 
 import { debugLog } from "../lib/helper";
 
@@ -47,7 +48,8 @@ const PageItemWrapper = ({ itemId, children }) => {
   const space = useSelector(state => state.page.space);
   const container = useSelector(state => state.page.container);
   const itemCopy = useSelector(state => state.page.itemCopy);
-  const draftInterval = useSelector(state => state.page.draftInterval);
+
+  const newLocalItemUpdated = useSelector(state => state.localBackup.newLocalItemUpdated);
 
   debugLog(debugOn, "aborted: ", aborted);
   debugLog(debugOn, "itemId: ", itemId);
@@ -259,6 +261,11 @@ const PageItemWrapper = ({ itemId, children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceKeyReady, containerInWorkspace]);
 
+  useEffect(() => {
+    if (newLocalItemUpdated) {
+      dispatch(setNewLocalItemUpdated(false));
+    }
+  }, [newLocalItemUpdated])
 
 
   return (

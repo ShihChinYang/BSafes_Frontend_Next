@@ -24,6 +24,7 @@ import { getItemLink } from '../lib/bSafesCommonUI'
 import { productIdDelimiter } from '../lib/productID';
 import { clearItems, createANewItemThunk, clearNewItem, listItemsThunk, searchItemsThunk, setListingDone } from '../reduxStore/containerSlice';
 import { abort, initPage, clearPage, itemPathLoaded } from '../reduxStore/pageSlice';
+import { setNewLocalItemUpdated, listLocalItemsThunk } from '../reduxStore/localBackupSlice';
 import { debugLog } from '../lib/helper'
 
 const hideFunction = (process.env.NEXT_PUBLIC_functions.indexOf('hide') !== -1)
@@ -52,6 +53,8 @@ export default function Workspace({ readyToList = false }) {
     const itemsPerPage = useSelector(state => state.container.itemsPerPage);
     const total = useSelector(state => state.container.total);
 
+    const newLocalItemUpdated = useSelector(state => state.localBackup.newLocalItemUpdated);
+
     const [selectedItemType, setSelectedItemType] = useState(null);
     const [addAction, setAddAction] = useState(null);
     const [targetItem, setTargetItem] = useState(null);
@@ -63,13 +66,12 @@ export default function Workspace({ readyToList = false }) {
         addAnItem(type, action, target, position);
     }
 
-    const items = itemsState.map((item, index) =>
-        {
-            return (item.id.split(":")[1].startsWith(productIdDelimiter) && (item.itemPack.type === 'N' || item.itemPack.type === 'D')) ?
+    const items = itemsState.map((item, index) => {
+        return (item.id.split(":")[1].startsWith(productIdDelimiter) && (item.itemPack.type === 'N' || item.itemPack.type === 'D')) ?
             <ProductCard key={index} itemIndex={index} item={item} onAdd={handleAdd} />
             :
             <ItemCard key={index} itemIndex={index} item={item} onAdd={handleAdd} />
-        }
+    }
     );
 
     const addAnItem = (itemType, addAction, targetItem = null, targetPosition = null) => {
@@ -158,6 +160,12 @@ export default function Workspace({ readyToList = false }) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [readyToList, container, workspaceId, workspaceKeyReady]);
+
+    useEffect(() => {
+        if (newLocalItemUpdated) {
+            dispatch(setNewLocalItemUpdated(false));
+        }
+    }, [newLocalItemUpdated]);
 
     useEffect(() => {
         if (newItem) {

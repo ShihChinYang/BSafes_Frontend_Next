@@ -10,7 +10,7 @@ import { containerActivity } from '../lib/activities';
 import { getDemoWorkspaceInfo } from '../lib/demoHelper';
 import { readDataFromServiceWorkerDB } from '../lib/serviceWorkerDBHelper';
 
-import { setSignedUrlForBackup, backupAnItemVersionToS3 } from './localBackupSlice';
+import { setSignedUrlForBackup, backupAnItemVersionToS3, listLocalItemsThunk } from './localBackupSlice';
 import { getTeamData } from './teamSlice';
 
 const debugOn = false;
@@ -461,6 +461,14 @@ export const initWorkspaceThunk = (data) => async (dispatch, getState) => {
 };
 
 export const listItemsThunk = (data) => async (dispatch, getState) => {
+    if (process.env.NEXT_PUBLIC_app !== "desktopBackup") {
+        dispatch(listCloudItemsThunk(data));
+    } else {
+        dispatch(listLocalItemsThunk(data));
+    }
+}
+
+export const listCloudItemsThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, containerActivity.ListItems, () => {
         return new Promise(async (resolve, reject) => {
             const workspace = getState().container.workspace;
