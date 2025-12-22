@@ -10,9 +10,9 @@ import format from "date-fns/format";
 
 import BSafesStyle from '../styles/BSafes.module.css'
 
-import { clearContainer, initContainer, initWorkspaceThunk, changeContainerOnly, clearItems, listItemsThunk, setWorkspaceKeyReady, setStartDateValue, setDiaryContentsPageFirstLoaded, setTurningPage } from '../reduxStore/containerSlice';
+import { clearContainer, initContainer, initWorkspaceThunk, changeContainerOnly, clearItems, listItemsThunk, setWorkspaceKeyReady, setStartDateValue, setDiaryContentsPageFirstLoaded, setTurningPage, setCurrenPage } from '../reduxStore/containerSlice';
 import { abort, clearPage, initPage, setChangingPage, setContainerData, setPageItemId, setPageStyle, decryptPageItemThunk, getPageItemThunk, setDraftInterval } from "../reduxStore/pageSlice";
-import { setNewLocalItemUpdated }  from "../reduxStore/localBackupSlice";
+import { setNewLocalItemUpdated } from "../reduxStore/localBackupSlice";
 
 import { debugLog } from "../lib/helper";
 
@@ -39,6 +39,7 @@ const PageItemWrapper = ({ itemId, children }) => {
   const workspaceKey = useSelector(state => state.container.workspaceKey);
   const workspaceKeyReady = useSelector(state => state.container.workspaceKeyReady);
   const startDateValue = useSelector(state => state.container.startDateValue);
+  const currentPage =  useSelector(state => state.container.currentPage);
   const [startDate, setStartDate] = useState(new Date(startDateValue));
 
   const aborted = useSelector(state => state.page.aborted);
@@ -264,6 +265,7 @@ const PageItemWrapper = ({ itemId, children }) => {
   useEffect(() => {
     if (newLocalItemUpdated) {
       dispatch(setNewLocalItemUpdated(false));
+      dispatch(listItemsThunk({ currentPage }));
     }
   }, [newLocalItemUpdated])
 

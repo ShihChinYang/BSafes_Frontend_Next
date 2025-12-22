@@ -15,7 +15,7 @@ import AddAnItemButton from "../../../components/addAnItemButton";
 import NewItemModal from "../../../components/newItemModal";
 import PaginationControl from "../../../components/paginationControl";
 
-import { createANewItemThunk, clearNewItem, listItemsThunk, searchItemsThunk, getFirstItemInContainer, getLastItemInContainer } from "../../../reduxStore/containerSlice";
+import { createANewItemThunk, clearNewItem, listItemsThunk, searchItemsThunk, getFirstItemInContainer, getLastItemInContainer, setCurrenPage } from "../../../reduxStore/containerSlice";
 import { } from "../../../reduxStore/pageSlice";
 
 import { debugLog } from "../../../lib/helper";
@@ -126,6 +126,7 @@ export default function FolderContents() {
 
     const listItems = ({ pageNumber = 1, searchMode }) => {
         const derivedSearchMode = searchMode || mode;
+        dispatch(setCurrenPage(pageNumber));
         if (derivedSearchMode === 'listAll')
             dispatch(listItemsThunk({ pageNumber }));
         else if (derivedSearchMode === 'search')

@@ -5,7 +5,7 @@ const DOMPurify = require('dompurify');
 
 import { setNavigationInSameContainer } from './containerSlice';
 import { setCurrentProduct } from './productSlice';
-import { setSignedUrlForBackup, backupAnItemVersionToS3 } from './localBackupSlice';
+import { setSignedUrlForBackup, backupAnItemVersionToS3, getPageItemFromLocalBackup } from './localBackupSlice';
 import { getBrowserInfo, usingServiceWorker, convertBinaryStringToUint8Array, debugLog, PostCall, extractHTMLElementText, requestAppleReview } from '../lib/helper'
 import { generateNewItemKey, decryptBinaryString, encryptBinaryString, encryptLargeBinaryString, decryptChunkBinaryStringToBinaryStringAsync, decryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync, stringToEncryptedTokensCBC, stringToEncryptedTokensECB, tokenfieldToEncryptedArray, tokenfieldToEncryptedTokensCBC, tokenfieldToEncryptedTokensECB } from '../lib/crypto';
 import { pageActivity } from '../lib/activities';
@@ -1542,12 +1542,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                 containerId = itemIdParts.join(':');
                 containerId = containerId.replace('p:', ':');
                 if (!isDemoMode()) {
-                    debugLog(debugOn, "/memberAPI/getPageItem: ", containerId);
-                    PostCall({
-                        api: '/memberAPI/getPageItem',
-                        body: { itemId: containerId },
-                        dispatch
-                    }).then(result => {
+                    if (process.env.NEXT_PUBLIC_app !== 'desktopBackup') {
+                        const result = await getPageItemFromLocalBackup({ itemId: containerId });
                         if (result.status === 'ok') {
                             debugLog(debugOn, "getContainerData: ", result);
                             if (result.item) {
@@ -1560,7 +1556,27 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             debugLog(debugOn, "woo... failed to get the container data!", data.error);
                             reject("Failed to get the container data.");
                         }
-                    });
+                    } else {
+                        debugLog(debugOn, "/memberAPI/getPageItem: ", containerId);
+                        PostCall({
+                            api: '/memberAPI/getPageItem',
+                            body: { itemId: containerId },
+                            dispatch
+                        }).then(result => {
+                            if (result.status === 'ok') {
+                                debugLog(debugOn, "getContainerData: ", result);
+                                if (result.item) {
+                                    resolve(result.item);
+                                } else {
+                                    debugLog(debugOn, "woo... failed to get the container data!", data.error);
+                                    reject("Failed to get the container data.");
+                                }
+                            } else {
+                                debugLog(debugOn, "woo... failed to get the container data!", data.error);
+                                reject("Failed to get the container data.");
+                            }
+                        });
+                    }
                 } else {
                     debugLog(debugOn, "getDemoItemFromServiceWorkerDB: ", containerId);
                     const result = await getDemoItemFromServiceWorkerDB(dispatch, containerId);
@@ -1617,7 +1633,6 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
 
                 })
             }
-
             async function processResultItem(result) {
                 dispatch(dataFetched({ item: result.item }));
                 const getCurrentItemKey = () => {
@@ -1690,6 +1705,59 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                 } else {
                     resolve();
                 }
+            }
+            function getItemFromLocalBackup() {
+                return new Promise(async (resolve, reject) => {
+                    debugLog(debugOn, "getItemFromLocalBackup: ", data.itemId);
+                    const productId = data.itemId.split(productIdDelimiter)[1] || "";
+                    dispatch(setCurrentProduct(productId));
+                    const result = await getPageItemFromLocalBackup(payload);
+                    if (result.status === 'ok') {
+                        if (data.itemId !== state.activeRequest) {
+                            debugLog(debugOn, "Aborted");
+                            reject("Aborted");
+                            return;
+                        }
+                        if (result.item) {
+                            await processResultItem(result);
+                            dispatch(setGetPageContentDone(true));
+                        } else {
+                            dispatch(setGetPageContentDone(true));
+                            if (data.navigationInSameContainer) {
+                                debugLog(debugOn, "setNavigationMode ...");
+                                dispatch(setNavigationMode(true));
+                                dispatch(setNavigationInSameContainer(false));
+                            } else if (!data.navigationInSameContainer && (data.itemId.startsWith('np') || data.itemId.startsWith('dp'))) {
+                                try {
+                                    const container = await getContainerData(data.itemId);
+                                    state = getState().page;
+                                    if (data.itemId === state.activeRequest) {
+                                        dispatch(containerDataFetched({ itemId: data.itemId, container }));
+                                    } else {
+                                        reject("Aborted");
+                                        return;
+                                    }
+                                } catch (error) {
+                                    reject("Failed to get the container data!");
+                                    return;
+                                }
+                            }
+                        }
+                        const { draftId, draftContentTypeId } = formDraftId(data.itemId);
+                        const response = await readDraftInDB(draftId);
+                        if (response.status === 'ok') {
+                            const draft = response.data;
+                            const draftContentType = localStorage.getItem(draftContentTypeId);
+                            if (draft) {
+                                dispatch(setDraft({ draft, draftContentType }));
+                            }
+                        }
+                        resolve();
+                    } else {
+                        debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
+                        reject("Failed to get a page item.");
+                    } Ｆ
+                });
             }
             function getItemFromServer() {
                 return new Promise((resolve, reject) => {
@@ -1784,7 +1852,6 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     })
                 })
             }
-
             async function downloadAdjacentPages() {
 
                 function downloadAPage(itemId) {
@@ -1916,7 +1983,6 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     }
                 }
             }
-
             if (!isDemoMode()) {
                 try {
                     function queryItemFromServer() {
@@ -1941,7 +2007,9 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             })
                         })
                     }
-                    if (navigationInSameContainer) {
+                    if (process.env.NEXT_PUBLIC_app !== 'desktopBackup') {
+                        await getItemFromLocalBackup();
+                    } else if (navigationInSameContainer) {
                         const result = await getItemFromServiceWorkerDB(data.itemId);
                         if ((result.status === 'ok') && result.item) {
                             await processResultItem(result);

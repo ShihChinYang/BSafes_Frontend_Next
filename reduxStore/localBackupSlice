@@ -620,5 +620,9 @@ export const listLocalItemsThunk = (data) => async (dispatch, getState) => {
         });
     });
 }
+export const getPageItemFromLocalBackup = (payload) => {
+    return new Promise(async (resolve, reject) => {
+    });
+}
 
 export default localBackupSlice;

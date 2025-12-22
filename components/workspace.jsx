@@ -22,7 +22,7 @@ import PaginationControl from './paginationControl';
 
 import { getItemLink } from '../lib/bSafesCommonUI'
 import { productIdDelimiter } from '../lib/productID';
-import { clearItems, createANewItemThunk, clearNewItem, listItemsThunk, searchItemsThunk, setListingDone } from '../reduxStore/containerSlice';
+import { clearItems, createANewItemThunk, clearNewItem, listItemsThunk, searchItemsThunk, setListingDone, setCurrenPage } from '../reduxStore/containerSlice';
 import { abort, initPage, clearPage, itemPathLoaded } from '../reduxStore/pageSlice';
 import { setNewLocalItemUpdated, listLocalItemsThunk } from '../reduxStore/localBackupSlice';
 import { debugLog } from '../lib/helper'
@@ -52,6 +52,7 @@ export default function Workspace({ readyToList = false }) {
     const pageNumber = useSelector(state => state.container.pageNumber);
     const itemsPerPage = useSelector(state => state.container.itemsPerPage);
     const total = useSelector(state => state.container.total);
+    const currentPage = useSelector(state => state.container.currentPage);
 
     const newLocalItemUpdated = useSelector(state => state.localBackup.newLocalItemUpdated);
 
@@ -112,6 +113,7 @@ export default function Workspace({ readyToList = false }) {
 
     const listItems = ({ pageNumber = 1, searchMode }) => {
         const derivedSearchMode = searchMode || mode;
+        dispatch(setCurrenPage(pageNumber));
         if (derivedSearchMode === 'listAll')
             dispatch(listItemsThunk({ pageNumber }));
         else if (derivedSearchMode === 'search')
@@ -164,6 +166,7 @@ export default function Workspace({ readyToList = false }) {
     useEffect(() => {
         if (newLocalItemUpdated) {
             dispatch(setNewLocalItemUpdated(false));
+            dispatch(listItemsThunk({ currentPage }));
         }
     }, [newLocalItemUpdated]);
 
@@ -279,7 +282,7 @@ export default function Workspace({ readyToList = false }) {
             <br />
             <br />
             <br />
-            {!hideFunction && workspaceId && <Row>
+            {process.env.NEXT_PUBLIC_app !== "desktopBackup" && !hideFunction && workspaceId && <Row>
                 <Col xs={12}>
                     <Link href={"/trashBox/" + workspaceId} legacyBehavior>
                         <Button variant="light" className='pull-right border-0 shadow-none'>

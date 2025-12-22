@@ -15,7 +15,7 @@ import ItemRow from "./itemRow";
 import TurningPageControls from "./turningPageControls";
 import PaginationControl from "./paginationControl";
 
-import { listItemsThunk, searchItemsThunk, getFirstItemInContainer, getLastItemInContainer } from "../reduxStore/containerSlice";
+import { listItemsThunk, searchItemsThunk, getFirstItemInContainer, getLastItemInContainer, setCurrenPage } from "../reduxStore/containerSlice";
 import { setPageStyle } from "../reduxStore/pageSlice";
 import { NotebookDemo, products } from "../lib/productID";
 import { debugLog } from "../lib/helper";
@@ -142,6 +142,7 @@ export default function NotebookContentsCommon({ demo = false }) {
 
     const listItems = ({ pageNumber = 1, searchMode }) => {
         const derivedSearchMode = searchMode || mode;
+        dispatch(setCurrenPage(pageNumber));
         if (derivedSearchMode === 'listAll')
             dispatch(listItemsThunk({ pageNumber }));
         else if (derivedSearchMode === 'search')

@@ -50,7 +50,8 @@ const initialState = {
     reloadAPage: false,
     itemTrashed: false,
     listingDone: false,
-    turningPage: false
+    turningPage: false,
+    currentPage: 1,
 };
 
 function separateActivities(activities, getTitle) {
@@ -298,11 +299,14 @@ const containerSlice = createSlice({
         },
         setTurningPage: (state, action) => {
             state.turningPage = action.payload;
+        },
+        setCurrenPage: (state, action) => {
+            state.currentPage = action.payload;
         }
     }
 })
 
-export const { cleanContainerSlice, resetContainerActivity, activityStart, activityDone, activityError, setListingItems, clearContainer, setNavigationInSameContainer, changeContainerOnly, initContainer, setWorkspaceKeyReady, setMode, pageLoaded, clearItems, setNewItem, clearNewItem, selectItem, deselectItem, clearSelected, containersLoaded, setStartDateValue, setDiaryContentsPageFirstLoaded, trashBoxIdLoaded, clearActivities, activitiesLoaded, setMovingItemsTask, completedMovingAnItem, insertAnItemBefore, insertAnItemAfter, setReloadAPage, clearReoloadAPage, setItemTrashed, setListingDone, setDemoWorkspace, setTurningPage } = containerSlice.actions;
+export const { cleanContainerSlice, resetContainerActivity, activityStart, activityDone, activityError, setListingItems, clearContainer, setNavigationInSameContainer, changeContainerOnly, initContainer, setWorkspaceKeyReady, setMode, pageLoaded, clearItems, setNewItem, clearNewItem, selectItem, deselectItem, clearSelected, containersLoaded, setStartDateValue, setDiaryContentsPageFirstLoaded, trashBoxIdLoaded, clearActivities, activitiesLoaded, setMovingItemsTask, completedMovingAnItem, insertAnItemBefore, insertAnItemAfter, setReloadAPage, clearReoloadAPage, setItemTrashed, setListingDone, setDemoWorkspace, setTurningPage, setCurrenPage } = containerSlice.actions;
 
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
