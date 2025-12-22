@@ -1712,6 +1712,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     const productId = data.itemId.split(productIdDelimiter)[1] || "";
                     dispatch(setCurrentProduct(productId));
                     const result = await getPageItemFromLocalBackup(payload);
+                    let state = getState().page;
                     if (result.status === 'ok') {
                         if (data.itemId !== state.activeRequest) {
                             debugLog(debugOn, "Aborted");
@@ -1756,7 +1757,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     } else {
                         debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
                         reject("Failed to get a page item.");
-                    } Ｆ
+                    } 
                 });
             }
             function getItemFromServer() {
@@ -2007,7 +2008,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             })
                         })
                     }
-                    if (process.env.NEXT_PUBLIC_app !== 'desktopBackup') {
+                    if (process.env.NEXT_PUBLIC_app === 'desktopBackup') {
                         await getItemFromLocalBackup();
                     } else if (navigationInSameContainer) {
                         const result = await getItemFromServiceWorkerDB(data.itemId);

@@ -240,7 +240,8 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                     try {
                         let continuationToken = 0;
                         let isTruncated = false;
-                        const response = await window.desktopAPI.getLastItemKey();
+                        const memberId = getState().auth.memberId;
+                        const response = await window.desktopAPI.getLastItemKey(memberId);
                         let startAfter = 0;
                         if (response.key) {
                             startAfter = response.key;
@@ -248,6 +249,8 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                         do {
                             const result = await getItemVersionsBackupList(startAfter, continuationToken, 4,);
                             if (result.numberOfItems) {
+                                const memberId = getState().auth.memberId;
+                                result.memberId = memberId;
                                 const response = await window.desktopAPI.addItemKeys(result);
                                 console.log(response) // prints out 'pong'
                             }
@@ -266,7 +269,8 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                 return new Promise(async (resolve, reject) => {
                     try {
                         while (1) {
-                            const response = await window.desktopAPI.getAnItemKeyForDwonload();
+                            const memberId = getState().auth.memberId;
+                            const response = await window.desktopAPI.getAnItemKeyForDwonload(memberId);
                             if (response.key) {
                                 const key = response.key;
                                 const dataCenter = localStorage.getItem("registeredDataCenter");
@@ -275,7 +279,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                                 debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
                                 const data = await getS3Object(signedUrl);
                                 const itemVersion = JSON.parse(data.binaryString);
-                                const result = await window.desktopAPI.addAnItemVersion(key, itemVersion);
+                                const result = await window.desktopAPI.addAnItemVersion(memberId, key, itemVersion);
                                 if (result.status === "ok") {
                                     dispatch(setNewLocalItemUpdated(true));
                                 }
@@ -622,6 +626,8 @@ export const listLocalItemsThunk = (data) => async (dispatch, getState) => {
 }
 export const getPageItemFromLocalBackup = (payload) => {
     return new Promise(async (resolve, reject) => {
+        let response = await window.desktopAPI.getPageItem(payload);
+        resolve(response);
     });
 }
 
