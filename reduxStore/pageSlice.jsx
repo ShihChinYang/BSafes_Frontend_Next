@@ -1189,6 +1189,39 @@ const newActivity = async (dispatch, type, activity) => {
     }
 }
 
+const getS3ObjectForAPage = (itemId, s3Key, cacheInServiceWorkerDB = true, dispatch, getState, signedURL = null, downloadingFunction = null, baseProgress = 0, progressRatio = 1, indexInQueue = -1) => {
+    return new Promise(async (resolve, reject) => {
+        let downloadedBinaryString = null;
+        try {
+            if (cacheInServiceWorkerDB) {
+                const response = await getS3ObjectFromServiceWorkerDB(s3Key);
+                if (response.status === 'ok' && response.object) {
+                    downloadedBinaryString = response.object;
+                    resolve(downloadedBinaryString);
+                    return;
+                }
+            }
+            if (process.env.NEXT_PUBLIC_app !== "desktopBackup") {
+                let s3SignedUrl = signedURL;
+                if (!s3SignedUrl) {
+                }
+                const response = await XHRDownload(itemId, dispatch, getState, s3SignedUrl, downloadingFunction, baseProgress, progressRatio, indexInQueue);
+                const buffer = Buffer.from(response, 'binary');
+                downloadedBinaryString = buffer.toString('binary');
+                if (cacheInServiceWorkerDB) {
+                    await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
+                }
+                resolve(downloadedBinaryString);
+            } else {
+
+
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 const XHRDownload = (itemId, dispatch, getState, signedURL, downloadingFunction = null, baseProgress = 0, progressRatio = 1, indexInQueue = -1) => {
     return new Promise(async (resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -1424,15 +1457,12 @@ const startDownloadingContentImages = async (itemId, dispatch, getState) => {
                     dispatch(downloadingContentImage({ itemId, progress: 5 }));
                     const signedURL = await preS3Download(state.id, s3Key, dispatch);
                     dispatch(downloadingContentImage({ itemId, progress: 10 }));
-                    const response = await XHRDownload(itemId, dispatch, getState, signedURL, downloadingContentImage);
-                    debugLog(debugOn, "downloadAnContentImage completed. Length: ", response.byteLength);
+                    downloadedBinaryString = await getS3ObjectForAPage(itemId, s3Key, false, dispatch, getState, signedURL, downloadingContentImage);
                     if (itemId !== state.activeRequest) {
                         debugLog(debugOn, "Aborted!");
                         reject("Aborted")
                         return;
-                    };
-                    const buffer = Buffer.from(response, 'binary');
-                    downloadedBinaryString = buffer.toString('binary');
+                    }
                 } else {
                     const result = await getS3ObjectFromServiceWorkerDB(s3Key);
                     if (result.status === 'ok') {
@@ -1652,17 +1682,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                 if (result.item.content && result.item.content.startsWith('s3Object/')) {
                     dispatch(setContentType('WritingPage'));
                     const s3Key = forge.util.decode64(result.item.content.substring(9));
-                    const response = await getS3ObjectFromServiceWorkerDB(s3Key);
-                    let downloadedBinaryString = null;
-                    if (response.status === 'ok' && response.object) {
-                        downloadedBinaryString = response.object;
-                    } else {
-                        const signedContentUrl = result.item.signedContentUrl;
-                        const response = await XHRDownload(null, dispatch, getState, signedContentUrl, null);
-                        const buffer = Buffer.from(response, 'binary');
-                        downloadedBinaryString = buffer.toString('binary');
-                        await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
-                    }
+                    let downloadedBinaryString = await getS3ObjectForAPage(result.item.id, s3Key, true, dispatch, getState, result.item.signedContentUrl);
                     debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
                     await itemKeyReady();
                     const keyData = getCurrentItemKey();
@@ -1676,17 +1696,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                 } else if (result.item.content && result.item.content.startsWith('s3DrawingObject/')) {
                     dispatch(setContentType('DrawingPage'));
                     const s3Key = forge.util.decode64(result.item.content.substring(16));
-                    const response = await getS3ObjectFromServiceWorkerDB(s3Key);
-                    let downloadedBinaryString = null;
-                    if (response.status === 'ok' && response.object) {
-                        downloadedBinaryString = response.object;
-                    } else {
-                        const signedContentUrl = result.item.signedContentUrl;
-                        const response = await XHRDownload(null, dispatch, getState, signedContentUrl, null);
-                        const buffer = Buffer.from(response, 'binary');
-                        downloadedBinaryString = buffer.toString('binary');
-                        await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
-                    }
+                    let downloadedBinaryString = await getS3ObjectForAPage(result.item.id, s3Key, true, dispatch, getState, result.item.signedContentUrl);
                     debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
                     await itemKeyReady();
                     const keyData = getCurrentItemKey();
@@ -1757,7 +1767,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     } else {
                         debugLog(debugOn, "woo... failed to get a page item!!!", result.error);
                         reject("Failed to get a page item.");
-                    } 
+                    }
                 });
             }
             function getItemFromServer() {
@@ -1854,25 +1864,16 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                 })
             }
             async function downloadAdjacentPages() {
-
                 function downloadAPage(itemId) {
                     function downloadS3Object(s3Key) {
                         return new Promise(async (resolve, reject) => {
-                            const response = await getS3ObjectFromServiceWorkerDB(s3Key);
-                            if (!(response.status === 'ok' && response.object)) {
-                                const signedURL = await preS3Download(itemId, s3Key);
-                                const response = await XHRDownload(null, dispatch, getState, signedURL, null);
-                                const buffer = Buffer.from(response, 'binary');
-                                const downloadedBinaryString = buffer.toString('binary');
-                                await putS3ObjectToServiceWorkerDB(s3Key, downloadedBinaryString);
-                            }
+                            const signedURL = await preS3Download(itemId, s3Key);
+                            let downloadedBinaryString = await getS3ObjectForAPage(null, s3Key, true, dispatch, getState, signedURL, null);
                             resolve();
                         });
                     }
-
                     return new Promise(async (resolve, reject) => {
                         let item = null;
-
                         async function getContentObject(item) {
                             if (item) {
                                 let s3Key = null;
@@ -2185,16 +2186,13 @@ export const decryptPageItemThunk = (data) => async (dispatch, getState) => {
                         if (!workspace.startsWith("d:")) {
                             dispatch(downloadingImage({ itemId, progress: 5 }));
                             const signedURL = await preS3Download(state.id, s3Key, dispatch);
+                            downloadedBinaryString = await getS3ObjectForAPage(itemId, s3Key, false, dispatch, getState, signedURL, downloadingImage);
                             dispatch(downloadingImage({ itemId, progress: 10 }));
-                            const response = await XHRDownload(itemId, dispatch, getState, signedURL, downloadingImage);
-                            debugLog(debugOn, "downloadAnImage completed. Length: ", response.byteLength);
                             if (itemId !== state.activeRequest) {
                                 debugLog(debugOn, "Aborted!");
                                 reject("Aborted")
                                 return;
                             };
-                            const buffer = Buffer.from(response, 'binary');
-                            downloadedBinaryString = buffer.toString('binary');
                         } else {
                             const result = await getS3ObjectFromServiceWorkerDB(s3Key);
                             if (result.status === 'ok') {
@@ -2372,10 +2370,8 @@ export const downloadVideoThunk = (data) => async (dispatch, getState) => {
         debugLog(debugOn, "downloadAVideo");
         let decryptedVideoStr, videoStarted = false;
         return new Promise(async (resolve, reject) => {
-
             if (video.numberOfChunks) {
                 let s3KeyPrefix, encrytedFileName, fileName, fileType, fileSize, numberOfChunks, messageChannel, fileInUint8Array, fileInUint8ArrayIndex, videoLinkFromServiceWorker;
-
                 if (fromContent) {
                     encrytedFileName = atob(video.fileName);
                     fileName = decryptBinaryString(encrytedFileName, state.itemKey, state.itemIV);
@@ -2531,25 +2527,11 @@ export const downloadVideoThunk = (data) => async (dispatch, getState) => {
                     return new Promise(async (resolve, reject) => {
                         try {
                             let result = await preS3ChunkDownload(state.id, chunkIndex, s3KeyPrefix, false, dispatch);
-                            let response;
-                            response = await XHRDownload(state.id, dispatch, getState, result.signedURL, downloadingVideo, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInVideosDownloadQueue);
-
-                            debugLog(debugOn, "downloadChunk completed. Length: ", response.byteLength);
-                            if (state.activeRequest !== itemId) {
-                                reject("Aborted");
-                                return;
-                            }
-
-
-                            let buffer = Buffer.from(response, 'binary');
-                            let downloadedBinaryString = buffer.toString('binary');
+                            let downloadedBinaryString = await getS3ObjectForAPage(state.id, result.s3Key, false, dispatch, getState, result.signedURL, fromContent? downloadingContentVideo:downloadingVideo, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInVideosDownloadQueue)
                             debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
                             let decryptedChunkStr = await decryptChunkBinaryStringToBinaryStringAsync(downloadedBinaryString, state.itemKey)
                             debugLog(debugOn, "Decrypted chunk string length: ", decryptedChunkStr.length);
-
                             await writeAChunkToFile(chunkIndex, decryptedChunkStr);
-
-
                             resolve();
                         } catch (error) {
                             debugLog(debugOn, "downloadDecryptAndAssemble failed: ", error);
@@ -2571,23 +2553,16 @@ export const downloadVideoThunk = (data) => async (dispatch, getState) => {
                     dispatch(downloadingContentVideo({ itemId, progress: 5 }));
                     const signedURL = await preS3Download(state.id, s3Key, dispatch);
                     dispatch(downloadingContentVideo({ itemId, progress: 10 }));
-                    const response = await XHRDownload(itemId, dispatch, getState, signedURL, downloadingContentVideo)
-                    debugLog(debugOn, "downloadAVideo completed. Length: ", response.byteLength);
-
-                    const buffer = Buffer.from(response, 'binary');
-                    const downloadedBinaryString = buffer.toString('binary');
+                    const downloadedBinaryString = await getS3ObjectForAPage(itemId, s3Key, false, dispatch, getState, signedURL, downloadingContentVideo )
                     debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
                     decryptedVideoStr = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
                     debugLog(debugOn, "Decrypted image string length: ", decryptedVideoStr.length);
-
                     const decryptedVideoDataInUint8Array = convertBinaryStringToUint8Array(decryptedVideoStr);
                     const link = window.URL.createObjectURL(new Blob([decryptedVideoDataInUint8Array]), {
                         type: 'video/*'
                     });
-
                     dispatch(contentVideoDownloaded({ itemId, indexInQueue, link }));
                     resolve();
-
                 } catch (error) {
                     debugLog(debugOn, 'downloadFromS3 error: ', error)
                     reject("Failed to download and decrypt a video chunk.");
@@ -2782,24 +2757,15 @@ export const downloadAudioThunk = (data) => async (dispatch, getState) => {
                     return new Promise(async (resolve, reject) => {
                         try {
                             let result = await preS3ChunkDownload(state.id, chunkIndex, s3KeyPrefix, false, dispatch);
-                            let response;
-                            response = await XHRDownload(state.id, dispatch, getState, result.signedURL, downloadingAudio, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInAudiosDownloadQueue);
-                            debugLog(debugOn, "downloadChunk completed. Length: ", response.byteLength);
+                            let downloadedBinaryString = await getS3ObjectForAPage(state.id, result.s3Key, false, dispatch, getState, result.signedURL, downloadingAudio, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInAudiosDownloadQueue);
                             if (state.activeRequest !== itemId) {
                                 reject("Aborted");
                                 return;
                             }
-
-
-                            let buffer = Buffer.from(response, 'binary');
-                            let downloadedBinaryString = buffer.toString('binary');
                             debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
                             let decryptedChunkStr = await decryptChunkBinaryStringToBinaryStringAsync(downloadedBinaryString, state.itemKey)
                             debugLog(debugOn, "Decrypted chunk string length: ", decryptedChunkStr.length);
-
                             await writeAChunkToFile(chunkIndex, decryptedChunkStr);
-
-
                             resolve();
                         } catch (error) {
                             debugLog(debugOn, "downloadDecryptAndAssemble failed: ", error);
@@ -2808,12 +2774,10 @@ export const downloadAudioThunk = (data) => async (dispatch, getState) => {
                         }
                     });
                 }
-
                 if (!(await setupWriter())) {
                     reject("setupWriter failed");
                     return;
                 };
-
             }
         });
     }
@@ -5350,14 +5314,11 @@ const downloadAnAttachment = (dispatch, getState, state, attachment, itemId) => 
                             numberOfChunks = result.numberOfChunks;
                             numberOfChunksRequired = false;
                         }
-                        const response = await XHRDownload(state.id, dispatch, getState, result.signedURL, downloadingAttachment, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks);
-                        debugLog(debugOn, "downloadChunk completed. Length: ", response.byteLength);
+                        downloadedBinaryString = await getS3ObjectForAPage(state.id, result.s3Key, false, dispatch, getState, result.signedURL, downloadingAttachment, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks);
                         if (state.activeRequest !== itemId) {
                             reject("Aborted");
                             return;
                         }
-                        buffer = Buffer.from(response, 'binary');
-                        downloadedBinaryString = buffer.toString('binary');
                     } else {
                         const s3Key = `${s3KeyPrefix}_chunk_${chunkIndex}`
                         const result = await getS3ObjectFromServiceWorkerDB(s3Key);
