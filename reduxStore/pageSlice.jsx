@@ -1193,15 +1193,15 @@ const getS3ObjectForAPage = (itemId, s3Key, cacheInServiceWorkerDB = true, dispa
     return new Promise(async (resolve, reject) => {
         let downloadedBinaryString = null;
         try {
-            if (cacheInServiceWorkerDB) {
-                const response = await getS3ObjectFromServiceWorkerDB(s3Key);
-                if (response.status === 'ok' && response.object) {
-                    downloadedBinaryString = response.object;
-                    resolve(downloadedBinaryString);
-                    return;
-                }
-            }
             if (process.env.NEXT_PUBLIC_app !== "desktopBackup") {
+                if (cacheInServiceWorkerDB) {
+                    const response = await getS3ObjectFromServiceWorkerDB(s3Key);
+                    if (response.status === 'ok' && response.object) {
+                        downloadedBinaryString = response.object;
+                        resolve(downloadedBinaryString);
+                        return;
+                    }
+                }
                 let s3SignedUrl = signedURL;
                 if (!s3SignedUrl) {
                 }
@@ -1213,8 +1213,14 @@ const getS3ObjectForAPage = (itemId, s3Key, cacheInServiceWorkerDB = true, dispa
                 }
                 resolve(downloadedBinaryString);
             } else {
-
-
+                const fsS3Key = s3Key.split('/').at(-1);
+                let response = await window.desktopAPI.getS3Object(fsS3Key);
+                if (response.status === "ok") {
+                    downloadedBinaryString = response.data;
+                    resolve(downloadedBinaryString);
+                } else {
+                    resolve(null);
+                }
             }
         } catch (error) {
             reject(error);

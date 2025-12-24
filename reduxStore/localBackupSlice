@@ -308,10 +308,12 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                                     response = await window.desktopAPI.putS3Object(fsS3Key, downloadedBinaryString);
                                     if (response.status === "ok") {
                                         resolve({ status: "ok", downloadedBinaryString });
+                                        /*
                                         response = await window.desktopAPI.getS3Object(fsS3Key);
                                         if (response.data === downloadedBinaryString) {
                                             response = {};
                                         }
+                                            */
                                     } else {
                                         resolve(response);
                                         return;
