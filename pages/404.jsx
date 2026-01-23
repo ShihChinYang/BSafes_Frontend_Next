@@ -12,7 +12,7 @@ export default function Custom404() {
     let redirect = false;
     if (pathRegex.test(window.location.pathname)) {
       redirect = true;
-    } else if (window.location.pathname.startsWith('/pd/')) {
+    } else if (window.location.pathname.startsWith('/product/')) {
       redirect = true;
     } else {
       let productID = window.location.pathname.split('/')[1];

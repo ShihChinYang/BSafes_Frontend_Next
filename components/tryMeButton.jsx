@@ -21,7 +21,7 @@ export default function TryMeButton({ forcedType = null, addAnItem, pageOnly = f
     const optionSelected = (productID) => {
         debugLog(debugOn, productID)
         setShow(false);
-        const link = `/pd/${productID}`;
+        const link = `/product/${productID}`;
         setupDemo();
         router.push(link);
     }

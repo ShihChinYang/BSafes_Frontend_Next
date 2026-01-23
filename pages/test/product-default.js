@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from 'next/link';
 import StoreLayout from "../../components/layouts/storeLayout";
 import NewestProduct from "../../components/beautico/components/Home/NewestProduct";
@@ -43,7 +43,7 @@ const ProductDefaultPage = () => {
                         <img src="/assets/img/inner-page/shop-details-tab-img4.png" alt="" />
                       </div>
                     </div>
-                    <div style={{ overflow: 'hidden' }} className="tab-pane fade show active" id="v-pills-img5" role="tabpanel">
+                    <div style={{ overflow: 'hidden' }} className="tab-pane fade show" id="v-pills-img5" role="tabpanel">
                       <div className="shop-details-tab-img product-img--main" data-scale="1.4" data-image="/assets/img/inner-page/shop-details-tab-img1.png">
                         <img src="/assets/img/inner-page/shop-details-tab-img1.png" alt="" />
                       </div>

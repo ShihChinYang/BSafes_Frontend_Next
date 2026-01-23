@@ -1463,7 +1463,7 @@ const startDownloadingContentImages = async (itemId, dispatch, getState) => {
                     dispatch(downloadingContentImage({ itemId, progress: 5 }));
                     const signedURL = await preS3Download(state.id, s3Key, dispatch);
                     dispatch(downloadingContentImage({ itemId, progress: 10 }));
-                    downloadedBinaryString = await getS3ObjectForAPage(itemId, s3Key, false, dispatch, getState, signedURL, downloadingContentImage);
+                    downloadedBinaryString = await getS3ObjectForAPage(itemId, s3Key, true, dispatch, getState, signedURL, downloadingContentImage);
                     if (itemId !== state.activeRequest) {
                         debugLog(debugOn, "Aborted!");
                         reject("Aborted")
@@ -1673,6 +1673,10 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                 dispatch(dataFetched({ item: result.item }));
                 const getCurrentItemKey = () => {
                     let itemKey, itemIV;
+                    let pageState = getState().page;
+                    itemKey = pageState.itemKey;
+                    itemIV = pageState.itemIV;
+                    /*
                     let workspaceKey = getState().container.workspaceKey;
                     if (result.item.envelopeIV && result.item.ivEnvelope && result.item.ivEnvelopeIV) { // legacy CBC-mode
                         itemKey = decryptBinaryString(forge.util.decode64(result.item.keyEnvelope), workspaceKey, forge.util.decode64(result.item.envelopeIV));
@@ -1681,7 +1685,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         const decoded = forge.util.decode64(result.item.keyEnvelope);
                         itemKey = decryptBinaryString(decoded, workspaceKey);
                         itemIV = null;
-                    }
+                    }*/
                     return { itemKey, itemIV }
                 }
 
@@ -1875,12 +1879,65 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         return new Promise(async (resolve, reject) => {
                             const signedURL = await preS3Download(itemId, s3Key);
                             let downloadedBinaryString = await getS3ObjectForAPage(null, s3Key, true, dispatch, getState, signedURL, null);
-                            resolve();
+                            resolve(downloadedBinaryString);
                         });
+                    }
+                    function getItemKeyData(item) {
+                        return new Promise((resolve, reject) => {
+                            function deriveKey(workspaceKey) {
+                                let itemKey, itemIV;
+                                if (item.envelopeIV && item.ivEnvelope && item.ivEnvelopeIV) { // legacy CBC-mode
+                                    itemKey = decryptBinaryString(forge.util.decode64(item.keyEnvelope), workspaceKey, forge.util.decode64(item.envelopeIV));
+                                    itemIV = decryptBinaryString(forge.util.decode64(item.ivEnvelope), workspaceKey, forge.util.decode64(item.ivEnvelopeIV));
+                                } else {
+                                    const decoded = forge.util.decode64(item.keyEnvelope);
+                                    itemKey = decryptBinaryString(decoded, workspaceKey);
+                                    itemIV = null;
+                                }
+                                return {itemKey, itemIV};
+                            }
+                            let trials = 0;
+                            state = getState().container;
+                            if (state.workspaceKey) {
+                                const keyData = deriveKey(state.workspaceKey);
+                                resolve(keyData);
+                                return;
+                            }
+                            const timer = setInterval(() => {
+                                state = getState().container;
+                                debugLog(debugOn, "Waiting for itemKey ...");
+                                if (state.workspaceKey) {
+                                    resolve(deriveKey(state.workspaceKey));
+                                    clearInterval(timer);
+                                    return;
+                                } else {
+                                    trials++;
+                                    if (trials > 100) {
+                                        reject('itemKey error!');
+                                        clearInterval(timer);
+                                    }
+                                }
+                            }, 100)
+
+                        })
+                    }
+                    function findImagesInContent(content) {
+                        const imageObjects = [];
+                        const tempElement = document.createElement("div");
+                        tempElement.innerHTML = content;
+
+                        const images = tempElement.querySelectorAll(".bSafesImage");
+                        images.forEach((item) => {
+                            let id = item.id;
+                            let idParts = id.split('&');
+                            let s3Key = idParts[0];
+                            imageObjects.push(s3Key);
+                        });
+                        return imageObjects;
                     }
                     return new Promise(async (resolve, reject) => {
                         let item = null;
-                        async function getContentObject(item) {
+                        async function getContentObjects(item) {
                             if (item) {
                                 let s3Key = null;
                                 if (item.content && item.content.startsWith('s3Object/')) {
@@ -1889,13 +1946,20 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                     s3Key = forge.util.decode64(item.content.substring(16));
                                 }
                                 if (s3Key) {
-                                    await downloadS3Object(s3Key);
+                                    let downloadedBinaryString = await downloadS3Object(s3Key);
+                                    let keyData = await getItemKeyData(item);
+                                    const decryptedContent = decryptBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
+                                    const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
+                                    const imageObjects = findImagesInContent(decodedContent);
+                                    for (let i = 0; i < imageObjects.length; i++) {
+                                        await downloadS3Object(imageObjects[i]);
+                                    }
                                 }
                             }
                         }
                         const result = await getItemFromServiceWorkerDB(itemId);
                         if ((result.status === 'ok') && result.item) {
-                            await getContentObject(result.item);
+                            await getContentObjects(result.item);
                             resolve();
                         } else {
                             PostCall({
@@ -1908,7 +1972,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                 debugLog(debugOn, result);
                                 if (result.status === 'ok' && result.item) {
                                     await addItemToServiceWorkerDB(itemId, result.item);
-                                    await getContentObject(result.item);
+                                    await getContentObjects(result.item);
                                 }
                                 resolve();
                             })
@@ -2533,7 +2597,7 @@ export const downloadVideoThunk = (data) => async (dispatch, getState) => {
                     return new Promise(async (resolve, reject) => {
                         try {
                             let result = await preS3ChunkDownload(state.id, chunkIndex, s3KeyPrefix, false, dispatch);
-                            let downloadedBinaryString = await getS3ObjectForAPage(state.id, result.s3Key, false, dispatch, getState, result.signedURL, fromContent? downloadingContentVideo:downloadingVideo, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInVideosDownloadQueue)
+                            let downloadedBinaryString = await getS3ObjectForAPage(state.id, result.s3Key, false, dispatch, getState, result.signedURL, fromContent ? downloadingContentVideo : downloadingVideo, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInVideosDownloadQueue)
                             debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
                             let decryptedChunkStr = await decryptChunkBinaryStringToBinaryStringAsync(downloadedBinaryString, state.itemKey)
                             debugLog(debugOn, "Decrypted chunk string length: ", decryptedChunkStr.length);
@@ -2559,7 +2623,7 @@ export const downloadVideoThunk = (data) => async (dispatch, getState) => {
                     dispatch(downloadingContentVideo({ itemId, progress: 5 }));
                     const signedURL = await preS3Download(state.id, s3Key, dispatch);
                     dispatch(downloadingContentVideo({ itemId, progress: 10 }));
-                    const downloadedBinaryString = await getS3ObjectForAPage(itemId, s3Key, false, dispatch, getState, signedURL, downloadingContentVideo )
+                    const downloadedBinaryString = await getS3ObjectForAPage(itemId, s3Key, false, dispatch, getState, signedURL, downloadingContentVideo)
                     debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
                     decryptedVideoStr = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
                     debugLog(debugOn, "Decrypted image string length: ", decryptedVideoStr.length);
