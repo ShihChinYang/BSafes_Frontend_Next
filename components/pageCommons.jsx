@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
-import Alert from 'react-bootstrap/Alert';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 import { Blocks } from 'react-loader-spinner';
 
@@ -61,6 +61,11 @@ export default function PageCommons() {
 
     const S3SignedUrlForContentUpload = useSelector(state => state.page.S3SignedUrlForContentUpload);
     const contentImagesDownloadQueue = useSelector(state => state.page.contentImagesDownloadQueue);
+    const contentImagedDownloadIndex = useSelector(state=>state.page.contentImagedDownloadIndex);
+    let currentContentImageDownloadingProgress = 0;
+    if(contentImagesDownloadQueue.length && contentImagedDownloadIndex<contentImagesDownloadQueue.length){
+        currentContentImageDownloadingProgress = contentImagesDownloadQueue[contentImagedDownloadIndex].progress;
+    }
     const contentImagesDisplayIndex = useSelector(state => state.page.contentImagesDisplayIndex);
     const contentImagesAllDownloaded = useSelector(state => state.page.contentImagesAllDownloaded);
     const contentImagesAllDisplayed = (contentImagesDisplayIndex === contentImagesDownloadQueue.length);
@@ -1095,28 +1100,22 @@ export default function PageCommons() {
                         {photoSwipeGallery()}
                     </div>}
                 {false && itemCopy && <Comments handleContentChanged={handleContentChanged} handlePenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />}
-                {true &&
+                {
                     <PageCommonControls isEditing={editingEditorId} onWrite={handleWrite} readyForSaving={(S3SignedUrlForContentUpload !== null) || readyForSaving} onSave={handleSave} onCancel={handleCancel} canEdit={(!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion) && contentImagesAllDisplayed)} />
                 }
-                {!contentImagesAllDisplayed &&
+                {(contentImagesDownloadQueue.length !== 0) && !contentImagesAllDisplayed &&
                     <div className='fixed-bottom'>
-                        <Alert variant='info'>
-                            Loading contents, please wait ...
-                        </Alert>
+                        <ProgressBar variant="success" now={currentContentImageDownloadingProgress} />
                     </div>
                 }
                 {contentUploadProgress !== 0 &&
                     <div className='fixed-bottom'>
-                        <Alert variant='info'>
-                            {`Syncing, ${contentUploadProgress} % done.`}
-                        </Alert>
+                        {true && <ProgressBar variant="success" now={contentUploadProgress} style={{zIndex:"1000"}} />}
                     </div>
                 }
                 {contentDownloadProgress !== 0 &&
                     <div className='fixed-bottom'>
-                        <Alert variant='info'>
-                            {`Syncing, ${contentDownloadProgress} % done.`}
-                        </Alert>
+                        <ProgressBar variant="success" now={contentDownloadProgress} />
                     </div>
                 }
                 <div ref={spinnerRef} className='bsafesMediaSpinner' hidden>
