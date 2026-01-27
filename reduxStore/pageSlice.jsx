@@ -1578,7 +1578,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                 containerId = itemIdParts.join(':');
                 containerId = containerId.replace('p:', ':');
                 if (!isDemoMode()) {
-                    if (process.env.NEXT_PUBLIC_app !== 'desktopBackup') {
+                    if (process.env.NEXT_PUBLIC_app === 'desktopBackup') {
                         const result = await getPageItemFromLocalBackup({ itemId: containerId });
                         if (result.status === 'ok') {
                             debugLog(debugOn, "getContainerData: ", result);
