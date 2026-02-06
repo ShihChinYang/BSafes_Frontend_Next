@@ -1520,7 +1520,7 @@ function getItemPath(id, dispatch, getState) {
         PostCall({
             api: '/memberAPI/getItemPath',
             body: { itemId },
-            dispatch
+            /*dispatch*/
         }).then(result => {
             debugLog(debugOn, result);
             if (result.status === 'ok') {
@@ -1560,6 +1560,191 @@ export const putS3ObjectInServiceWorkerDB = (s3Key, data, onProgress) => {
             reject();
         }
     });
+}
+
+export const downloadAdjacentPagesThunk = (data) => async (dispatch, getState) => {
+    function downloadAPage(itemId) {
+        function downloadS3Object(s3Key) {
+            return new Promise(async (resolve, reject) => {
+                const signedURL = await preS3Download(itemId, s3Key);
+                let downloadedBinaryString = await getS3ObjectForAPage(null, s3Key, true, dispatch, getState, signedURL, null);
+                resolve(downloadedBinaryString);
+            });
+        }
+        function getItemKeyData(item) {
+            return new Promise((resolve, reject) => {
+                function deriveKey(workspaceKey) {
+                    let itemKey, itemIV;
+                    if (item.envelopeIV && item.ivEnvelope && item.ivEnvelopeIV) { // legacy CBC-mode
+                        itemKey = decryptBinaryString(forge.util.decode64(item.keyEnvelope), workspaceKey, forge.util.decode64(item.envelopeIV));
+                        itemIV = decryptBinaryString(forge.util.decode64(item.ivEnvelope), workspaceKey, forge.util.decode64(item.ivEnvelopeIV));
+                    } else {
+                        const decoded = forge.util.decode64(item.keyEnvelope);
+                        itemKey = decryptBinaryString(decoded, workspaceKey);
+                        itemIV = null;
+                    }
+                    return { itemKey, itemIV };
+                }
+                let trials = 0;
+                let state = getState().container;
+                if (state.workspaceKey) {
+                    const keyData = deriveKey(state.workspaceKey);
+                    resolve(keyData);
+                    return;
+                }
+                const timer = setInterval(() => {
+                    state = getState().container;
+                    debugLog(debugOn, "Waiting for itemKey ...");
+                    if (state.workspaceKey) {
+                        resolve(deriveKey(state.workspaceKey));
+                        clearInterval(timer);
+                        return;
+                    } else {
+                        trials++;
+                        if (trials > 100) {
+                            reject('itemKey error!');
+                            clearInterval(timer);
+                        }
+                    }
+                }, 100)
+
+            })
+        }
+        function findImagesInContent(content) {
+            const imageObjects = [];
+            const tempElement = document.createElement("div");
+            tempElement.innerHTML = content;
+
+            const images = tempElement.querySelectorAll(".bSafesImage");
+            images.forEach((item) => {
+                let id = item.id;
+                let idParts = id.split('&');
+                let s3Key = idParts[0];
+                imageObjects.push(s3Key);
+            });
+            return imageObjects;
+        }
+        return new Promise(async (resolve, reject) => {
+            async function getContentObjects(item) {
+                if (item) {
+                    let s3Key = null, isHtml = false;
+                    if (item.content && item.content.startsWith('s3Object/')) {
+                        s3Key = forge.util.decode64(item.content.substring(9));
+                        isHtml = true;
+                    } else if (item.content && item.content.startsWith('s3DrawingObject/')) {
+                        s3Key = forge.util.decode64(item.content.substring(16));
+                    }
+                    if (s3Key) {
+                        let downloadedBinaryString = await downloadS3Object(s3Key);
+                        if (isHtml) {
+                            let keyData = await getItemKeyData(item);
+                            const decryptedContent = decryptBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
+                            const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
+                            const imageObjects = findImagesInContent(decodedContent);
+                            for (let i = 0; i < imageObjects.length; i++) {
+                                await downloadS3Object(imageObjects[i]);
+                            }
+                        }
+                    }
+                }
+            }
+            const result = await getItemFromServiceWorkerDB(itemId);
+            if ((result.status === 'ok') && result.item) {
+                await getContentObjects(result.item);
+                resolve();
+            } else {
+                PostCall({
+                    api: '/memberAPI/getPageItem',
+                    body: {
+                        itemId,
+                        adjacentPage: true
+                    }
+                }).then(async result => {
+                    debugLog(debugOn, result);
+                    if (result.status === 'ok' && result.item) {
+                        await addItemToServiceWorkerDB(itemId, result.item);
+                        await getContentObjects(result.item);
+                    }
+                    resolve();
+                })
+            }
+        })
+    }
+
+    let adjacentPages = [];
+    if (data.itemId.startsWith('np')) {
+        const idParts = data.itemId.split(":");
+        const thisPageNumber = parseInt(idParts.at(-1));
+        idParts.splice(-1);
+        const pageIdPrefix = idParts.join(":");
+        let startPage = thisPageNumber - 2;
+        if (startPage < 1) startPage = 1;
+        if (thisPageNumber > 2) {
+            adjacentPages = [
+                `${pageIdPrefix}:${thisPageNumber + 3}`,
+                `${pageIdPrefix}:${thisPageNumber - 2}`,
+                `${pageIdPrefix}:${thisPageNumber + 2}`,
+                `${pageIdPrefix}:${thisPageNumber - 1}`,
+                `${pageIdPrefix}:${thisPageNumber + 1}`,
+            ]
+        } else if (thisPageNumber > 1) {
+            adjacentPages = [
+                `${pageIdPrefix}:${thisPageNumber + 4}`,
+                `${pageIdPrefix}:${thisPageNumber + 3}`,
+                `${pageIdPrefix}:${thisPageNumber + 2}`,
+                `${pageIdPrefix}:${thisPageNumber - 1}`,
+                `${pageIdPrefix}:${thisPageNumber + 1}`,
+            ]
+        } else {
+            adjacentPages = [
+                `${pageIdPrefix}:${thisPageNumber + 5}`,
+                `${pageIdPrefix}:${thisPageNumber + 4}`,
+                `${pageIdPrefix}:${thisPageNumber + 3}`,
+                `${pageIdPrefix}:${thisPageNumber + 2}`,
+                `${pageIdPrefix}:${thisPageNumber + 1}`,
+            ]
+        }
+    } else if (data.itemId.startsWith('dp')) {
+        const idParts = data.itemId.split(":");
+        const thisPageDateStr = idParts.at(-1);
+        const dateParts = thisPageDateStr.split("-");
+        idParts.splice(-1);
+        const pageIdPrefix = idParts.join(":");
+        const thisPageDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+        const thisPageTime = thisPageDate.getTime();
+        const aDay = 24 * 60 * 60 * 1000;
+        function getADateString(distance) {
+            const theTime = thisPageTime + distance * aDay;
+            const theDate = new Date(theTime);
+            const theYear = theDate.getFullYear();
+            const theMonth = theDate.getMonth() + 1;
+            const theDay = theDate.getDate();
+            const theDateString = `${theYear}-${theMonth < 10 ? "0" : ""}${theMonth}-${theDay < 10 ? "0" : ""}${theDay}`
+            return theDateString;
+        }
+        adjacentPages = [
+            `${pageIdPrefix}:${getADateString(3)}`,
+            `${pageIdPrefix}:${getADateString(-2)}`,
+            `${pageIdPrefix}:${getADateString(2)}`,
+            `${pageIdPrefix}:${getADateString(-1)}`,
+            `${pageIdPrefix}:${getADateString(1)}`,
+        ]
+    }
+    let queue = getState().page.adjacentPagesDownloadQueue;
+    let queueLength = queue.length;
+    let itemId;
+    dispatch(addAdjacentPagesToDownloadQueue(adjacentPages))
+    if (queueLength === 0) {
+        queue = getState().page.adjacentPagesDownloadQueue;
+        queueLength = queue.length;
+        while (queueLength > 0) {
+            itemId = queue.at(-1)
+            await downloadAPage(itemId);
+            dispatch(adjacentPageDownloaded(itemId));
+            queue = getState().page.adjacentPagesDownloadQueue;
+            queueLength = queue.length;
+        }
+    }
 }
 
 export const getPageItemThunk = (data) => async (dispatch, getState) => {
@@ -1873,191 +2058,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     })
                 })
             }
-            async function downloadAdjacentPages() {
-                function downloadAPage(itemId) {
-                    function downloadS3Object(s3Key) {
-                        return new Promise(async (resolve, reject) => {
-                            const signedURL = await preS3Download(itemId, s3Key);
-                            let downloadedBinaryString = await getS3ObjectForAPage(null, s3Key, true, dispatch, getState, signedURL, null);
-                            resolve(downloadedBinaryString);
-                        });
-                    }
-                    function getItemKeyData(item) {
-                        return new Promise((resolve, reject) => {
-                            function deriveKey(workspaceKey) {
-                                let itemKey, itemIV;
-                                if (item.envelopeIV && item.ivEnvelope && item.ivEnvelopeIV) { // legacy CBC-mode
-                                    itemKey = decryptBinaryString(forge.util.decode64(item.keyEnvelope), workspaceKey, forge.util.decode64(item.envelopeIV));
-                                    itemIV = decryptBinaryString(forge.util.decode64(item.ivEnvelope), workspaceKey, forge.util.decode64(item.ivEnvelopeIV));
-                                } else {
-                                    const decoded = forge.util.decode64(item.keyEnvelope);
-                                    itemKey = decryptBinaryString(decoded, workspaceKey);
-                                    itemIV = null;
-                                }
-                                return { itemKey, itemIV };
-                            }
-                            let trials = 0;
-                            state = getState().container;
-                            if (state.workspaceKey) {
-                                const keyData = deriveKey(state.workspaceKey);
-                                resolve(keyData);
-                                return;
-                            }
-                            const timer = setInterval(() => {
-                                state = getState().container;
-                                debugLog(debugOn, "Waiting for itemKey ...");
-                                if (state.workspaceKey) {
-                                    resolve(deriveKey(state.workspaceKey));
-                                    clearInterval(timer);
-                                    return;
-                                } else {
-                                    trials++;
-                                    if (trials > 100) {
-                                        reject('itemKey error!');
-                                        clearInterval(timer);
-                                    }
-                                }
-                            }, 100)
 
-                        })
-                    }
-                    function findImagesInContent(content) {
-                        const imageObjects = [];
-                        const tempElement = document.createElement("div");
-                        tempElement.innerHTML = content;
-
-                        const images = tempElement.querySelectorAll(".bSafesImage");
-                        images.forEach((item) => {
-                            let id = item.id;
-                            let idParts = id.split('&');
-                            let s3Key = idParts[0];
-                            imageObjects.push(s3Key);
-                        });
-                        return imageObjects;
-                    }
-                    return new Promise(async (resolve, reject) => {
-                        let item = null;
-                        async function getContentObjects(item) {
-                            if (item) {
-                                let s3Key = null, isHtml = false;
-                                if (item.content && item.content.startsWith('s3Object/')) {
-                                    s3Key = forge.util.decode64(item.content.substring(9));
-                                    isHtml = true;
-                                } else if (item.content && item.content.startsWith('s3DrawingObject/')) {
-                                    s3Key = forge.util.decode64(item.content.substring(16));
-                                }
-                                if (s3Key) {
-                                    let downloadedBinaryString = await downloadS3Object(s3Key);
-                                    if (isHtml) {
-                                        let keyData = await getItemKeyData(item);
-                                        const decryptedContent = decryptBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
-                                        const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
-                                        const imageObjects = findImagesInContent(decodedContent);
-                                        for (let i = 0; i < imageObjects.length; i++) {
-                                            await downloadS3Object(imageObjects[i]);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        const result = await getItemFromServiceWorkerDB(itemId);
-                        if ((result.status === 'ok') && result.item) {
-                            await getContentObjects(result.item);
-                            resolve();
-                        } else {
-                            PostCall({
-                                api: '/memberAPI/getPageItem',
-                                body: {
-                                    itemId,
-                                    adjacentPage: true
-                                }
-                            }).then(async result => {
-                                debugLog(debugOn, result);
-                                if (result.status === 'ok' && result.item) {
-                                    await addItemToServiceWorkerDB(itemId, result.item);
-                                    await getContentObjects(result.item);
-                                }
-                                resolve();
-                            })
-                        }
-                    })
-                }
-
-                let adjacentPages = [];
-                if (data.itemId.startsWith('np')) {
-                    const idParts = data.itemId.split(":");
-                    const thisPageNumber = parseInt(idParts.at(-1));
-                    idParts.splice(-1);
-                    const pageIdPrefix = idParts.join(":");
-                    let startPage = thisPageNumber - 2;
-                    if (startPage < 1) startPage = 1;
-                    if (thisPageNumber > 2) {
-                        adjacentPages = [
-                            `${pageIdPrefix}:${thisPageNumber + 3}`,
-                            `${pageIdPrefix}:${thisPageNumber - 2}`,
-                            `${pageIdPrefix}:${thisPageNumber + 2}`,
-                            `${pageIdPrefix}:${thisPageNumber - 1}`,
-                            `${pageIdPrefix}:${thisPageNumber + 1}`,
-                        ]
-                    } else if (thisPageNumber > 1) {
-                        adjacentPages = [
-                            `${pageIdPrefix}:${thisPageNumber + 4}`,
-                            `${pageIdPrefix}:${thisPageNumber + 3}`,
-                            `${pageIdPrefix}:${thisPageNumber + 2}`,
-                            `${pageIdPrefix}:${thisPageNumber - 1}`,
-                            `${pageIdPrefix}:${thisPageNumber + 1}`,
-                        ]
-                    } else {
-                        adjacentPages = [
-                            `${pageIdPrefix}:${thisPageNumber + 5}`,
-                            `${pageIdPrefix}:${thisPageNumber + 4}`,
-                            `${pageIdPrefix}:${thisPageNumber + 3}`,
-                            `${pageIdPrefix}:${thisPageNumber + 2}`,
-                            `${pageIdPrefix}:${thisPageNumber + 1}`,
-                        ]
-                    }
-                } else if (data.itemId.startsWith('dp')) {
-                    const idParts = data.itemId.split(":");
-                    const thisPageDateStr = idParts.at(-1);
-                    const dateParts = thisPageDateStr.split("-");
-                    idParts.splice(-1);
-                    const pageIdPrefix = idParts.join(":");
-                    const thisPageDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-                    const thisPageTime = thisPageDate.getTime();
-                    const aDay = 24 * 60 * 60 * 1000;
-                    function getADateString(distance) {
-                        const theTime = thisPageTime + distance * aDay;
-                        const theDate = new Date(theTime);
-                        const theYear = theDate.getFullYear();
-                        const theMonth = theDate.getMonth() + 1;
-                        const theDay = theDate.getDate();
-                        const theDateString = `${theYear}-${theMonth < 10 ? "0" : ""}${theMonth}-${theDay < 10 ? "0" : ""}${theDay}`
-                        return theDateString;
-                    }
-                    adjacentPages = [
-                        `${pageIdPrefix}:${getADateString(3)}`,
-                        `${pageIdPrefix}:${getADateString(-2)}`,
-                        `${pageIdPrefix}:${getADateString(2)}`,
-                        `${pageIdPrefix}:${getADateString(-1)}`,
-                        `${pageIdPrefix}:${getADateString(1)}`,
-                    ]
-                }
-                let queue = getState().page.adjacentPagesDownloadQueue;
-                let queueLength = queue.length;
-                let itemId;
-                dispatch(addAdjacentPagesToDownloadQueue(adjacentPages))
-                if (queueLength === 0) {
-                    queue = getState().page.adjacentPagesDownloadQueue;
-                    queueLength = queue.length;
-                    while (queueLength > 0) {
-                        itemId = queue.at(-1)
-                        await downloadAPage(itemId);
-                        dispatch(adjacentPageDownloaded(itemId));
-                        queue = getState().page.adjacentPagesDownloadQueue;
-                        queueLength = queue.length;
-                    }
-                }
-            }
             if (!isDemoMode()) {
                 try {
                     function queryItemFromServer() {
@@ -2114,7 +2115,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     }
                     await getItemPath(data.itemId, dispatch, getState);
                     if (data.itemId.startsWith("np") || data.itemId.startsWith("dp")) {
-                        await downloadAdjacentPages();
+                        //await downloadAdjacentPages();
+                        dispatch(downloadAdjacentPagesThunk({itemId:data.itemId}));
                     }
                     resolve();
                 } catch (error) {
