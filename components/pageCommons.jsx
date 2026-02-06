@@ -925,10 +925,10 @@ export default function PageCommons() {
 
     useEffect(() => {
         if (!activity) {
-            const elem = document.getElementById("BSafesPage");
+            /*const elem = document.getElementById("BSafesPage");
             if (elem) {
                 elem.scrollIntoView({ behavior: "smooth" });
-            }
+            }*/
         }
     }, [activity])
     const photoSwipeGallery = () => {

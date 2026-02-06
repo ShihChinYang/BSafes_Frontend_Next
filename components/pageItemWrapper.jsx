@@ -39,7 +39,7 @@ const PageItemWrapper = ({ itemId, children }) => {
   const workspaceKey = useSelector(state => state.container.workspaceKey);
   const workspaceKeyReady = useSelector(state => state.container.workspaceKeyReady);
   const startDateValue = useSelector(state => state.container.startDateValue);
-  const currentPage =  useSelector(state => state.container.currentPage);
+  const currentPage = useSelector(state => state.container.currentPage);
   const [startDate, setStartDate] = useState(new Date(startDateValue));
 
   const aborted = useSelector(state => state.page.aborted);
@@ -132,12 +132,10 @@ const PageItemWrapper = ({ itemId, children }) => {
         payload.version = parseInt(version);
       }
       dispatch(getPageItemThunk(payload));
-      /*const elem = document.getElementById("BSafesPage");
-      if (elem && navigationInSameContainer) {
-        //elem.scrollIntoView({ behavior: "smooth" });
-        window.scrollTo(0,120);
-        //elem.scrollTo({ top:100, left:0, behavior: "smooth" });
-      }*/
+      const elem = document.getElementById("BSafesPage");
+      if (elem) {
+        elem.scrollIntoView({ behavior: "smooth" });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageItemId]);
