@@ -36,6 +36,7 @@ yarn-error.log*
 buildAndAddSri
 buildForIOSColors
 buildForIOSBSafes
+deployToCloudflare
 runForIOS
 runForWeb
 runForWebProduct

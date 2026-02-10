@@ -446,7 +446,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     return (
         <div>
             {(generateDrawingSnapshot || (accountActivity !== 0) || (authActivity !== 0) || (v1AccountActivity !== 0) || (teamsActivity !== 0) || (containerActivity !== 0) || (pageActivity !== 0) || (iOSActivity !== 0)) &&
-                <div className={BSafesStyle.screenCenter}>
+                <div className={BSafesStyle.screenBottomLeft}>
                     <Blocks
                         visible={true}
                         height="40"
