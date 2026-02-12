@@ -820,7 +820,7 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                         </>
                     }
                 </div> :
-                <div className={BSafesStyle.screenCenter}>
+                <div className={BSafesStyle.screenBottomLeft}>
                     <Blocks
                         visible={true}
                         height="40"
