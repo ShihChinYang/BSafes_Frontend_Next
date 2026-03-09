@@ -113,7 +113,7 @@ export default function AppPreivews() {
                 <ul><li>Sync your other devices with end-to-end encryption to ensure your privacy is protected.<Button variant="link" size="sm" onClick={() => { setShow(true) }}>Learne more</Button></li></ul>
               </Col>
               <Col xs={3}>
-                <Button size="sm" onClick={() => { router.push('/keySetup') }}>Go Pro</Button>
+                <Button size="sm" onClick={() => { router.push('/getStarted') }}>Get Started</Button>
               </Col>
             </Row>
           </Container>
