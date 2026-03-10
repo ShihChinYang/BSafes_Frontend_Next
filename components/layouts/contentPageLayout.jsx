@@ -162,7 +162,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     }
 
     const ifRedirectToHome = (path) => {
-        if ((path !== '/') && (!path.startsWith('/public/') && !path.startsWith('/apps/') && !path.startsWith('/logIn') && (path !== '/keySetup') && (!path.startsWith('/n/')))) {
+        if ((path !== '/') && (!path.startsWith('/public/') && !path.startsWith('/apps/') && !path.startsWith('/getStarted') && !path.startsWith('/logIn') && (path !== '/keySetup') && (!path.startsWith('/n/')))) {
             return true;
         } else return false;
     }

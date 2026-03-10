@@ -36,7 +36,7 @@ function MyApp({ Component, pageProps }) {
           let interval = null;
           const accessKeyWebCall = (data) => {
             console.log('accessKeyWebCall');
-            accessKeyInfo = data;
+            let accessKeyInfo = data;
             if (interval) {
               clearInterval(interval);
               interval = null;

@@ -110,7 +110,7 @@ export default function LogIn() {
                                             <hr />
                                         </>
                                     }
-                                    <h1 className='text-center'>Open Your <span style={{ backgroundColor: 'yellow', color: 'black', fontWeight: 'bold', padding: '7px' }}>BSafes</span></h1>
+                                    <h1 className='text-center'><i className="fa fa-lock" aria-hidden="true"></i> Unlock BSafes</h1>
                                     <hr></hr>
                                     <Form>
                                         <Form.Group className="mb-3" controlId="Nickname">
@@ -142,7 +142,7 @@ export default function LogIn() {
                                         <Col className='text-center'>
                                             <img className='mx-auto d-block' src="/images/mySafe_Small.png" style={{ width: '52px' }} />
                                             <Button size='lg' variant='link' onClick={handleCreate} disabled={activity === "LoggingIn"} style={{ textTransform: 'none', textDecoration: 'none' }}>
-                                                Create your lock <i className="fa fa-lock" aria-hidden="true"></i>, own your <span style={{ fontWeight: 'bold' }}>BSafes</span>
+                                                Create a BSafes Account
                                             </Button>
                                         </Col>
                                     </Row>

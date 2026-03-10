@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 import Container from 'react-bootstrap/Container'
@@ -14,6 +15,7 @@ import BSafesStyle from '../styles/BSafes.module.css'
 import ContentPageLayout from '../components/layouts/contentPageLayout';
 
 export default function GetStarted() {
+    const router = useRouter();
     return (
         <div className={`${BSafesStyle.minHeight100Percent}`} style={{ backgroundColor: "#F8F9F9" }}>
             <ContentPageLayout showNaveBar={false} showNavbarMenu={false} showPathRow={false}>
@@ -31,7 +33,7 @@ export default function GetStarted() {
                     </Row>
                     <Row>
                         <Col className="text-center">
-                            <Button type="button" className="btn btn-primary text-capitalize">Unlock BSafes</Button>
+                            <Button className="btn btn-primary text-capitalize" onClick={() => { router.push('/logIn') }}>Unlock BSafes</Button>
                         </Col>
                     </Row>
                     <hr />
@@ -42,7 +44,7 @@ export default function GetStarted() {
                     </Row>
                     <Row>
                         <Col className="text-center">
-                            <Button type="button" className="btn btn-success text-capitalize">Create a BSafes account</Button>
+                            <Button type="button" className="btn btn-success text-capitalize" onClick={() => { router.push('/keySetup') }}>Create a BSafes account</Button>
                         </Col>
                     </Row>
                     <br />
