@@ -61,6 +61,7 @@ export default function KeySetup() {
         let thisKeyStrength, thisKeyStrengthColor;
         if (key.length < 5) {
             thisKeyStrength = '';
+            thisKeyStrengthColor = 'warning';
         } else {
             thisKeyStrength = 'Password does not meet requirements';
             thisKeyStrengthColor = 'danger';
