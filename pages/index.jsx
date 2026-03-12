@@ -26,7 +26,7 @@ import DialerLock from '../components/dialerLock/dialerLock';
 import ComplianceBadge from '../components/complianceBadge';
 import TryMeButton from '../components/tryMeButton';
 
-import { setDemoMode } from '../reduxStore/auth';
+import { setDemoMode, checkLocalSession, setGotoFirstPagetAfterLoggedIn } from '../reduxStore/auth';
 import { cleanContainerSlice } from '../reduxStore/containerSlice';
 import { clearDemo } from '../lib/demoHelper';
 
@@ -71,25 +71,29 @@ export default function Home() {
         dispatch(setDemoMode(false));
         dispatch(cleanContainerSlice());
         clearDemo();
+        const localSessionState = checkLocalSession();
+        if (localSessionState.unlocked) {
+            return;
+        }
         if (product) {
             router.replace(`/appPreviews/${product}`);
         } else {
-            if(process.env.NEXT_PUBLIC_platform !== "Web"){
+            if (process.env.NEXT_PUBLIC_platform !== "Web") {
                 router.replace(`/apps/bsafes`);
-            }     
+            }
         }
     }, [])
 
     useEffect(() => {
         if (isLoggedIn) {
-            router.push('/safe');
+            dispatch(setGotoFirstPagetAfterLoggedIn(true));
         }
     }, [isLoggedIn])
 
     return (
-        <>
+        <ContentPageLayout publicPage={true} publicHooks={{ onOpen: handleUnlock }} showNavbarMenu={false} showPathRow={false}>
             {(process.env.NEXT_PUBLIC_platform === "Web") && !product &&
-                <ContentPageLayout publicPage={true} publicHooks={{ onOpen: handleUnlock }} showNavbarMenu={false} showPathRow={false}>
+                <>
                     <div style={{ height: '1px', backgroundColor: 'Grey' }}>
                     </div>
                     <div>
@@ -572,8 +576,8 @@ export default function Home() {
                     </div>
                     <Footer className={monteserrat.className} />
                     <br />
-                </ContentPageLayout>
+                </>
             }
-        </>
+        </ContentPageLayout>
     )
 }

@@ -474,14 +474,15 @@ export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
     });
 }
 
+export const checkLocalSession = () => {
+    const authToken = localStorage.getItem('authToken');
+    const authState = localStorage.getItem("authState");
+    const demoMode = localStorage.getItem("demoMode");
+    debugLog(debugOn, "demoMode: ", demoMode);
+    return { demoMode: demoMode ? true : false, sessionExists: authToken ? true : false, authState, unlocked: (authState === 'Unlocked') };
+}
+
 export const createCheckSessionIntervalThunk = () => (dispatch, getState) => {
-    const checkLocalSession = () => {
-        const authToken = localStorage.getItem('authToken');
-        const authState = localStorage.getItem("authState");
-        const demoMode = localStorage.getItem("demoMode");
-        debugLog(debugOn, "demoMode: ", demoMode);
-        return { demoMode: demoMode ? true : false, sessionExists: authToken ? true : false, authState, unlocked: (authState === 'Unlocked') };
-    }
     const state = getState().auth;
     let contextId = state.contextId;
     if (!contextId) {

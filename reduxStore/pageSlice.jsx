@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const forge = require('node-forge');
 const DOMPurify = require('dompurify');
 
+import { setPaymentIntentData } from './accountSlice';
 import { setNavigationInSameContainer } from './containerSlice';
 import { setCurrentProduct } from './productSlice';
 import { setSignedUrlForBackup, backupAnItemVersionToS3, getPageItemFromLocalBackup } from './localBackupSlice';
@@ -15,6 +16,7 @@ import { downScaleImage } from '../lib/wnImage';
 import { isDemoMode } from '../lib/demoHelper';
 import { readDataFromServiceWorkerDBTable, writeDataToServiceWorkerDBTable, deleteAnItemInServiceWorkerDBTable, writeDataToServiceWorkerDB } from '../lib/serviceWorkerDBHelper';
 import { productIdDelimiter } from '../lib/productID';
+import { setPreflightReady } from './auth';
 
 const embeddJSONSeperator = '=#=#=embeddJSON=';
 const MAX_NUMBER_OF_MEDIA_FILES = 32;
@@ -2086,6 +2088,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     if (process.env.NEXT_PUBLIC_app === 'desktopBackup') {
                         await getItemFromLocalBackup();
                     } else if (navigationInSameContainer) {
+                        dispatch(setPreflightReady(true));
                         const result = await getItemFromServiceWorkerDB(data.itemId);
                         if ((result.status === 'ok') && result.item) {
                             await processResultItem(result);

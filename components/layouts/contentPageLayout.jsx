@@ -156,13 +156,15 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
         return (path === '/' ||
             path.startsWith('/logIn') ||
             path.startsWith('/keySetup') ||
+            path.startsWith('/appPreviews') ||
+            path.startsWith('/getStarted') ||
             path.startsWith('/n/') ||
             path.startsWith('/v1/' ||
                 path.startsWith('/v3')));
     }
 
     const ifRedirectToHome = (path) => {
-        if ((path !== '/') && (!path.startsWith('/public/') && !path.startsWith('/apps/') && !path.startsWith('/getStarted') && !path.startsWith('/logIn') && (path !== '/keySetup') && (!path.startsWith('/n/')))) {
+        if ((path !== '/') && (!path.startsWith('/public/') && !path.startsWith('/apps/') && !path.startsWith('/appPreviews/') && !path.startsWith('/getStarted') && !path.startsWith('/logIn') && (path !== '/keySetup') && (!path.startsWith('/n/')))) {
             return true;
         } else return false;
     }
@@ -208,6 +210,14 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     };
 
 
+    const saveCurrentPath = (path) => {
+        localStorage.setItem("currentPath", path);
+    }
+
+    const getCurrentPath = () => {
+        return localStorage.getItem("currentPath");
+    }
+
     const localSessionStateChanged = () => {
         debugLog(debugOn, `localSessionStateChanged(): preflightReady:${preflightReady}, state: ${JSON.stringify(localSessionState)}, isLoggedIn:${isLoggedIn}`);
 
@@ -222,6 +232,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                             dispatch(setGotoFirstPagetAfterLoggedIn(true));
                         }
                     }
+                    saveCurrentPath(path);
                     return;
                 } else {
                     if (accountVersion === 'v1') {
@@ -427,7 +438,13 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     useEffect(() => {
         if (gotoFirstPagetAfterLoggedIn) {
-            const firstPage = getFirstPageAfterLoggedIn(memberId);
+            const storedCurrentPath = getCurrentPath();
+            let firstPage;
+            if (storedCurrentPath) {
+                firstPage = storedCurrentPath;
+            } else {
+                firstPage = getFirstPageAfterLoggedIn(memberId);
+            }
             if (firstPage !== "/safe") {
                 let currentKeyVersion;
                 if (accountVersion === 'v1') {
@@ -457,120 +474,121 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                     />
                 </div>
             }
+            {((process.env.NEXT_PUBLIC_platform === "Web") || isLoggedIn) && <>
+                {(!workspace || (workspace && !workspace.startsWith("d:"))) && showNaveBar && ((accountVersion === '' || accountVersion === 'v1' || (accountVersion === 'v2' && !((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn)))) &&
+                    <Navbar bg="light" className={BSafesStyle.bsafesNavbar}>
+                        <Container fluid>
+                            {workspaceName ?
+                                <Navbar.Brand className={BSafesStyle.navbarBrand}>
+                                    <span className={BSafesStyle.navbarTeamName}>
+                                        {workspaceName}
+                                    </span>
+                                </Navbar.Brand> :
+                                <Navbar.Brand href="/" className={BSafesStyle.navbarBrand}>
+                                    <span className={BSafesStyle.navbarTeamName}>
+                                        BSafes
+                                    </span>
+                                </Navbar.Brand>
+                            }
+                            {showNavbarMenu && (accountVersion === 'v1') && (isLoggedIn || (router.asPath === '/v1/keyEnter')) && <Dropdown align="end" className="justify-content-end">
+                                <Dropdown.Toggle variant="link" id="dropdown-basic" className={BSafesStyle.navbarMenu}>
+                                    <span className={BSafesStyle.memberBadge}>{displayName && displayName.charAt(0)}</span>
+                                </Dropdown.Toggle>
 
-            {(!workspace || (workspace && !workspace.startsWith("d:"))) && showNaveBar && ((accountVersion === '' || accountVersion === 'v1' || (accountVersion === 'v2' && !((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn)))) &&
-                <Navbar bg="light" className={BSafesStyle.bsafesNavbar}>
-                    <Container fluid>
-                        {workspaceName ?
-                            <Navbar.Brand className={BSafesStyle.navbarBrand}>
-                                <span className={BSafesStyle.navbarTeamName}>
-                                    {workspaceName}
-                                </span>
-                            </Navbar.Brand> :
-                            <Navbar.Brand href="/" className={BSafesStyle.navbarBrand}>
-                                <span className={BSafesStyle.navbarTeamName}>
-                                    BSafes
-                                </span>
-                            </Navbar.Brand>
-                        }
-                        {showNavbarMenu && (accountVersion === 'v1') && (isLoggedIn || (router.asPath === '/v1/keyEnter')) && <Dropdown align="end" className="justify-content-end">
-                            <Dropdown.Toggle variant="link" id="dropdown-basic" className={BSafesStyle.navbarMenu}>
-                                <span className={BSafesStyle.memberBadge}>{displayName && displayName.charAt(0)}</span>
-                            </Dropdown.Toggle>
-
-                            <Dropdown.Menu>
-                                {isLoggedIn &&
-                                    <Dropdown.Item onClick={lock}>Lock</Dropdown.Item>
-                                }
-                                {(isLoggedIn || (router.asPath === '/v1/keyEnter')) &&
-                                    <Dropdown.Item onClick={signOut}>Sign out</Dropdown.Item>
-                                }
-                            </Dropdown.Menu>
-
-                            {accountVersion === '' &&
                                 <Dropdown.Menu>
-                                    {(router.asPath === '/v1/keyEnter') &&
+                                    {isLoggedIn &&
+                                        <Dropdown.Item onClick={lock}>Lock</Dropdown.Item>
+                                    }
+                                    {(isLoggedIn || (router.asPath === '/v1/keyEnter')) &&
                                         <Dropdown.Item onClick={signOut}>Sign out</Dropdown.Item>
                                     }
                                 </Dropdown.Menu>
-                            }
-                        </Dropdown>}
-                        {publicPage && <>
-                            <Nav className="me-auto">
-                                <NavDropdown title="Company" id="collapsible-nav-dropdown" className={BSafesStyle.navLink}>
-                                    <NavDropdown.Item href="https://blog.bsafes.com">
-                                        Blogs
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item href="/public/aboutUs">
-                                        About Us
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item href="/public/mission">
-                                        Mission
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item href="/public/privacyPolicy">
-                                        Privacy Policy
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item href="/public/termsOfService">
-                                        Terms of Service
-                                    </NavDropdown.Item>
-                                </NavDropdown>
-                                <Nav.Link href="https://support.bsafes.com" className={BSafesStyle.navLink}>Support</Nav.Link>
-                                <Nav.Link href="/public/pricing" className={BSafesStyle.navLink}>Pricing</Nav.Link>
-                            </Nav>
-                            <Button size='sm' variant='light' align="end" className="justify-content-end" onClick={() => publicHooks.onOpen()}>
-                                Open
-                            </Button>
-                        </>}
-                    </Container>
-                </Navbar>
-            }
-            {(!workspace || (workspace && !workspace.startsWith("d:"))) && showNaveBar && (accountVersion === 'v2') && ((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn) &&
-                <Navbar key={false} expand="false" bg="light" className={`${BSafesStyle.bsafesNavbar} py-2`}>
-                    <Container>
-                        {true && <>
-                            {(localSessionState && localSessionState.authState === 'MFARequired' && !isLoggedIn) &&
-                                <Navbar.Brand><h2>Security</h2></Navbar.Brand>
-                            }
-                            {isLoggedIn &&
-                                <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-false`} />
-                            }
-                            {isLoggedIn &&
-                                <Navbar.Offcanvas
-                                    id={`offcanvasNavbar-expand-false`}
-                                    aria-labelledby={`offcanvasNavbarLabel-expand-false`}
-                                    placement="start"
-                                    style={{ border: 'solid' }}
-                                >
-                                    {true && <Offcanvas.Header closeButton style={{ backgroundColor: '#abdbe3' }}>
-                                        <Offcanvas.Title id={`offcanvasNavbarLabel-expand-false`}>
-                                            <h4><i className="fa fa-info-circle" aria-hidden="true" style={{ width: '32px' }}></i> Services</h4>
-                                        </Offcanvas.Title>
-                                    </Offcanvas.Header>}
-                                    <Offcanvas.Body>
-                                        <Nav className="justify-content-end flex-grow-1 pe-3">
-                                            <p>Your ID</p>
-                                            <p style={{ borderBottom: 'solid', backgroundColor: '#EBF5FB', color: '#063970' }}>{memberId}</p>
-                                            <Nav.Link onClick={payment} style={{ borderBottom: 'solid' }}><h5><i className="fa fa-credit-card" aria-hidden="true" style={{ width: '32px' }}></i> Payment</h5></Nav.Link>
-                                            <Nav.Link onClick={mfaSetup} style={{ borderBottom: 'solid' }}><h5><i className="fa fa-shield" aria-hidden="true" style={{ width: '32px' }}></i> 2FA</h5></Nav.Link>
-                                            <Nav.Link onClick={dataCenter} style={{ borderBottom: 'solid' }}><h5><i className="fa fa-globe" aria-hidden="true" style={{ width: '32px' }}></i> Data Center</h5></Nav.Link>
-                                            <Nav.Link href="https://support.bsafes.com" target='_blank' rel="noopener noreferrer" style={{ borderBottom: 'solid' }}><h5><i className="fa fa-question" aria-hidden="true" style={{ width: '32px' }}></i> Support</h5></Nav.Link>
-                                        </Nav>
-                                    </Offcanvas.Body>
-                                </Navbar.Offcanvas>
-                            }
-                            {((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn) &&
-                                <>
-                                    <a href="https://support.bsafes.com" target='_blank' className='' style={{ color: "#000000" }}><i className="fa fa-lg fa-question" aria-hidden="true"></i></a>
-                                    <Button variant='link' size='md' className='' onClick={refresh} style={{ color: 'black' }}><i className="fa fa-refresh" aria-hidden="true"></i></Button>
-                                    <Button variant='link' size='md' className='' onClick={localBackup} style={{ color: 'black' }}><i className="fa fa-download" aria-hidden="true"></i></Button>
-                                    <Button variant='dark' size='sm' onClick={logOut}>Lock</Button>
-                                </>
-                            }
-                        </>}
-                    </Container>
-                </Navbar>
 
-            }
+                                {accountVersion === '' &&
+                                    <Dropdown.Menu>
+                                        {(router.asPath === '/v1/keyEnter') &&
+                                            <Dropdown.Item onClick={signOut}>Sign out</Dropdown.Item>
+                                        }
+                                    </Dropdown.Menu>
+                                }
+                            </Dropdown>}
+                            {publicPage && <>
+                                <Nav className="me-auto">
+                                    <NavDropdown title="Company" id="collapsible-nav-dropdown" className={BSafesStyle.navLink}>
+                                        <NavDropdown.Item href="https://blog.bsafes.com">
+                                            Blogs
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Item href="/public/aboutUs">
+                                            About Us
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Item href="/public/mission">
+                                            Mission
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Item href="/public/privacyPolicy">
+                                            Privacy Policy
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Item href="/public/termsOfService">
+                                            Terms of Service
+                                        </NavDropdown.Item>
+                                    </NavDropdown>
+                                    <Nav.Link href="https://support.bsafes.com" className={BSafesStyle.navLink}>Support</Nav.Link>
+                                    <Nav.Link href="/public/pricing" className={BSafesStyle.navLink}>Pricing</Nav.Link>
+                                </Nav>
+                                <Button size='sm' variant='light' align="end" className="justify-content-end" onClick={() => publicHooks.onOpen()}>
+                                    Open
+                                </Button>
+                            </>}
+                        </Container>
+                    </Navbar>
+                }
+                {(!workspace || (workspace && !workspace.startsWith("d:"))) && showNaveBar && (accountVersion === 'v2') && ((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn) &&
+                    <Navbar key={false} expand="false" bg="light" className={`${BSafesStyle.bsafesNavbar} py-2`}>
+                        <Container>
+                            {true && <>
+                                {(localSessionState && localSessionState.authState === 'MFARequired' && !isLoggedIn) &&
+                                    <Navbar.Brand><h2>Security</h2></Navbar.Brand>
+                                }
+                                {isLoggedIn &&
+                                    <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-false`} />
+                                }
+                                {isLoggedIn &&
+                                    <Navbar.Offcanvas
+                                        id={`offcanvasNavbar-expand-false`}
+                                        aria-labelledby={`offcanvasNavbarLabel-expand-false`}
+                                        placement="start"
+                                        style={{ border: 'solid' }}
+                                    >
+                                        {true && <Offcanvas.Header closeButton style={{ backgroundColor: '#abdbe3' }}>
+                                            <Offcanvas.Title id={`offcanvasNavbarLabel-expand-false`}>
+                                                <h4><i className="fa fa-info-circle" aria-hidden="true" style={{ width: '32px' }}></i> Services</h4>
+                                            </Offcanvas.Title>
+                                        </Offcanvas.Header>}
+                                        <Offcanvas.Body>
+                                            <Nav className="justify-content-end flex-grow-1 pe-3">
+                                                <p>Your ID</p>
+                                                <p style={{ borderBottom: 'solid', backgroundColor: '#EBF5FB', color: '#063970' }}>{memberId}</p>
+                                                <Nav.Link onClick={payment} style={{ borderBottom: 'solid' }}><h5><i className="fa fa-credit-card" aria-hidden="true" style={{ width: '32px' }}></i> Payment</h5></Nav.Link>
+                                                <Nav.Link onClick={mfaSetup} style={{ borderBottom: 'solid' }}><h5><i className="fa fa-shield" aria-hidden="true" style={{ width: '32px' }}></i> 2FA</h5></Nav.Link>
+                                                <Nav.Link onClick={dataCenter} style={{ borderBottom: 'solid' }}><h5><i className="fa fa-globe" aria-hidden="true" style={{ width: '32px' }}></i> Data Center</h5></Nav.Link>
+                                                <Nav.Link href="https://support.bsafes.com" target='_blank' rel="noopener noreferrer" style={{ borderBottom: 'solid' }}><h5><i className="fa fa-question" aria-hidden="true" style={{ width: '32px' }}></i> Support</h5></Nav.Link>
+                                            </Nav>
+                                        </Offcanvas.Body>
+                                    </Navbar.Offcanvas>
+                                }
+                                {((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn) &&
+                                    <>
+                                        <a href="https://support.bsafes.com" target='_blank' className='' style={{ color: "#000000" }}><i className="fa fa-lg fa-question" aria-hidden="true"></i></a>
+                                        <Button variant='link' size='md' className='' onClick={refresh} style={{ color: 'black' }}><i className="fa fa-refresh" aria-hidden="true"></i></Button>
+                                        <Button variant='link' size='md' className='' onClick={localBackup} style={{ color: 'black' }}><i className="fa fa-download" aria-hidden="true"></i></Button>
+                                        <Button variant='dark' size='sm' onClick={logOut}>Lock</Button>
+                                    </>
+                                }
+                            </>}
+                        </Container>
+                    </Navbar>
+
+                }
+            </>}
             {false && (workspace && workspace.startsWith("d:")) &&
                 <DemoNotice />
             }

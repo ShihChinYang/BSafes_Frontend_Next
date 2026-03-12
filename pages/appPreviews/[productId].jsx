@@ -11,6 +11,8 @@ import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
+import ContentPageLayout from '../../components/layouts/contentPageLayout';
+
 import BSafesStyle from '../../styles/BSafes.module.css'
 
 import { debugLog } from '../../lib/helper';
@@ -64,7 +66,7 @@ export default function AppPreivews() {
   }, [demoReady])
 
   return (
-    <>
+    <ContentPageLayout showNaveBar={false} showNavbarMenu={false} showPathRow={false}>
       <div className="bsafesStore">
         <div className={BSafesStyle.appPreview}>
           <Container>
@@ -141,6 +143,6 @@ export default function AppPreivews() {
           </Tabs>
         </Modal.Body>
       </Modal>
-    </>
+    </ContentPageLayout>
   );
 };
