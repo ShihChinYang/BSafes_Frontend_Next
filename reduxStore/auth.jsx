@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 const forge = require('node-forge');
 
-import { debugLog, PostCall, getTimeZoneOffset, clearLocalData } from '../lib/helper'
+import { debugLog, PostCall, getTimeZoneOffset, clearLocalData, saveNickname } from '../lib/helper'
 import { clearDemo } from '../lib/demoHelper';
 import { calculateCredentials, saveLocalCredentials, createAccountRecoveryCode, decryptBinaryString, readLocalCredentials, clearLocalCredentials } from '../lib/crypto'
 import { authActivity } from '../lib/activities';
@@ -203,6 +203,7 @@ export const keySetupAsyncThunk = (data) => async (dispatch, getState) => {
 export const logInAsyncThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, authActivity.LogIn, () => {
         return new Promise(async (resolve, reject) => {
+            const nickname = data.nickname;
             const credentials = await calculateCredentials(data.nickname, data.keyPassword, true);
             if (credentials) {
                 debugLog(debugOn, "credentials: ", credentials);
@@ -218,7 +219,7 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
                         reject("102");
                         return;
                     }
-
+                    saveNickname(nickname);
                     // Verify if public key matches private key to ensure public key is not replaced by threat actors
                     let privateKey = forge.util.decode64(data.privateKeyEnvelope);
                     privateKey = decryptBinaryString(privateKey, credentials.secret.expandedKey);

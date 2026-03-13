@@ -26,7 +26,7 @@ import { clearItemVersions, getItemVersionsHistoryThunk, saveTagsThunk } from ".
 import { getItemLink } from "../lib/bSafesCommonUI";
 import { products } from "../lib/productID";
 
-export default function ItemTopRows() {
+export default function ItemTopRows({cover=false}) {
     const dispatch = useDispatch();
     const router = useRouter();
 
@@ -94,11 +94,11 @@ export default function ItemTopRows() {
                         placement='top'
                         overlay={
                             <Tooltip id={`tooltip-top`}>
-                                <TagHelp />
+                                <TagHelp productId={productId} cover={cover}/>
                             </Tooltip>
                         }
-                    ><Button variant="link" className="text-dark p-0 pull-right"><i className="fa fa-question" aria-hidden="true"></i></Button></OverlayTrigger>
-                    <label className="mx-1 pull-right"><span><i className={`fa fa-tags ${BSafesProductsStyle[`${productId}_TagsLable`] || BSafesProductsStyle[`_TagsLable`]}`} aria-hidden="true"></i></span></label>
+                    ><Button variant="link" className="text-dark p-0 pull-right"><i className={`fa fa-question`} aria-hidden="true"></i></Button></OverlayTrigger>
+                    <label className="mx-1 pull-right"><span><i className={`fa fa-tags ${(BSafesProductsStyle[`${productId}_TagsLable`] || BSafesProductsStyle[`_TagsLable`])} ${cover?(BSafesProductsStyle[`${productId}_TagsColor`] || BSafesProductsStyle[`_TagsColor`]):""}`} aria-hidden="true"></i></span></label>
                 </Col>
                 <Col xs="8" className={`${BSafesProductsStyle[`${productId}_TagsInput`] || BSafesProductsStyle[`_TagsInput`]}`}>
                     {oldVersion ?
@@ -218,7 +218,7 @@ function ItemVersionCard({ onVersionSelected, id, container, updatedBy, updatedT
 function TagHelp() {
     return (
         <>
-            Add a tag and press the Return key ↵ on the keyboard. After you add all tags, select the green <i className="fa fa-check" aria-hidden="true"></i>.
+            Add a tag and press the Return key ↵ on the keyboard. After you add all tags, select the green <i className={`fa fa-check`} aria-hidden="true"></i>.
         </>
     )
 }

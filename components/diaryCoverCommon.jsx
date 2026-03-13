@@ -148,7 +148,7 @@ export default function DiaryCoverCommon({ demo = false }) {
                                 <Col lg={{ span: 10, offset: 1 }}>
                                     {
                                         <div className={`${BSafesStyle.diaryPanel} ${BSafesStyle.diaryCoverPanel} ${BSafesStyle.containerCoverPanel}`}>
-                                            <ItemTopRows />
+                                            <ItemTopRows cover={true}/>
                                             <div className="mt-sm-3 mt-md-5 mt-lg-5">
                                                 <Row className="pt-sm-3 pt-md-3 pt-lg-5 justify-content-center">
                                                     <Col className={BSafesStyle.containerTitleLabel} xs="10" sm="10" md="8" >
@@ -170,7 +170,7 @@ export default function DiaryCoverCommon({ demo = false }) {
                         }
                         {router.query.itemId && router.query.itemId.startsWith(`d:${productIdDelimiter}`) &&
                             <div className={`${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_Cover`]}`}>
-                                <ItemTopRows />
+                                <ItemTopRows cover={true}/>
                                 <div className={theProduct.fixedSize ? "" : "mt-2 mt-sm-3 mt-md-5 mt-lg-5 pt-2 pt-sm-3 pt-md-5 pt-lg-5"}>
                                     <Row className="justify-content-center">
                                     <div className={theProduct.fixedSize ? `${BSafesProductsStyle[`${productId}_CoverTitle`]}` : `col-md-8 col-sm-10 col-10 ${BSafesStyle.containerTitleLabel}`}>

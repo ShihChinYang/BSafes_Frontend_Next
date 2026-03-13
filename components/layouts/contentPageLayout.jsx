@@ -231,8 +231,9 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                         } else {
                             dispatch(setGotoFirstPagetAfterLoggedIn(true));
                         }
+                    } else {
+                        saveCurrentPath(path);
                     }
-                    saveCurrentPath(path);
                     return;
                 } else {
                     if (accountVersion === 'v1') {

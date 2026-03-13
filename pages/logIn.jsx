@@ -11,7 +11,7 @@ import Button from 'react-bootstrap/Button'
 
 import BSafesStyle from '../styles/BSafes.module.css'
 
-import { debugLog } from '../lib/helper'
+import { debugLog, getNickname } from '../lib/helper'
 
 import ContentPageLayout from '../components/layouts/contentPageLayout';
 import KeyInput from "../components/keyInput";
@@ -78,6 +78,8 @@ export default function LogIn() {
                 setToPath(path);
             }
         }
+        const storedNickname = getNickname();
+        if(storedNickname) setNickname(storedNickname);
     }, []);
 
     useEffect(() => {

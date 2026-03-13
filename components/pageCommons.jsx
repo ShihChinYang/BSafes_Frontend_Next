@@ -444,7 +444,7 @@ export default function PageCommons() {
         }
     }
 
-    const handleSave = () => {
+    const handleSave = (e) => {
         debugLog(debugOn, "handleSave");
         setEditingEditorMode("Saving");
         setReadyForSaving(false);

@@ -153,12 +153,12 @@ export default function KeySetup() {
                                         <ProgressBar variant={keyStrengthColor} now={keyStrengthProgress} />
                                         <p className={`text-${keyStrengthColor}`}>{keyStrength}</p>
                                         <Form.Text id="passwordHelpBlock" muted>
-                                            <span><i class="fa fa-circle" aria-hidden="true" style={{color:rule1Checked?ruleCheckedColor:ruleColor}}></i> At least 8 characters </span><br/>
-                                            <span><i class="fa fa-circle" aria-hidden="true" style={{color:rule2Checked?ruleCheckedColor:ruleColor}}></i> Include 1 number </span><br/>
-                                            <span><i class="fa fa-circle" aria-hidden="true" style={{color:rule3Checked?ruleCheckedColor:ruleColor}}></i> Include 1 uppercase letter </span><br/>
-                                            <span><i class="fa fa-circle" aria-hidden="true" style={{color:rule4Checked?ruleCheckedColor:ruleColor}}></i> Include 1 lowercase letter </span><br/>
-                                            <span><i class="fa fa-circle" aria-hidden="true" style={{color:rule5Checked?ruleCheckedColor:ruleColor}}></i> Include 1 symbol (!@#$%^&*) </span><br/>
-                                            <span><i class="fa fa-circle" aria-hidden="true" style={{color:rule6Checked?ruleCheckedColor:ruleColor}}></i> 16+ characters recommended </span><br/>
+                                            <span><i className="fa fa-circle" aria-hidden="true" style={{color:rule1Checked?ruleCheckedColor:ruleColor}}></i> At least 8 characters </span><br/>
+                                            <span><i className="fa fa-circle" aria-hidden="true" style={{color:rule2Checked?ruleCheckedColor:ruleColor}}></i> Include 1 number </span><br/>
+                                            <span><i className="fa fa-circle" aria-hidden="true" style={{color:rule3Checked?ruleCheckedColor:ruleColor}}></i> Include 1 uppercase letter </span><br/>
+                                            <span><i className="fa fa-circle" aria-hidden="true" style={{color:rule4Checked?ruleCheckedColor:ruleColor}}></i> Include 1 lowercase letter </span><br/>
+                                            <span><i className="fa fa-circle" aria-hidden="true" style={{color:rule5Checked?ruleCheckedColor:ruleColor}}></i> Include 1 symbol (!@#$%^&*) </span><br/>
+                                            <span><i className="fa fa-circle" aria-hidden="true" style={{color:rule6Checked?ruleCheckedColor:ruleColor}}></i> 16+ characters recommended </span><br/>
                                         </Form.Text>
                                     </Form.Group>
                                     <Form.Group key='ConfirmkeyPassword' className="mb-3" controlId="ConfirmkeyPassword">

@@ -18,7 +18,7 @@ import { Montserrat, Tourney, Oswald, Tilt_Warp, Outfit } from 'next/font/google
 
 import BSafesStyle from '../styles/BSafes.module.css'
 
-import { debugLog } from '../lib/helper'
+import { debugLog, getNickname } from '../lib/helper'
 
 import ContentPageLayout from '../components/layouts/contentPageLayout';
 import Footer from '../components/footer';
@@ -73,6 +73,11 @@ export default function Home() {
         clearDemo();
         const localSessionState = checkLocalSession();
         if (localSessionState.unlocked) {
+            return;
+        }
+        const storedNickname = getNickname();
+        if(storedNickname) {
+            router.replace(`/logIn`);
             return;
         }
         if (product) {
