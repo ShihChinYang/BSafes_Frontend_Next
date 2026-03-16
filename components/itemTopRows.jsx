@@ -100,9 +100,9 @@ export default function ItemTopRows({cover=false}) {
                     ><Button variant="link" className="text-dark p-0 pull-right"><i className={`fa fa-question`} aria-hidden="true"></i></Button></OverlayTrigger>
                     <label className="mx-1 pull-right"><span><i className={`fa fa-tags ${(BSafesProductsStyle[`${productId}_TagsLable`] || BSafesProductsStyle[`_TagsLable`])} ${cover?(BSafesProductsStyle[`${productId}_TagsColor`] || BSafesProductsStyle[`_TagsColor`]):""}`} aria-hidden="true"></i></span></label>
                 </Col>
-                <Col xs="8" className={`${BSafesProductsStyle[`${productId}_TagsInput`] || BSafesProductsStyle[`_TagsInput`]}`}>
+                <Col xs="8" className={cover?`${BSafesProductsStyle[`${productId}_TagsInput`] || BSafesProductsStyle[`_TagsInput`]}`:""}>
                     {oldVersion ?
-                        <TagsInput value={tags} onChange={handleChange} disabled />
+                        <TagsInput value={tags} onChange={handleChange} disabled/>
                         :
                         <TagsInput value={tags} onChange={handleChange} />
                     }
@@ -115,15 +115,6 @@ export default function ItemTopRows({cover=false}) {
                             <i className="fa fa-share-square-o" aria-hidden="true"></i>
                         </Button>}
                     </div>
-                </Col>
-            </Row>
-            <Row hidden>
-                <Col xs={{ offset: "0", span: "12" }} sm={{ offset: "1", span: "10" }}>
-                    {oldVersion ?
-                        <TagsInput value={tags} onChange={handleChange} disabled />
-                        :
-                        <TagsInput value={tags} onChange={handleChange} />
-                    }
                 </Col>
             </Row>
             {showTagsConfirmButton && <Row>

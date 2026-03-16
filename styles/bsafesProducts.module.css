@@ -351,6 +351,12 @@
     border-radius: 0 20px 20px 0;
     background-image: url("/images/covers/foggy-birds.png");
 }
+.AS02_TagsColor {
+    color: white;
+}
+.AS02_TagsInput input{
+    color: Black;
+}
 /*--- End of AS02 ---*/
 /*--- AS03 ---*/
 .AS03_Cover {
@@ -359,6 +365,12 @@
     border-radius: 0 20px 20px 0;
     background-image: url("/images/covers/food.png");
 }
+.AS03_TagsColor {
+    color: white;
+}
+.AS03_TagsInput input{
+    color: Black;
+}
 /*--- End of AS03 ---*/
 /*--- AS04 ---*/
 .AS04_Cover {
@@ -366,6 +378,12 @@
     border-left: 30px solid #000;
     border-radius: 0 20px 20px 0;
     background-image: url("/images/covers/argyle.png");
+}
+.AS04_TagsColor {
+    color: white;
+}
+.AS04_TagsInput input{
+    color: Black;
 }
 /*--- End of AS04 ---*/
 /*--- AS05 ---*/
@@ -426,7 +444,6 @@
 }
 /*--- End of AS11 ---*/
 /*--- End of ASxx Special Jounral Series ---*/
-/*--- AL01 ---*/
 /*--- D001 ---*/
 .D001_General {
     position: relative;

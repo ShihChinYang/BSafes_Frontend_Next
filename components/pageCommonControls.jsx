@@ -41,7 +41,7 @@ export default function PageCommonControls({ showWriteBtn = true, isEditing, onW
     }, [pageCommonControlsBottom]);
 
     useEffect(()=>{
-        if(readyForSaving){
+        if(readyForSaving && isEditing){
             const tipsSetting = JSON.parse(getTipsSetting());
             if(!tipsSetting || !tipsSetting.save){
                 let target = saveRef.current;
@@ -49,7 +49,7 @@ export default function PageCommonControls({ showWriteBtn = true, isEditing, onW
                 setShowSaveTip(true);
             }
         }
-    }, [readyForSaving])
+    }, [readyForSaving, isEditing])
 
     return (
         <>
