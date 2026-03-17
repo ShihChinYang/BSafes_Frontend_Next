@@ -2014,7 +2014,10 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                 return;
                             }
                             if (result.item) {
-                                dispatch(setSignedUrlForBackup(result.signedUrlForBackup))
+                                dispatch(setSignedUrlForBackup(result.signedUrlForBackup));
+                                if(payload.createFromTemplate) {
+                                    backupAnItemVersionToS3(result.item, dispatch, getState);
+                                }
                                 await processResultItem(result);
                                 dispatch(setGetPageContentDone(true));
                                 await addItemToServiceWorkerDB(data.itemId, result.item);
