@@ -43,7 +43,7 @@ function MyApp({ Component, pageProps }) {
             }
             resolve();
           }
-    
+
           if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.toggleMessageHandler) {
             function getAccessKey() {
               console.log('getAccessKey');
@@ -61,7 +61,24 @@ function MyApp({ Component, pageProps }) {
       }, 0)
       const pingFromNative = () => {
         debugLog(debugOn, "pingFromNative");
-        return "ok"
+        const lastPingTime = localStorage.getItem('lastPingTime');
+        if (lastPingTime) {
+          const now = Date.now();
+          const timeDiff = now - lastPingTime;
+          debugLog(debugOn, `Time since last ping: ${timeDiff} ms`);
+          localStorage.setItem('lastPingTime', now);
+          if (timeDiff < 10*60000) {
+            debugLog(debugOn, "Received ping from native within 10 minutes, ignoring.");
+          } else {
+            debugLog(debugOn, "Received ping from native after 10 minutes, updating last ping time.");
+            setTimeout(() => {
+              location.reload();
+            }, 100);
+          }
+        } else {
+          localStorage.setItem('lastPingTime', Date.now());
+        }
+        return "ok";
       }
       window.bsafesNative = {
         name: "bsafeNative",

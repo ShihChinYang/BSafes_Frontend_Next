@@ -738,7 +738,7 @@ export default function PageCommons() {
     useEffect(() => {
         if (getPageContentDone) {
             if (productId !== "" && (!itemCopy || !itemCopy.content)) {
-                dispatch(getPageTemplateThunk({ url: "https://pagetemplate.bsafes.com/A002.draw" }))
+                //dispatch(getPageTemplateThunk({ url: "https://pagetemplate.bsafes.com/A002.draw" }))
             }
         }
     }, [getPageContentDone])
