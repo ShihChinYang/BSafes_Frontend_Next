@@ -59,15 +59,25 @@ function MyApp({ Component, pageProps }) {
       setTimeout(() => {
         getAccessKeyFromNative();
       }, 0)
+
       const pingFromNative = () => {
         debugLog(debugOn, "pingFromNative");
+        const lastPingPath = localStorage.getItem('lastPingPath');
+        if (lastPingPath && lastPingPath === '/') {
+          setTimeout(() => {
+            localStorage.setItem('lastPingPath', '');
+            location.reload();
+          }, 100);
+          return window.location.pathname;
+        }
+        localStorage.setItem('lastPingPath', window.location.pathname);
         const lastPingTime = localStorage.getItem('lastPingTime');
         if (lastPingTime) {
           const now = Date.now();
           const timeDiff = now - lastPingTime;
           debugLog(debugOn, `Time since last ping: ${timeDiff} ms`);
           localStorage.setItem('lastPingTime', now);
-          if (timeDiff < 10*60000) {
+          if (timeDiff < 10 * 60000) {
             debugLog(debugOn, "Received ping from native within 10 minutes, ignoring.");
           } else {
             debugLog(debugOn, "Received ping from native after 10 minutes, updating last ping time.");
@@ -78,7 +88,7 @@ function MyApp({ Component, pageProps }) {
         } else {
           localStorage.setItem('lastPingTime', Date.now());
         }
-        return "ok";
+        return window.location.pathname;
       }
       window.bsafesNative = {
         name: "bsafeNative",

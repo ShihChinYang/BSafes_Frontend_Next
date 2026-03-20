@@ -76,6 +76,7 @@ export default function Home() {
             return;
         }
         const storedNickname = getNickname();
+        localStorage.setItem('lastPingTime', Date.now());
         if(storedNickname) {
             router.replace(`/logIn`);
             return;

@@ -143,6 +143,7 @@ const authSlice = createSlice({
             state.froalaLicenseKey = action.payload.froalaLicenseKey;
         },
         setGotoFirstPagetAfterLoggedIn: (state, action) => {
+            localStorage.setItem('lastPingTime', Date.now());
             state.gotoFirstPagetAfterLoggedIn = action.payload;
         }
     }
