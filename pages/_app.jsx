@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { reduxWrapper } from '../reduxStore/store'
 import { useDispatch } from 'react-redux';
 import Head from "next/head";
@@ -23,10 +23,14 @@ import 'swiper/css/autoplay';
 
 import { debugLog } from '../lib/helper';
 import { setServiceWorkerRegistered } from '../reduxStore/auth';
+import { set } from 'date-fns';
 
 function MyApp({ Component, pageProps }) {
   const debugOn = true;
   const dispatch = useDispatch()
+
+  const [pingCount, setPingCount] = useState(0);
+
   useEffect(() => {
     import("bootstrap/dist/js/bootstrap.min.js");
     window.EXCALIDRAW_ASSET_PATH = "/js/excalidraw/";
@@ -64,10 +68,14 @@ function MyApp({ Component, pageProps }) {
         debugLog(debugOn, "pingFromNative");
         const lastPingPath = localStorage.getItem('lastPingPath');
         if (lastPingPath && lastPingPath === '/') {
-          setTimeout(() => {
-            localStorage.setItem('lastPingPath', '');
-            location.reload();
-          }, 100);
+          setPingCount(prevCount => prevCount + 1);
+          if (pingCount >= 3) {
+            setPingCount(0);
+            setTimeout(() => {
+              debugLog(debugOn, `The page remains on / for too long`);
+              location.reload();
+            }, 100);
+          }
           return window.location.pathname;
         }
         localStorage.setItem('lastPingPath', window.location.pathname);
