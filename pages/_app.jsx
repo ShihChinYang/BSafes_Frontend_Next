@@ -29,7 +29,8 @@ function MyApp({ Component, pageProps }) {
   const debugOn = true;
   const dispatch = useDispatch()
 
-  const [pingCount, setPingCount] = useState(0);
+  //const [pingCount, setPingCount] = useState(0);
+  let pingCount=0
 
   useEffect(() => {
     import("bootstrap/dist/js/bootstrap.min.js");
@@ -65,12 +66,16 @@ function MyApp({ Component, pageProps }) {
       }, 0)
 
       const pingFromNative = () => {
-        debugLog(debugOn, "pingFromNative");
+        debugLog(debugOn, "pingFromNative:" + pingCount);
+        //setPingCount(prevCount => prevCount + 1);
+        pingCount++;
         const lastPingPath = localStorage.getItem('lastPingPath');
-        if (lastPingPath && lastPingPath === '/') {
-          setPingCount(prevCount => prevCount + 1);
+        debugLog(debugOn, "lastPingPath: " + lastPingPath);
+        if (window.location.pathname === '/' && lastPingPath && lastPingPath === '/') {
+          //setPingCount(prevCount => prevCount + 1);
+          debugLog(debugOn, "lastPingCount: " + pingCount);
           if (pingCount >= 3) {
-            setPingCount(0);
+            //setPingCount(0);
             setTimeout(() => {
               debugLog(debugOn, `The page remains on / for too long`);
               location.reload();
