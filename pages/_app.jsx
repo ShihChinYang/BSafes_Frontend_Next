@@ -29,7 +29,6 @@ function MyApp({ Component, pageProps }) {
   const debugOn = true;
   const dispatch = useDispatch()
 
-  //const [pingCount, setPingCount] = useState(0);
   let pingCount=0
 
   useEffect(() => {
@@ -67,15 +66,13 @@ function MyApp({ Component, pageProps }) {
 
       const pingFromNative = () => {
         debugLog(debugOn, "pingFromNative:" + pingCount);
-        //setPingCount(prevCount => prevCount + 1);
         pingCount++;
         const lastPingPath = localStorage.getItem('lastPingPath');
         debugLog(debugOn, "lastPingPath: " + lastPingPath);
         if (window.location.pathname === '/' && lastPingPath && lastPingPath === '/') {
-          //setPingCount(prevCount => prevCount + 1);
           debugLog(debugOn, "lastPingCount: " + pingCount);
-          if (pingCount >= 3) {
-            //setPingCount(0);
+          if (pingCount >= 10) {
+            pingCount = 0;
             setTimeout(() => {
               debugLog(debugOn, `The page remains on / for too long`);
               location.reload();
@@ -90,10 +87,11 @@ function MyApp({ Component, pageProps }) {
           const timeDiff = now - lastPingTime;
           debugLog(debugOn, `Time since last ping: ${timeDiff} ms`);
           localStorage.setItem('lastPingTime', now);
-          if (timeDiff < 10 * 60000) {
+          if (timeDiff < 10*60000) {
             debugLog(debugOn, "Received ping from native within 10 minutes, ignoring.");
           } else {
             debugLog(debugOn, "Received ping from native after 10 minutes, updating last ping time.");
+            //alert("Received ping from native after 10 minutes, refreshing the page.");
             setTimeout(() => {
               location.reload();
             }, 100);

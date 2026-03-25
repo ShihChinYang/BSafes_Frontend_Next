@@ -16,6 +16,7 @@
     "@fontsource-variable/noto-serif": "^5.0.6",
     "@fontsource-variable/oswald": "^5.0.21",
     "@fontsource-variable/roboto-flex": "^5.0.16",
+    "@lottiefiles/dotlottie-react": "^0.18.7",
     "@reduxjs/toolkit": "^1.9.7",
     "@stripe/react-stripe-js": "^2.8.0",
     "@stripe/stripe-js": "^3.5.0",

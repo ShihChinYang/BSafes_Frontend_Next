@@ -13,6 +13,7 @@ import Carousel from 'react-bootstrap/Carousel';
 import Accordion from 'react-bootstrap/Accordion';
 import Table from 'react-bootstrap/Table';
 
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 import { Montserrat, Tourney, Oswald, Tilt_Warp, Outfit } from 'next/font/google'
 
@@ -63,11 +64,14 @@ export default function Home() {
     const product = process.env.NEXT_PUBLIC_product;
     const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
 
+    const [pageState, setPageState] = useState("loading");
+
     const handleUnlock = () => {
         router.push("/logIn");
     }
 
     useEffect(() => {
+        setPageState("Mounted");
         dispatch(setDemoMode(false));
         dispatch(cleanContainerSlice());
         clearDemo();
@@ -77,7 +81,7 @@ export default function Home() {
         }
         const storedNickname = getNickname();
         localStorage.setItem('lastPingTime', Date.now());
-        if(storedNickname) {
+        if (storedNickname) {
             router.replace(`/logIn`);
             return;
         }
@@ -582,6 +586,20 @@ export default function Home() {
                     </div>
                     <Footer className={monteserrat.className} />
                     <br />
+                </>
+            }
+            {(process.env.NEXT_PUBLIC_platform !== "Web") &&
+                <>
+                    <h1 hidden>Index Page</h1>
+                    <h4>{`state: ${pageState}`}</h4>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <DotLottieReact
+                        src="/assets/animations/LockBlue.lottie"
+                        loop
+                        autoplay
+                    />
                 </>
             }
         </ContentPageLayout>
