@@ -589,18 +589,13 @@ export default function Home() {
                 </>
             }
             {(process.env.NEXT_PUBLIC_platform !== "Web") &&
-                <>
-                    <h1 hidden>Index Page</h1>
-                    <h4>{`state: ${pageState}`}</h4>
-                    <br/>
-                    <br/>
-                    <br/>
+                <div className="d-flex justify-content-center align-items-center vh-100">
                     <DotLottieReact
-                        src="/assets/animations/LockBlue.lottie"
+                        src="/assets/animations/idea.lottie"
                         loop
                         autoplay
                     />
-                </>
+                </div>
             }
         </ContentPageLayout>
     )

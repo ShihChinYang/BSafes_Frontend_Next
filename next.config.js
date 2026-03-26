@@ -43,7 +43,8 @@ const nextConfig = {
     });
 
     return config;
-  }
+  },
+  allowedDevOrigins: ['127.0.0.1']
 }
 
 module.exports = nextConfig
