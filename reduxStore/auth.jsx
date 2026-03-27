@@ -11,6 +11,7 @@ import { cleanV1AccountSlice, setNextAuthStep, setKeyMeta } from './v1AccountSli
 import { cleanContainerSlice } from './containerSlice';
 import { cleanPageSlice } from './pageSlice';
 import { cleanTeamSlice } from './teamSlice';
+import { set } from 'date-fns';
 
 const debugOn = false;
 
@@ -41,7 +42,8 @@ const initialState = {
     mfa: null,
     demoMode: false,
     serviceWorkerRegistered: false,
-    gotoFirstPagetAfterLoggedIn: false
+    gotoFirstPagetAfterLoggedIn: false,
+    preflightError: false
 }
 
 const authSlice = createSlice({
@@ -145,11 +147,14 @@ const authSlice = createSlice({
         setGotoFirstPagetAfterLoggedIn: (state, action) => {
             localStorage.setItem('lastPingTime', Date.now());
             state.gotoFirstPagetAfterLoggedIn = action.payload;
+        },
+        setPreflightError: (state, action) => {
+            state.preflightError = action.payload;
         }
     }
 });
 
-export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey, setGotoFirstPagetAfterLoggedIn } = authSlice.actions;
+export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey, setGotoFirstPagetAfterLoggedIn, setPreflightError } = authSlice.actions;
 
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
@@ -424,6 +429,7 @@ export const logOutAsyncThunk = (data) => async (dispatch, getState) => {
 export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, authActivity.Preflight, () => {
         return new Promise(async (resolve, reject) => {
+            dispatch(setPreflightError(false));
             if (getState().auth.challengeState) {
                 resolve();
                 return;
@@ -469,7 +475,8 @@ export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
                 resolve();
             }).catch(error => {
                 debugLog(debugOn, "woo... preflight failed.");
-                dispatch(setPreflightReady(true));
+                dispatch(setPreflightError(true));
+                //dispatch(setPreflightReady(true));
                 reject("110");
             })
         });

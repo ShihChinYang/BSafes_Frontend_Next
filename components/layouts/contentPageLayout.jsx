@@ -11,6 +11,7 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import Container from 'react-bootstrap/Container'
 import Dropdown from 'react-bootstrap/Dropdown'
 import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 
 import { Blocks } from 'react-loader-spinner';
 import { ToastContainer, toast } from 'react-toastify';
@@ -60,6 +61,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     const dispatch = useDispatch();
 
     const [nextRoute, setNextRoute] = useState(null);
+    const [showPrefilightErrorModal, setShowPrefilightErrorModal] = useState(false);
 
     const accountState = useSelector(state => state.account.accountState);
     debugLog(debugOn, "accountState: ", accountState);
@@ -78,6 +80,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     const iOSActivity = useSelector(state => state.page.iOSActivity);
     const generateDrawingSnapshot = useSelector(state => state.page.generateDrawingSnapshot);
 
+    const preflightError = useSelector(state => state.auth.preflightError);
     const preflightReady = useSelector(state => state.auth.preflightReady);
     const localSessionState = useSelector(state => state.auth.localSessionState);
     const v2NextAuthStep = useSelector(state => state.auth.v2NextAuthStep);
@@ -304,6 +307,12 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
         }
     }
 
+    const handlePreflightRetry = () => {
+        dispatch(setPreflightReady(false));
+        dispatch(preflightAsyncThunk());
+        setShowPrefilightErrorModal(false);
+    }
+
     useEffect(() => {
         debugLog(debugOn, `${router.asPath} is loaded`)
     }, [router.asPath]);
@@ -331,6 +340,12 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (preflightError) {
+            setShowPrefilightErrorModal(true);
+        }
+    }, [preflightError]);
 
     useEffect(() => {
         if (preflightReady) {
@@ -625,6 +640,14 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                     {(displayPaymentBanner && accountState === 'overflow') && <SuspendedModal overflow={true} />}
                 </>
             }
+            <Modal show={showPrefilightErrorModal} centered>
+                <Modal.Body><h4>Network Error!</h4></Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" size="sm" onClick={handlePreflightRetry}>
+                        Retry
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     )
 };
