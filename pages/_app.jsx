@@ -71,7 +71,7 @@ function MyApp({ Component, pageProps }) {
         debugLog(debugOn, "lastPingPath: " + lastPingPath);
         if (window.location.pathname === '/' && lastPingPath && lastPingPath === '/') {
           debugLog(debugOn, "lastPingCount: " + pingCount);
-          if (pingCount >= 10) {
+          if (pingCount >= 6) {
             pingCount = 0;
             setTimeout(() => {
               debugLog(debugOn, `The page remains on / for too long`);
