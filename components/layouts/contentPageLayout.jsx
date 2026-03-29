@@ -27,7 +27,7 @@ import DemoNotice from '../demoNotice';
 
 import BSafesStyle from '../../styles/BSafes.module.css'
 
-import { debugLog } from '../../lib/helper';
+import { debugLog, getNickname } from '../../lib/helper';
 import { getErrorMessages } from '../../lib/activities';
 import { getFirstPageAfterLoggedIn } from '../../lib/productID'
 
@@ -187,12 +187,6 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     const goLogin = () => {
         switch (process.env.NEXT_PUBLIC_app) {
-            case 'bsafes':
-                changePage('/apps/bsafes');
-                break;
-            case 'colors':
-                changePage('/apps/colors');
-                break;
             default:
                 changePage('/logIn');
         }
@@ -293,6 +287,15 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                         goLogin();
                     }
                 } else {
+                    const storedNickname = getNickname();
+                    if (storedNickname) {
+                        goLogin();
+                        return;
+                    }
+                    if (product) {
+                        changePage(`/appPreviews/${product}`);
+                        return;
+                    }
                     const path = router.asPath;
                     if (ifRedirectToHome(path)) {
                         goHome();
