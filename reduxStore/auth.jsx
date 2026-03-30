@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 const forge = require('node-forge');
 
-import { debugLog, PostCall, getTimeZoneOffset, clearLocalData, saveNickname } from '../lib/helper'
+import { debugLog, PostCall, getTimeZoneOffset, clearLocalData, saveNickname, isUserContentPage } from '../lib/helper'
+import { processPreflightResponse } from '../lib/preflightHelper';  
 import { clearDemo } from '../lib/demoHelper';
 import { calculateCredentials, saveLocalCredentials, createAccountRecoveryCode, decryptBinaryString, readLocalCredentials, clearLocalCredentials } from '../lib/crypto'
 import { authActivity } from '../lib/activities';
@@ -11,7 +12,6 @@ import { cleanV1AccountSlice, setNextAuthStep, setKeyMeta } from './v1AccountSli
 import { cleanContainerSlice } from './containerSlice';
 import { cleanPageSlice } from './pageSlice';
 import { cleanTeamSlice } from './teamSlice';
-import { set } from 'date-fns';
 
 const debugOn = false;
 
@@ -430,6 +430,11 @@ export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, authActivity.Preflight, () => {
         return new Promise(async (resolve, reject) => {
             dispatch(setPreflightError(false));
+            if(isUserContentPage()) {
+                dispatch(setPreflightReady(true));
+                resolve()
+                return;
+            }
             if (getState().auth.challengeState) {
                 resolve();
                 return;
@@ -442,7 +447,8 @@ export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
             if (data && data.action) params.body = { action: data.action };
             PostCall(params).then(data => {
                 debugLog(debugOn, data);
-                if (data.status === 'ok') {
+                processPreflightResponse(data, dispatch);
+                /*if (data.status === 'ok') {
                     dispatch(setAccountVersion(data.accountVersion));
                     if (data.nextStep) {
                         localStorage.setItem("authState", data.nextStep.step);
@@ -472,6 +478,7 @@ export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
                 }
                 dispatch(setClientEncryptionKey(data.clientEncryptionKey));
                 dispatch(setPreflightReady(true));
+                */
                 resolve();
             }).catch(error => {
                 debugLog(debugOn, "woo... preflight failed.");

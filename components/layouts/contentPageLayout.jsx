@@ -131,7 +131,6 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     const logOut = (e) => {
         debugLog(debugOn, "Log out");
-        //changePage('/logOut');
         dispatch(logOutAsyncThunk());
     }
 
@@ -311,9 +310,10 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     }
 
     const handlePreflightRetry = () => {
-        dispatch(setPreflightReady(false));
+        /*dispatch(setPreflightReady(false));
         dispatch(preflightAsyncThunk());
-        setShowPrefilightErrorModal(false);
+        setShowPrefilightErrorModal(false);*/
+        location.reload();
     }
 
     useEffect(() => {

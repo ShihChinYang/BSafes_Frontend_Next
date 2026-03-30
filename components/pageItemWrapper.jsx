@@ -115,7 +115,7 @@ const PageItemWrapper = ({ itemId, children }) => {
 
   useEffect(() => {
     debugLog(debugOn, `demoMode: ${demoMode}, ${isLoggedIn}, ${itemId}, ${pageItemId}`);
-    if ((isLoggedIn || (demoMode && serviceWorkerRegistered)) && itemId && !pageItemId && !aborted) {
+    if (serviceWorkerRegistered && itemId && !pageItemId && !aborted) {
       reloadAPage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
