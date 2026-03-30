@@ -30,7 +30,12 @@ import { products, productIdDelimiter } from "../lib/productID";
 export default function PageCommons() {
     const debugOn = true;
     const dispatch = useDispatch();
-
+    const photoSwipeOptions = {
+        history: false,
+        shareButtons: [
+            { id: 'download', label: 'Download image', url: '{{raw_image_url}}', download: true }
+        ]
+    }
     const editorScriptsLoaded = useSelector(state => state.scripts.editorScriptsLoaded);
     const workspaceKey = useSelector(state => state.container.workspaceKey);
     const workspaceSearchKey = useSelector(state => state.container.searchKey);
@@ -61,9 +66,9 @@ export default function PageCommons() {
 
     const S3SignedUrlForContentUpload = useSelector(state => state.page.S3SignedUrlForContentUpload);
     const contentImagesDownloadQueue = useSelector(state => state.page.contentImagesDownloadQueue);
-    const contentImagedDownloadIndex = useSelector(state=>state.page.contentImagedDownloadIndex);
+    const contentImagedDownloadIndex = useSelector(state => state.page.contentImagedDownloadIndex);
     let currentContentImageDownloadingProgress = 0;
-    if(contentImagesDownloadQueue.length && contentImagedDownloadIndex<contentImagesDownloadQueue.length){
+    if (contentImagesDownloadQueue.length && contentImagedDownloadIndex < contentImagesDownloadQueue.length) {
         currentContentImageDownloadingProgress = contentImagesDownloadQueue[contentImagedDownloadIndex].progress;
     }
     const contentImagesDisplayIndex = useSelector(state => state.page.contentImagesDisplayIndex);
@@ -150,9 +155,7 @@ export default function PageCommons() {
         }
         const pswpElement = pswpRef.current;
         const options = {
-            // optionName: 'option value'
-            // for example:
-            history: false,
+            ...photoSwipeOptions,
             index: startingIndex // start at first slide
         };
         const gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, slides, options);
@@ -163,9 +166,7 @@ export default function PageCommons() {
         const slides = [data];
         const pswpElement = pswpRef.current;
         const options = {
-            // optionName: 'option value'
-            // for example:
-            history: false,
+            ...photoSwipeOptions,
             index: 0
         };
         const gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, slides, options);
@@ -990,7 +991,7 @@ export default function PageCommons() {
                         {((productId === "") || product.fixedSize === undefined) ?
                             <Row className="justify-content-center">
                                 <Col sm="10">
-                                    <hr className="mx-3"/>
+                                    <hr className="mx-3" />
                                 </Col>
                             </Row>
                             :
@@ -1110,7 +1111,7 @@ export default function PageCommons() {
                 }
                 {contentUploadProgress !== 0 &&
                     <div className='fixed-bottom'>
-                        {true && <ProgressBar variant="success" now={contentUploadProgress} style={{zIndex:"1000"}} />}
+                        {true && <ProgressBar variant="success" now={contentUploadProgress} style={{ zIndex: "1000" }} />}
                     </div>
                 }
                 {contentDownloadProgress !== 0 &&
