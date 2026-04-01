@@ -231,14 +231,14 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                         saveCurrentPath(path);
                     }
                     return;
-                } else {
+                } /*else {
                     if (accountVersion === 'v1') {
                         changePage('/teams');
                     } else {
                         dispatch(setGotoFirstPagetAfterLoggedIn(true));
                     }
                     return;
-                }
+                }*/
             } else {
                 if (isLoggedIn) {
                     dispatch(loggedOut());
