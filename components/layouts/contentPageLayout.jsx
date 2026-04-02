@@ -82,6 +82,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     const preflightError = useSelector(state => state.auth.preflightError);
     const preflightReady = useSelector(state => state.auth.preflightReady);
+    const preflightResponseProcessed = useSelector(state => state.auth.preflightResponseProcessed);
     const localSessionState = useSelector(state => state.auth.localSessionState);
     const v2NextAuthStep = useSelector(state => state.auth.v2NextAuthStep);
 
@@ -228,17 +229,19 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                             dispatch(setGotoFirstPagetAfterLoggedIn(true));
                         }
                     } else {
-                        saveCurrentPath(path);
+                        if (process.env.NEXT_PUBLIC_platform !== "Web") {
+                            saveCurrentPath(path);
+                        }
                     }
                     return;
-                } /*else {
+                } else {
                     if (accountVersion === 'v1') {
                         changePage('/teams');
                     } else {
                         dispatch(setGotoFirstPagetAfterLoggedIn(true));
                     }
                     return;
-                }*/
+                }
             } else {
                 if (isLoggedIn) {
                     dispatch(loggedOut());
@@ -351,10 +354,10 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     }, [preflightError]);
 
     useEffect(() => {
-        if (preflightReady) {
+        if (preflightResponseProcessed) {
             dispatch(createCheckSessionIntervalThunk());
         }
-    }, [preflightReady]);
+    }, [preflightResponseProcessed]);
 
     useEffect(() => {
         if (!nextRoute) return;
@@ -440,13 +443,6 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
         }
     }, [nextAuthStep])
 
-
-    useEffect(() => {
-        if (preflightReady && accountState) {
-
-        }
-    }, [preflightReady, accountState])
-
     useEffect(() => {
         if (authActivityErrors) {
             const errorMessages = getErrorMessages('Auth', authActivityErrors, authActivityErrorCodes);
@@ -457,7 +453,10 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     useEffect(() => {
         if (gotoFirstPagetAfterLoggedIn) {
-            const storedCurrentPath = getCurrentPath();
+            let storedCurrentPath = null;
+            if (process.env.NEXT_PUBLIC_platform !== "Web") {
+                storedCurrentPath = getCurrentPath();
+            }
             let firstPage;
             if (storedCurrentPath) {
                 firstPage = storedCurrentPath;

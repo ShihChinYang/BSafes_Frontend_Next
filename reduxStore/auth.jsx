@@ -23,6 +23,8 @@ const initialState = {
     contextId: null,
     challengeState: false,
     preflightReady: false,
+    preflightResponseProcessed: false,
+    preflightError: false,
     localSessionState: null,
     accountVersion: '',
     memberId: null,
@@ -43,7 +45,6 @@ const initialState = {
     demoMode: false,
     serviceWorkerRegistered: false,
     gotoFirstPagetAfterLoggedIn: false,
-    preflightError: false
 }
 
 const authSlice = createSlice({
@@ -83,6 +84,15 @@ const authSlice = createSlice({
         },
         setPreflightReady: (state, action) => {
             state.preflightReady = action.payload;
+            if(action.payload === false) {
+                state.preflightResponseProcessed = false;
+            }
+        },
+        setPreflightError: (state, action) => {
+            state.preflightError = action.payload;
+        },
+        setPreflightResponseProcessed: (state, action) => {
+            state.preflightResponseProcessed = action.payload;
         },
         setLocalSessionState: (state, action) => {
             state.localSessionState = action.payload;
@@ -147,14 +157,11 @@ const authSlice = createSlice({
         setGotoFirstPagetAfterLoggedIn: (state, action) => {
             localStorage.setItem('lastPingTime', Date.now());
             state.gotoFirstPagetAfterLoggedIn = action.payload;
-        },
-        setPreflightError: (state, action) => {
-            state.preflightError = action.payload;
         }
     }
 });
 
-export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey, setGotoFirstPagetAfterLoggedIn, setPreflightError } = authSlice.actions;
+export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setPreflightError, setPreflightResponseProcessed, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey, setGotoFirstPagetAfterLoggedIn } = authSlice.actions;
 
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
