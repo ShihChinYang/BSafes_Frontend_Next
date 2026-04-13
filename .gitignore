@@ -39,10 +39,11 @@ buildForIOSBSafes
 deployToCloudflare
 runForIOS
 runForWeb
+runForBackup
 runForWebProduct
 runForAndroidBSafes
 runForWebColors
-runForBackup
+runForLocalBackup
 runAnIOSFeatureProduct
 public/js/excalidraw/custom-fonts
 resolved_fonts.json

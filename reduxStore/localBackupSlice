@@ -247,7 +247,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                             startAfter = response.key;
                         }
                         do {
-                            const result = await getItemVersionsBackupList(startAfter, continuationToken, 4,);
+                            const result = await getItemVersionsBackupList(startAfter, continuationToken, 100);
                             if (result.numberOfItems) {
                                 const memberId = getState().auth.memberId;
                                 result.memberId = memberId;
