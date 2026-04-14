@@ -343,15 +343,15 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                                     });
                                 }
                                 return new Promise(async (resolve, reject) => {
-                                    let workspace = JSON.parse(item.space);
+                                    let workspace = item.space;
                                     let workspaceKey = await getWorkspaceKey(workspace);
                                     let itemKey;
-                                    const decoded = forge.util.decode64(JSON.parse(item.keyEnvelope));
+                                    const decoded = forge.util.decode64(item.keyEnvelope);
                                     itemKey = decryptBinaryString(decoded, workspaceKey);
                                     resolve(itemKey);
                                 });
                             }
-                            const content = JSON.parse(item.content);
+                            const content = item.content;
                             if (content.startsWith('s3Object/')) {
                                 const downloadObjectsInContent = (content) => {
                                     return new Promise(async (resolve, reject) => {
@@ -411,7 +411,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                                 }
                                 resolve(result);
                             } else if (item.content && item.content.startsWith('s3DrawingObject/')) {
-                                const s3Key = forge.util.decode64(result.item.content.substring(16));
+                                const s3Key = forge.util.decode64(item.content.substring(16));
                                 let response = await downloadAnObject(s3Key);
                                 let result;
                                 if (response.status === "ok") {
@@ -425,7 +425,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                     }
                     const downloadVideoObjects = (item) => {
                         return new Promise(async (resolve, reject) => {
-                            const videos = JSON.parse(item.videos);
+                            const videos = item.videos;
                             let s3Objects = [];
                             for (let i = 0; i < videos.length; i++) {
                                 let video = videos[i];
@@ -450,7 +450,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                     }
                     const downloadImageObjects = (item) => {
                         return new Promise(async (resolve, reject) => {
-                            const images = JSON.parse(item.images);
+                            const images = item.images;
                             let s3Objects = [];
                             for (let i = 0; i < images.length; i++) {
                                 let image = images[i];
@@ -470,7 +470,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                     }
                     const downloadAudioObjects = (item) => {
                         return new Promise(async (resolve, reject) => {
-                            const audios = JSON.parse(item.audios);
+                            const audios = item.audios;
                             let s3Objects = [];
                             for (let i = 0; i < audios.length; i++) {
                                 let audio = audios[i];
@@ -493,7 +493,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                     }
                     const downloadAttachmentObjects = (item) => {
                         return new Promise(async (resolve, reject) => {
-                            const attachments = JSON.parse(item.attachments);
+                            const attachments = item.attachments;
                             let s3Objects = [];
                             for (let i = 1; i < attachments.length; i++) {
                                 let attachment = attachments[i];
@@ -527,7 +527,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                                     finished = false;
                                 }
                             }
-                            if (item.videos) {
+                            if (item.videos ) {
                                 response = await downloadVideoObjects(item)
                             }
                             if (item.images) {
@@ -548,6 +548,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                             break;
                         }
                     }
+                    resolve();
                 });
             }
             try {
