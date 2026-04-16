@@ -2120,8 +2120,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         await getItemFromServer();
                     }
                     await getItemPath(data.itemId, dispatch, getState);
-                    if (data.itemId.startsWith("np") || data.itemId.startsWith("dp")) {
-                        //await downloadAdjacentPages();
+                    if ( process.env.NEXT_PUBLIC_app !== 'desktopBackup' && (data.itemId.startsWith("np") || data.itemId.startsWith("dp"))) {
                         dispatch(downloadAdjacentPagesThunk({itemId:data.itemId}));
                     }
                     resolve();
