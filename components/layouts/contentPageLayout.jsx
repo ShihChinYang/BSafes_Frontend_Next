@@ -313,9 +313,6 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     }
 
     const handlePreflightRetry = () => {
-        /*dispatch(setPreflightReady(false));
-        dispatch(preflightAsyncThunk());
-        setShowPrefilightErrorModal(false);*/
         location.reload();
     }
 

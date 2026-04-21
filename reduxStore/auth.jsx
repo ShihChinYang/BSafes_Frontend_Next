@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const forge = require('node-forge');
 
 import { debugLog, PostCall, getTimeZoneOffset, clearLocalData, saveNickname, isUserContentPage } from '../lib/helper'
-import { processPreflightResponse } from '../lib/preflightHelper';  
+import { processPreflightResponse } from '../lib/preflightHelper';
 import { clearDemo } from '../lib/demoHelper';
 import { calculateCredentials, saveLocalCredentials, createAccountRecoveryCode, decryptBinaryString, readLocalCredentials, clearLocalCredentials } from '../lib/crypto'
 import { authActivity } from '../lib/activities';
@@ -84,7 +84,7 @@ const authSlice = createSlice({
         },
         setPreflightReady: (state, action) => {
             state.preflightReady = action.payload;
-            if(action.payload === false) {
+            if (action.payload === false) {
                 state.preflightResponseProcessed = false;
             }
         },
@@ -215,12 +215,43 @@ export const keySetupAsyncThunk = (data) => async (dispatch, getState) => {
 
 export const logInAsyncThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, authActivity.LogIn, () => {
+        const loginLocally = (credentials) => {
+            return new Promise(async (resolve, reject) => {
+                const respose = await window.desktopAPI.getAMmberByAuthId(credentials.keyPack.id);
+                if (respose.status === "ok" && respose.member) {
+                    try {
+                        const member = respose.member;
+                        let privateKey = forge.util.decode64(member.privateKeyEnvelope);
+                        privateKey = decryptBinaryString(privateKey, credentials.secret.expandedKey);
+                        const pki = forge.pki;
+                        let privateKeyFromPem = pki.privateKeyFromPem(privateKey);
+                        const randomMessage = forge.util.encode64(forge.random.getBytesSync(128));
+                        let md = forge.md.sha1.create();
+                        md.update(randomMessage, 'utf8');
+                        let signature = privateKeyFromPem.sign(md);
+                        const publicKey = pki.publicKeyFromPem(forge.util.decode64(member.publicKey));
+                        const verified = publicKey.verify(md.digest().bytes(), signature);
+                        if (verified) {
+                            resolve({ status: "ok"});
+                        } else {
+                            throw new Error("Failed to verify the public and private keys.");
+                        }
+                    }
+                    catch (error) {
+                        alert("Failed to login locally.");
+                        resolve({status: "error"});
+                    }
+                } else {
+                    alert("The account does not exist on desktop.");
+                    resolve({status: "error"});
+                }
+            });
+        }
         return new Promise(async (resolve, reject) => {
             const nickname = data.nickname;
             const credentials = await calculateCredentials(data.nickname, data.keyPassword, true);
             if (credentials) {
                 debugLog(debugOn, "credentials: ", credentials);
-
                 PostCall({
                     api: '/logIn',
                     body: credentials.keyPack,
@@ -283,13 +314,27 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
                             api: '/memberAPI/verifyChallenge',
                             body: { signature },
                             dispatch
-                        }).then(data => {
-
+                        }).then(async data => {
                             if (data.status == "ok") {
                                 credentials.memberId = data.memberId;
                                 credentials.displayName = data.displayName;
                                 credentials.currentKeyVersion = data.currentKeyVersion;
                                 dispatch(setAccountVersion('v2'));
+                                if (process.env.NEXT_PUBLIC_app === "desktopBackup") {
+                                    let thisMember = {
+                                        memberId: credentials.memberId,
+                                        displayName: credentials.displayName,
+                                        privateKeyEnvelope: credentials.keyPack.privateKeyEnvelope,
+                                        searchKeyEnvelope: credentials.keyPack.searchKeyEnvelope,
+                                        searchIVEnvelope: credentials.keyPack.searchIVEnvelope,
+                                        publicKey: credentials.keyPack.publicKey
+                                    }
+                                    const response = await window.desktopAPI.addAMemberIfNotExists(credentials.keyPack.id, thisMember);
+                                    if (response.status !== "ok") {
+                                        debugLog(debugOn, "Failed to add a member to desktop: ", response.error);
+                                        alert("Failed to add a member to desktop!");
+                                    }
+                                }
                                 if (data.nextStep) {
                                     saveLocalCredentials(credentials, data.sessionKey, data.sessionIV);
                                     localStorage.setItem("authState", data.nextStep.step);
@@ -437,7 +482,7 @@ export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, authActivity.Preflight, () => {
         return new Promise(async (resolve, reject) => {
             dispatch(setPreflightError(false));
-            if(isUserContentPage()) {
+            if (isUserContentPage()) {
                 dispatch(setPreflightReady(true));
                 resolve()
                 return;
@@ -455,42 +500,10 @@ export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
             PostCall(params).then(data => {
                 debugLog(debugOn, data);
                 processPreflightResponse(data, dispatch);
-                /*if (data.status === 'ok') {
-                    dispatch(setAccountVersion(data.accountVersion));
-                    if (data.nextStep) {
-                        localStorage.setItem("authState", data.nextStep.step);
-                        if (data.nextStep.keyMeta) {
-                            dispatch(setDisplayName(data.nextStep.keyMeta.displayName));
-                            dispatch(setKeyMeta(data.nextStep.keyMeta));
-                        }
-                        if (data.idleTimeout) {
-                            if (data.accountVersion === 'v1') {
-                                clearLocalCredentials('v1');
-                            } else {
-                                clearLocalData();
-                                dispatch(loggedOut());
-                            }
-                            dispatch(setNextAuthStep(data.nextStep))
-                        }
-                    } else {
-                        dispatch(loggedIn({ sessionKey: data.sessionKey, sessionIV: data.sessionIV, froalaLicenseKey: data.froalaLicenseKey, stripePublishableKey: data.stripePublishableKey }));
-                        dispatch(setAccountState({ accountState: data.accountState, nextDueTime: data.nextDueTime }));
-                    }
-                } else {
-                    if (data.error === 'SessionNotExisted') {
-                        clearLocalData();
-                        dispatch(loggedOut());
-                        dispatch(setFroalaLicenseKey({ froalaLicenseKey: data.froalaLicenseKey }))
-                    }
-                }
-                dispatch(setClientEncryptionKey(data.clientEncryptionKey));
-                dispatch(setPreflightReady(true));
-                */
                 resolve();
             }).catch(error => {
                 debugLog(debugOn, "woo... preflight failed.");
                 dispatch(setPreflightError(true));
-                //dispatch(setPreflightReady(true));
                 reject("110");
             })
         });
