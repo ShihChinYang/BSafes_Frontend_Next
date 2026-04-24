@@ -1195,7 +1195,7 @@ const getS3ObjectForAPage = (itemId, s3Key, cacheInServiceWorkerDB = true, dispa
     return new Promise(async (resolve, reject) => {
         let downloadedBinaryString = null;
         try {
-            if (process.env.NEXT_PUBLIC_app !== "desktopBackup") {
+            if (process.env.NEXT_PUBLIC_app !== "localBackup") {
                 if (cacheInServiceWorkerDB) {
                     const response = await getS3ObjectFromServiceWorkerDB(s3Key);
                     if (response.status === 'ok' && response.object) {
@@ -1765,7 +1765,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                 containerId = itemIdParts.join(':');
                 containerId = containerId.replace('p:', ':');
                 if (!isDemoMode()) {
-                    if (process.env.NEXT_PUBLIC_app === 'desktopBackup') {
+                    if (process.env.NEXT_PUBLIC_app === 'localBackup') {
                         const result = await getPageItemFromLocalBackup({ itemId: containerId });
                         if (result.status === 'ok') {
                             debugLog(debugOn, "getContainerData: ", result);
@@ -2088,7 +2088,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             })
                         })
                     }
-                    if (process.env.NEXT_PUBLIC_app === 'desktopBackup') {
+                    if (process.env.NEXT_PUBLIC_app === 'localBackup') {
                         await getItemFromLocalBackup();
                     } else if (navigationInSameContainer) {
                         dispatch(setPreflightReady(true));
@@ -2120,7 +2120,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         await getItemFromServer();
                     }
                     await getItemPath(data.itemId, dispatch, getState);
-                    if ( process.env.NEXT_PUBLIC_app !== 'desktopBackup' && (data.itemId.startsWith("np") || data.itemId.startsWith("dp"))) {
+                    if ( process.env.NEXT_PUBLIC_app !== 'localBackup' && (data.itemId.startsWith("np") || data.itemId.startsWith("dp"))) {
                         dispatch(downloadAdjacentPagesThunk({itemId:data.itemId}));
                     }
                     resolve();

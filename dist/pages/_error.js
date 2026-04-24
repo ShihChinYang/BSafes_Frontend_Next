@@ -1,0 +1,1 @@
+(self.webpackChunkbsafes_frontend=self.webpackChunkbsafes_frontend||[]).push([[2731],{92164:(n,e,s)=>{(window.__NEXT_P=window.__NEXT_P||[]).push(["/_error",function(){return s(45494)}])}},n=>{n.O(0,[636,6593,8792],()=>n(n.s=92164)),n.O()}]);

@@ -45,6 +45,7 @@ const initialState = {
     demoMode: false,
     serviceWorkerRegistered: false,
     gotoFirstPagetAfterLoggedIn: false,
+    offlineMode: false,
 }
 
 const authSlice = createSlice({
@@ -157,11 +158,14 @@ const authSlice = createSlice({
         setGotoFirstPagetAfterLoggedIn: (state, action) => {
             localStorage.setItem('lastPingTime', Date.now());
             state.gotoFirstPagetAfterLoggedIn = action.payload;
+        },
+        setOfflineMode: (state, action) => {
+            state.offlineMode = action.payload;
         }
     }
 });
 
-export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setPreflightError, setPreflightResponseProcessed, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey, setGotoFirstPagetAfterLoggedIn } = authSlice.actions;
+export const { cleanAuthSlice, resetAuthActivity, activityStart, activityDone, activityError, setContextId, setChallengeState, setPreflightReady, setPreflightError, setPreflightResponseProcessed, setLocalSessionState, setDisplayName, loggedIn, loggedOut, setAccountVersion, setV2NextAuthStep, setClientEncryptionKey, setMfa, setDemoMode, setServiceWorkerRegistered, setFroalaLicenseKey, setGotoFirstPagetAfterLoggedIn, setOfflineMode } = authSlice.actions;
 
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
@@ -232,18 +236,18 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
                         const publicKey = pki.publicKeyFromPem(forge.util.decode64(member.publicKey));
                         const verified = publicKey.verify(md.digest().bytes(), signature);
                         if (verified) {
-                            resolve({ status: "ok"});
+                            resolve({ status: "ok", member });
                         } else {
                             throw new Error("Failed to verify the public and private keys.");
                         }
                     }
                     catch (error) {
                         alert("Failed to login locally.");
-                        resolve({status: "error"});
+                        resolve({ status: "error" });
                     }
                 } else {
                     alert("The account does not exist on desktop.");
-                    resolve({status: "error"});
+                    resolve({ status: "error" });
                 }
             });
         }
@@ -252,6 +256,36 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
             const credentials = await calculateCredentials(data.nickname, data.keyPassword, true);
             if (credentials) {
                 debugLog(debugOn, "credentials: ", credentials);
+                if (process.env.NEXT_PUBLIC_app === "localBackup") {
+                    let offlineMode = getState().auth.offlineMode;
+                    if (offlineMode) {
+                        const data = await loginLocally(credentials);
+                        if (data.status === 'ok') {
+                            saveNickname(nickname);
+                            credentials.keyPack.privateKeyEnvelope = data.member.privateKeyEnvelope;
+                            credentials.keyPack.searchKeyEnvelope = data.member.searchKeyEnvelope;
+                            credentials.keyPack.searchIVEnvelope = data.member.searchIVEnvelope;
+                            credentials.keyPack.publicKey = data.member.publicKey;
+                            credentials.memberId = data.member.memberId;
+                            credentials.displayName = data.member.displayName;
+                            credentials.currentKeyVersion = data.member.currentKeyVersion;
+                            dispatch(setAccountVersion('v2'));
+                            const salt = forge.random.getBytesSync(16);
+                            const randomKey = forge.random.getBytesSync(32);
+                            const sessionKey = forge.pkcs5.pbkdf2(randomKey, salt, 10000, 32);
+                            const sessionIV = forge.random.getBytesSync(16);
+                            localStorage.setItem("sessionKey", sessionKey);
+                            localStorage.setItem("sessionIV", sessionIV);
+                            saveLocalCredentials(credentials, sessionKey, sessionIV);
+                            debugLog(debugOn, "Logged in.");
+                            localStorage.setItem("authState", "Unlocked");
+                            dispatch(loggedIn({ sessionKey: sessionKey, sessionIV: sessionIV }));
+                            debugLog(debugOn, "loggedIn dispatched.");
+                        }
+                        resolve();
+                        return;
+                    }
+                }
                 PostCall({
                     api: '/logIn',
                     body: credentials.keyPack,
@@ -320,9 +354,10 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
                                 credentials.displayName = data.displayName;
                                 credentials.currentKeyVersion = data.currentKeyVersion;
                                 dispatch(setAccountVersion('v2'));
-                                if (process.env.NEXT_PUBLIC_app === "desktopBackup") {
+                                if (process.env.NEXT_PUBLIC_app === "localBackup") {
                                     let thisMember = {
                                         memberId: credentials.memberId,
+                                        currentKeyVersion: credentials.currentKeyVersion,
                                         displayName: credentials.displayName,
                                         privateKeyEnvelope: credentials.keyPack.privateKeyEnvelope,
                                         searchKeyEnvelope: credentials.keyPack.searchKeyEnvelope,
@@ -361,9 +396,7 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
                         })
 
                     }
-
                     verifyChallenge();
-
                 }).catch(error => {
                     debugLog(debugOn, "woo... failed to login.")
                     reject("108");
@@ -450,22 +483,23 @@ function clearIndexDB() {
 export const logOutAsyncThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, authActivity.LogOut, () => {
         return new Promise(async (resolve, reject) => {
-
-            PostCall({
-                api: '/memberAPI/logOut',
-                dispatch
-            }).then(data => {
-                debugLog(debugOn, data);
-                if (data.status === 'ok') {
-                    resolve();
-                } else {
-                    debugLog(debugOn, "woo... failed to log out: ", data.error)
+            if (!(process.env.NEXT_PUBLIC_app === "localBackup" && getState().auth.offlineMode)) {
+                PostCall({
+                    api: '/memberAPI/logOut',
+                    dispatch
+                }).then(data => {
+                    debugLog(debugOn, data);
+                    if (data.status === 'ok') {
+                        resolve();
+                    } else {
+                        debugLog(debugOn, "woo... failed to log out: ", data.error)
+                        reject("Failed to log out.");
+                    }
+                }).catch(error => {
+                    debugLog(debugOn, "woo... failed to log out.")
                     reject("Failed to log out.");
-                }
-            }).catch(error => {
-                debugLog(debugOn, "woo... failed to log out.")
-                reject("Failed to log out.");
-            })
+                })
+            }
             clearLocalData();
             try {
                 await clearIndexDB();
@@ -481,8 +515,28 @@ export const logOutAsyncThunk = (data) => async (dispatch, getState) => {
 export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, authActivity.Preflight, () => {
         return new Promise(async (resolve, reject) => {
+            if (process.env.NEXT_PUBLIC_app === "localBackup") {
+                const offlineMode = localStorage.getItem("offlineMode");
+                const authState = localStorage.getItem("authState");
+                if (offlineMode === "true") {
+                    dispatch(setOfflineMode(true));
+                    if (authState !== 'Unlocked') {
+                        dispatch(setPreflightReady(true));
+                        resolve();
+                        return;
+                    } else {
+                        const sessionKey = localStorage.getItem("sessionKey");
+                        const sessionIV = localStorage.getItem("sessionIV");
+                        dispatch(loggedIn({ sessionKey, sessionIV }));
+                        dispatch(setPreflightReady(true));
+                        dispatch(setPreflightResponseProcessed(true));
+                        resolve();
+                        return;
+                    }
+                }
+            }
             dispatch(setPreflightError(false));
-            if (isUserContentPage()) {
+            if (process.env.NEXT_PUBLIC_app !== "localBackup" && isUserContentPage()) {
                 dispatch(setPreflightReady(true));
                 resolve()
                 return;

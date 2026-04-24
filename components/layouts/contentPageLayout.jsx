@@ -12,6 +12,8 @@ import Container from 'react-bootstrap/Container'
 import Dropdown from 'react-bootstrap/Dropdown'
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 import { Blocks } from 'react-loader-spinner';
 import { ToastContainer, toast } from 'react-toastify';
@@ -32,7 +34,7 @@ import { getErrorMessages } from '../../lib/activities';
 import { getFirstPageAfterLoggedIn } from '../../lib/productID'
 
 import { resetAccountActivity, setAccountHashVerified } from '../../reduxStore/accountSlice';
-import { resetAuthActivity, preflightAsyncThunk, setPreflightReady, setLocalSessionState, createCheckSessionIntervalThunk, loggedOut, cleanMemoryThunk, setV2NextAuthStep, logOutAsyncThunk, setGotoFirstPagetAfterLoggedIn } from '../../reduxStore/auth';
+import { resetAuthActivity, preflightAsyncThunk, setPreflightReady, setLocalSessionState, createCheckSessionIntervalThunk, loggedOut, cleanMemoryThunk, setV2NextAuthStep, logOutAsyncThunk, setGotoFirstPagetAfterLoggedIn, setOfflineMode } from '../../reduxStore/auth';
 import { resetContainerActivity, initContainer } from '../../reduxStore/containerSlice';
 import { resetPageActivity } from '../../reduxStore/pageSlice';
 import { resetTeamActivity } from '../../reduxStore/teamSlice';
@@ -68,6 +70,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     const accountActivity = useSelector(state => state.account.activity);
     const authActivity = useSelector(state => state.auth.activity);
     const authActivityErrors = useSelector(state => state.auth.activityErrors);
+    const offlineMode = useSelector(state => state.auth.offlineMode);
     const authActivityErrorCodes = useSelector(state => state.auth.activityErrorCodes);
     const workspaceKey = useSelector(state => state.auth.expandedKey);
     const searchKey = useSelector(state => state.auth.searchKey);
@@ -213,6 +216,16 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     const getCurrentPath = () => {
         return localStorage.getItem("currentPath");
+    }
+
+    const goOffline = () => {
+        localStorage.setItem("offlineMode", "true");
+        location.reload();
+    }
+
+    const goOnline = () => {
+        localStorage.removeItem("offlineMode");
+        location.reload();
     }
 
     const localSessionStateChanged = () => {
@@ -604,6 +617,21 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
                 }
             </>}
+            {offlineMode && (
+                <div className={BSafesStyle.offlineStatusBar}>
+                    <Row>
+                        <Col>
+                            <p>Your are now offline.</p>
+                        </Col>
+                        <Col className='text-end'>
+                            {!isLoggedIn && <Button variant="primary" size="sm" onClick={goOnline}>
+                                Go Online
+                            </Button>}
+                        </Col>
+                    </Row>
+
+                </div>
+            )}
             {false && (workspace && workspace.startsWith("d:")) &&
                 <DemoNotice />
             }
@@ -640,8 +668,11 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                 </>
             }
             <Modal show={showPrefilightErrorModal} centered>
-                <Modal.Body><h4>Network Error!</h4></Modal.Body>
+                <Modal.Body><h4>We’re having trouble connecting.</h4></Modal.Body>
                 <Modal.Footer>
+                    {process.env.NEXT_PUBLIC_app === 'localBackup' && <Button variant="success" size="sm" onClick={goOffline}>
+                        Go Offline
+                    </Button>}
                     <Button variant="primary" size="sm" onClick={handlePreflightRetry}>
                         Retry
                     </Button>

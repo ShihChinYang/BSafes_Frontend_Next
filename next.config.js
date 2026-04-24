@@ -5,6 +5,7 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
+
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // don't resolve 'fs' module on the client to prevent this error on build --> Error: Can't resolve 'fs'
@@ -41,7 +42,7 @@ const nextConfig = {
         }
       });
     });
-
+    
     return config;
   },
   allowedDevOrigins: ['127.0.0.1']

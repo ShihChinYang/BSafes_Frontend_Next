@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkbsafes_frontend=self.webpackChunkbsafes_frontend||[]).push([[2855],{62855:(e,a,n)=>{n.r(a),n.d(a,{decodePngMetadata:()=>t.jh,encodePngMetadata:()=>t.ih,getTEXtChunk:()=>t.hh});var t=n(68212);n(46088),n(65195)}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkbsafes_frontend=self.webpackChunkbsafes_frontend||[]).push([[4110],{74110:(e,a,s)=>{s.r(a),s.d(a,{default:()=>f.c,en:()=>f.a,kaa:()=>f.b});var f=s(16943);s(65195)}}]);

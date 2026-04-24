@@ -282,7 +282,7 @@ export default function Workspace({ readyToList = false }) {
             <br />
             <br />
             <br />
-            {process.env.NEXT_PUBLIC_app !== "desktopBackup" && !hideFunction && workspaceId && <Row>
+            {process.env.NEXT_PUBLIC_app !== "localBackup" && !hideFunction && workspaceId && <Row>
                 <Col xs={12}>
                     <Link href={"/trashBox/" + workspaceId} legacyBehavior>
                         <Button variant="light" className='pull-right border-0 shadow-none'>

@@ -465,7 +465,7 @@ export const initWorkspaceThunk = (data) => async (dispatch, getState) => {
 };
 
 export const listItemsThunk = (data) => async (dispatch, getState) => {
-    if (process.env.NEXT_PUBLIC_app !== "desktopBackup") {
+    if (process.env.NEXT_PUBLIC_app !== "localBackup") {
         dispatch(listCloudItemsThunk(data));
     } else {
         dispatch(listLocalItemsThunk(data));

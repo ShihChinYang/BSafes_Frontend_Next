@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkbsafes_frontend=self.webpackChunkbsafes_frontend||[]).push([[4737],{50798:e=>{e.exports=[]}}]);

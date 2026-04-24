@@ -73,7 +73,7 @@
 
 /* End of general */
 
-/*--********  Navigation bar */
+/*--*****  Navigation bar */
 .navbarBrand {
   margin-right: 0px;
 }
@@ -162,6 +162,21 @@
 }
 
 /* End of navigation bar */
+
+/*--****** Various status bars *******/
+.offlineStatusBar {
+  position: fixed;
+  bottom: 0;       /* Anchors it to the bottom */
+  left: 0;
+  width: 100%;
+  background-color: #f0e117; /* Dark gray for a bottom status feel */
+  color: black;
+  padding: 12px;
+  font-size: 18px;
+  z-index: 100; 
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1); /* Shadow pointing upwards */
+}
+/* End of Various status bars */
 
 /*--****** Background *******/
 .teamsBackground {
