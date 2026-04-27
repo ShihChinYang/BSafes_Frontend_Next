@@ -15,6 +15,7 @@ import { abort, clearPage, initPage, setChangingPage, setContainerData, setPageI
 import { setNewLocalItemUpdated } from "../reduxStore/localBackupSlice";
 
 import { debugLog } from "../lib/helper";
+import { setServiceWorkerRegistered } from "../reduxStore/auth";
 
 const PageItemWrapper = ({ itemId, children }) => {
   const debugOn = false;
@@ -97,6 +98,13 @@ const PageItemWrapper = ({ itemId, children }) => {
 
     router.events.on('routeChangeStart', handleRouteChange)
     router.events.on('routeChangeComplete', handleRouteChangeComplete)
+
+    navigator.serviceWorker.getRegistration("/").then((registration) => {
+      debugLog(debugOn, "registration: ", registration);
+      if (registration) {
+        dispatch(setServiceWorkerRegistered(true));
+      }
+    })
 
     // If the component is unmounted, unsubscribe
     // from the event with the `off` method:

@@ -150,6 +150,29 @@ export const getBackupDownloadSignedUrl = (s3Key, dispatch) => {
         })
     });
 }
+export const getBackupDownloadSignedUrlsForKeys = (s3Keys, dispatch) => {
+    return new Promise(async (resolve, reject) => {
+        PostCall({
+            api: '/memberAPI/getDownloadSignedUrlsForKeys',
+            body: {
+                s3Keys
+            },
+            dispatch,
+            tinybird: true
+        }).then(data => {
+            debugLog(debugOn, data);
+            if (data.status === 'ok') {
+                resolve(data.signedUrls);
+            } else {
+                debugLog(debugOn, "woo... getBackupDownloadSignedUrlsForKeys failed:", data.error);
+                reject("Failed to get the backup signed urls.");
+            }
+        }).catch(error => {
+            debugLog(debugOn, "woo... getBackupDownloadSignedUrlsForKeys failed:", error);
+            reject("Failed to get the backup signed urls.");
+        })
+    });
+}
 export const getBackupTokenThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, localBackupActivity.downloadItemVersionsBackup, () => {
         return new Promise(async (resolve, reject) => {
@@ -270,18 +293,26 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                     try {
                         while (1) {
                             const memberId = getState().auth.memberId;
-                            const response = await window.desktopAPI.getAnItemKeyForDwonload(memberId);
-                            if (response.key) {
-                                const key = response.key;
+                            const response = await window.desktopAPI.getItemKeysForDownload(memberId);
+                            if (response.keys && response.keys.length > 0) {
+                                let keys = response.keys;
                                 const dataCenter = localStorage.getItem("registeredDataCenter");
-                                const s3Key = `${dataCenter}:${key}`;
-                                const signedUrl = await getBackupDownloadSignedUrl(s3Key, dispatch);
-                                debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
-                                const data = await getS3Object(signedUrl);
-                                const itemVersion = JSON.parse(data.binaryString);
-                                const result = await window.desktopAPI.addAnItemVersion(memberId, key, itemVersion);
-                                if (result.status === "ok") {
-                                    dispatch(setNewLocalItemUpdated(true));
+                                let s3Keys = [];
+                                for (let i = 0; i < response.keys.length; i++) {
+                                    let key = keys[i].key;
+                                    let s3Key = `${dataCenter}:${key}`;
+                                    s3Keys.push(s3Key);
+                                }
+                                const signedUrls = await getBackupDownloadSignedUrlsForKeys(s3Keys, dispatch);
+                                for (let i = 0; i < signedUrls.length; i++) {
+                                    let signedUrl = signedUrls[i];
+                                    debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
+                                    const data = await getS3Object(signedUrl);
+                                    const itemVersion = JSON.parse(data.binaryString);
+                                    const result = await window.desktopAPI.addAnItemVersion(memberId, keys[i].key, itemVersion);
+                                    if (result.status === "ok") {
+                                        dispatch(setNewLocalItemUpdated(true));
+                                    }
                                 }
                             } else {
                                 break;
@@ -527,7 +558,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                                     finished = false;
                                 }
                             }
-                            if (item.videos ) {
+                            if (item.videos) {
                                 response = await downloadVideoObjects(item)
                             }
                             if (item.images) {
