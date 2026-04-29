@@ -27,6 +27,7 @@ const initialState = {
     preflightError: false,
     localSessionState: null,
     accountVersion: '',
+    authId: null,
     memberId: null,
     displayName: null,
     currentKeyVersion: null,
@@ -110,6 +111,7 @@ const authSlice = createSlice({
             state.activityErrorCodes = {};
             state.isLoggedIn = true;
             state.accountVersion = credentials.accountVersion;
+            state.authId = credentials.keyPack.id;
             state.memberId = credentials.memberId;
             state.currentKeyVersion = credentials.currentKeyVersion;
             state.displayName = forge.util.decodeUtf8(credentials.displayName);
@@ -123,6 +125,7 @@ const authSlice = createSlice({
             }
             state.froalaLicenseKey = action.payload.froalaLicenseKey;
             state.stripePublishableKey = action.payload.stripePublishableKey;
+            
         },
         loggedOut: (state, action) => {
             state.isLoggedIn = false;
@@ -221,10 +224,10 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, authActivity.LogIn, () => {
         const loginLocally = (credentials) => {
             return new Promise(async (resolve, reject) => {
-                const respose = await window.desktopAPI.getAMmberByAuthId(credentials.keyPack.id);
-                if (respose.status === "ok" && respose.member) {
+                const response = await window.desktopAPI.getAMmberByAuthId(credentials.keyPack.id);
+                if (response.status === "ok" && response.member) {
                     try {
-                        const member = respose.member;
+                        const member = response.member;
                         let privateKey = forge.util.decode64(member.privateKeyEnvelope);
                         privateKey = decryptBinaryString(privateKey, credentials.secret.expandedKey);
                         const pki = forge.pki;
@@ -362,7 +365,8 @@ export const logInAsyncThunk = (data) => async (dispatch, getState) => {
                                         privateKeyEnvelope: credentials.keyPack.privateKeyEnvelope,
                                         searchKeyEnvelope: credentials.keyPack.searchKeyEnvelope,
                                         searchIVEnvelope: credentials.keyPack.searchIVEnvelope,
-                                        publicKey: credentials.keyPack.publicKey
+                                        publicKey: credentials.keyPack.publicKey,
+                                        lastUpdatedTime:0
                                     }
                                     const response = await window.desktopAPI.addAMemberIfNotExists(credentials.keyPack.id, thisMember);
                                     if (response.status !== "ok") {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useRouter } from "next/router";
 
@@ -39,7 +39,7 @@ import { resetContainerActivity, initContainer } from '../../reduxStore/containe
 import { resetPageActivity } from '../../reduxStore/pageSlice';
 import { resetTeamActivity } from '../../reduxStore/teamSlice';
 import { resetV1AccountActivity } from '../../reduxStore/v1AccountSlice';
-import { getBackupTokenThunk, getItemVersionsBackupThunk } from '../../reduxStore/localBackupSlice';
+import { updateLocalBackupThunk, updateStatusBarMessageThunk } from '../../reduxStore/localBackupSlice';
 
 import { setNextAuthStep, lockAsyncThunk, signOutAsyncThunk, signedOut } from '../../reduxStore/v1AccountSlice';
 
@@ -90,6 +90,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     const v2NextAuthStep = useSelector(state => state.auth.v2NextAuthStep);
 
     const accountVersion = useSelector(state => state.auth.accountVersion);
+    const authId = useSelector(state => state.auth.authId);
     const memberId = useSelector(state => state.auth.memberId);
     const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
     const displayName = useSelector(state => state.auth.displayName);
@@ -97,6 +98,8 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     const workspace = useSelector(state => state.container.workspace);
     const workspaceName = useSelector(state => state.container.workspaceName);
+
+    const statusBarMessage = useSelector(state => state.localBackup.statusBarMessage);
 
     const displayPaymentBanner = !(router.asPath.startsWith('/logIn')) && !(router.asPath.startsWith('/services/')) && !(router.asPath.startsWith('/apps/'));
 
@@ -114,7 +117,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     }
 
     const localBackup = (e) => {
-        dispatch(getItemVersionsBackupThunk());
+        dispatch(updateLocalBackupThunk());
     }
 
     const mfaSetup = (e) => {
@@ -356,6 +359,12 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (process.env.NEXT_PUBLIC_app === 'localBackup' && isLoggedIn) {
+            dispatch(updateStatusBarMessageThunk({ authId }));
+        }
+    }, [isLoggedIn]);
 
     useEffect(() => {
         if (preflightError) {
@@ -617,14 +626,29 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
                 }
             </>}
-            {offlineMode && (
+            {!isLoggedIn && offlineMode && (
                 <div className={BSafesStyle.offlineStatusBar}>
                     <Row>
-                        <Col>
+                        <Col xs={10}>
                             <p>Your are now offline.</p>
                         </Col>
-                        <Col className='text-end'>
-                            {!isLoggedIn && <Button variant="primary" size="sm" onClick={goOnline}>
+                        <Col xs={2} className='text-end'>
+                            <Button variant="primary" size="sm" onClick={goOnline}>
+                                Go Online
+                            </Button>
+                        </Col>
+                    </Row>
+
+                </div>
+            )}
+            {isLoggedIn && (
+                <div className={BSafesStyle.offlineStatusBar}>
+                    <Row>
+                        <Col xs={10}>
+                            <p>{statusBarMessage}</p>
+                        </Col>
+                        <Col xs={2} className='text-end'>
+                            {!isLoggedIn && offlineMode && <Button variant="primary" size="sm" onClick={goOnline}>
                                 Go Online
                             </Button>}
                         </Col>

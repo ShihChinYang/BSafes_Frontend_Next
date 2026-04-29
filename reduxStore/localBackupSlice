@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { parseString } from 'xml2js';
 const forge = require('node-forge');
 
-import { debugLog, PostCall } from '../lib/helper';
+import { debugLog, PostCall, sleep } from '../lib/helper';
 import { localBackupActivity } from '../lib/activities';
 import { putS3Object, getS3Object } from '../lib/s3Helper';
 import { decryptBinaryString } from '../lib/crypto';
@@ -20,6 +20,7 @@ const initialState = {
     error: null,
     signedUrlForBackup: null,
     newLocalItemUpdated: false,
+    statusBarMessage: "",
 }
 
 const localBackupSlice = createSlice({
@@ -56,12 +57,15 @@ const localBackupSlice = createSlice({
         },
         setNewLocalItemUpdated: (state, action) => {
             state.newLocalItemUpdated = action.payload;
+        },
+        setStatusBarMessage: (state, action) => {
+            state.statusBarMessage = action.payload;
         }
     }
 })
 
 
-export const { resetAuthActivity, activityStart, activityDone, activityError, setSignedUrlForBackup, setNewLocalItemUpdated } = localBackupSlice.actions;
+export const { resetAuthActivity, activityStart, activityDone, activityError, setSignedUrlForBackup, setNewLocalItemUpdated, setStatusBarMessage } = localBackupSlice.actions;
 export const localBackupReducer = localBackupSlice.reducer;
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
@@ -189,7 +193,7 @@ export const getBackupTokenThunk = (data) => async (dispatch, getState) => {
         });
     })
 }
-export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) => {
+export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, localBackupActivity.DownloadItemVersionsBackup, () => {
         return new Promise(async (resolve, reject) => {
             if (!localStorage.getItem("backupToken")) {
@@ -269,13 +273,17 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                         if (response.key) {
                             startAfter = response.key;
                         }
+                        let newKeysCount = 0;
                         do {
                             const result = await getItemVersionsBackupList(startAfter, continuationToken, 100);
                             if (result.numberOfItems) {
                                 const memberId = getState().auth.memberId;
                                 result.memberId = memberId;
                                 const response = await window.desktopAPI.addItemKeys(result);
-                                console.log(response) // prints out 'pong'
+                                if (response.status === "ok") {
+                                    newKeysCount += result.numberOfItems;
+                                    dispatch(setStatusBarMessage(`Retrieving new item version keys. Found ${newKeysCount} keys so far...`));
+                                }
                             }
                             startAfter = 0;
                             isTruncated = result.isTruncated;
@@ -588,7 +596,7 @@ export const getItemVersionsBackupThunk = (data) => async (dispatch, getState) =
                 await downloadObjectsInItems();
                 resolve();
             } catch (error) {
-                debugLog(debugOn, "getItemVersionsBackupThunk failed: ", error)
+                debugLog(debugOn, "updateLocalBackupThunk failed: ", error)
                 reject(error);
             }
         });
@@ -662,6 +670,25 @@ export const getPageItemFromLocalBackup = (payload) => {
     return new Promise(async (resolve, reject) => {
         let response = await window.desktopAPI.getPageItem(payload);
         resolve(response);
+    });
+}
+export const updateStatusBarMessageThunk =  (data) => async (dispatch, getState) => {
+    return new Promise(async (resolve, reject) => {
+        const authId = data.authId;
+        const response = await window.desktopAPI.getAMmberByAuthId(authId);
+                if (response.status === "ok" && response.member) {
+                    const lastUpdatedTime = response.member.lastUpdatedTime;
+                    const offlineMode = getState().auth.offlineMode;
+                    let statusBarMessage = "";
+                    if(lastUpdatedTime){
+                        statusBarMessage =  "Your local backup was last updated: " + new Date(lastUpdatedTime).toLocaleString();
+                    } 
+                    if(offlineMode) {
+                        statusBarMessage = "Your are now offline. "+  statusBarMessage;
+                    } 
+                    dispatch(setStatusBarMessage(statusBarMessage));
+                    resolve();
+                }
     });
 }
 
