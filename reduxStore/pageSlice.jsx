@@ -1479,14 +1479,16 @@ const startDownloadingContentImages = async (itemId, dispatch, getState) => {
                         throw new Error("Failed to read an image data from service worker DB!");
                     }
                 }
-                debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                decryptedImageStr = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
-                debugLog(debugOn, "Decrypted image string length: ", decryptedImageStr.length);
-                const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decryptedImageStr);
-                const link = window.URL.createObjectURL(new Blob([decryptedImageDataInUint8Array]), {
-                    type: 'image/*'
-                });
-                dispatch(contentImageDownloaded({ itemId, link }));
+                if (downloadedBinaryString) {
+                    debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                    decryptedImageStr = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
+                    debugLog(debugOn, "Decrypted image string length: ", decryptedImageStr.length);
+                    const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decryptedImageStr);
+                    const link = window.URL.createObjectURL(new Blob([decryptedImageDataInUint8Array]), {
+                        type: 'image/*'
+                    });
+                    dispatch(contentImageDownloaded({ itemId, link }));
+                }
                 resolve();
             } catch (error) {
                 debugLog(debugOn, 'downloadFromS3 error: ', error);
@@ -1880,31 +1882,35 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                     dispatch(setContentType('WritingPage'));
                     const s3Key = forge.util.decode64(result.item.content.substring(9));
                     let downloadedBinaryString = await getS3ObjectForAPage(result.item.id, s3Key, true, dispatch, getState, result.item.signedContentUrl);
-                    debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                    await itemKeyReady();
-                    const keyData = getCurrentItemKey();
-                    const decryptedContent = decryptBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
-                    debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
-                    const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
-                    dispatch(contentDecrypted({ item: { id: data.itemId, content: decodedContent } }));
-                    state = getState().page;
-                    startDownloadingContentImages(data.itemId, dispatch, getState);
+                    if (downloadedBinaryString) {
+                        debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                        await itemKeyReady();
+                        const keyData = getCurrentItemKey();
+                        const decryptedContent = decryptBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
+                        debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
+                        const decodedContent = DOMPurify.sanitize(forge.util.decodeUtf8(decryptedContent));
+                        dispatch(contentDecrypted({ item: { id: data.itemId, content: decodedContent } }));
+                        state = getState().page;
+                        startDownloadingContentImages(data.itemId, dispatch, getState);
+                    }
                     resolve();
                 } else if (result.item.content && result.item.content.startsWith('s3DrawingObject/')) {
                     dispatch(setContentType('DrawingPage'));
                     const s3Key = forge.util.decode64(result.item.content.substring(16));
                     let downloadedBinaryString = await getS3ObjectForAPage(result.item.id, s3Key, true, dispatch, getState, result.item.signedContentUrl);
-                    debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                    await itemKeyReady();
-                    const keyData = getCurrentItemKey();
-                    const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
-                    debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
-                    const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
-                    const blob = {};
-                    blob.metadata = {
-                        ExcalidrawSerializedJSON: forge.util.decodeUtf8(embeddJSON)
-                    };
-                    dispatch(contentDecrypted({ item: { id: data.itemId, content: blob } }));
+                    if (downloadedBinaryString) {
+                        debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                        await itemKeyReady();
+                        const keyData = getCurrentItemKey();
+                        const decryptedContent = decryptLargeBinaryString(downloadedBinaryString, keyData.itemKey, keyData.itemIV)
+                        debugLog(debugOn, "Decrypted string length: ", decryptedContent.length);
+                        const [decryptedImageStr, embeddJSON] = decryptedContent.split(embeddJSONSeperator);
+                        const blob = {};
+                        blob.metadata = {
+                            ExcalidrawSerializedJSON: forge.util.decodeUtf8(embeddJSON)
+                        };
+                        dispatch(contentDecrypted({ item: { id: data.itemId, content: blob } }));
+                    }
                     resolve();
                 } else if (result.item.content) {
                     dispatch(setContentType('WritingPage'));
@@ -2015,7 +2021,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             }
                             if (result.item) {
                                 dispatch(setSignedUrlForBackup(result.signedUrlForBackup));
-                                if(payload.createFromTemplate) {
+                                if (payload.createFromTemplate) {
                                     backupAnItemVersionToS3(result.item, dispatch, getState);
                                 }
                                 await processResultItem(result);
@@ -2120,8 +2126,8 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         await getItemFromServer();
                     }
                     await getItemPath(data.itemId, dispatch, getState);
-                    if ( process.env.NEXT_PUBLIC_app !== 'localBackup' && (data.itemId.startsWith("np") || data.itemId.startsWith("dp"))) {
-                        dispatch(downloadAdjacentPagesThunk({itemId:data.itemId}));
+                    if (process.env.NEXT_PUBLIC_app !== 'localBackup' && (data.itemId.startsWith("np") || data.itemId.startsWith("dp"))) {
+                        dispatch(downloadAdjacentPagesThunk({ itemId: data.itemId }));
                     }
                     resolve();
                 } catch (error) {
@@ -2260,12 +2266,17 @@ export const decryptPageItemThunk = (data) => async (dispatch, getState) => {
             state = getState().page;
             const downloadAnImage = (image) => {
                 return new Promise(async (resolve, reject) => {
-                    const s3Key = image.s3Key + (image.forVideo ? '' : "_gallery");
+                    let s3Key;
+
+                    s3Key = image.s3Key + (image.forVideo ? '' : "_gallery");
                     let downloadedBinaryString, decryptedImageStr;
                     try {
                         if (!workspace.startsWith("d:")) {
                             dispatch(downloadingImage({ itemId, progress: 5 }));
-                            const signedURL = await preS3Download(state.id, s3Key, dispatch);
+                            let signedURL;
+                            if (process.env.NEXT_PUBLIC_app !== 'localBackup') {
+                                 signedURL = await preS3Download(state.id, s3Key, dispatch);
+                            }
                             downloadedBinaryString = await getS3ObjectForAPage(itemId, s3Key, false, dispatch, getState, signedURL, downloadingImage);
                             dispatch(downloadingImage({ itemId, progress: 10 }));
                             if (itemId !== state.activeRequest) {
@@ -2281,24 +2292,24 @@ export const decryptPageItemThunk = (data) => async (dispatch, getState) => {
                                 throw new Error("Failed to read an image data from service worker DB!");
                             }
                         }
-                        debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                        decryptedImageStr = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
-                        debugLog(debugOn, "Decrypted image string length: ", decryptedImageStr.length);
+                        if (downloadedBinaryString) {
+                            debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                            decryptedImageStr = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
+                            debugLog(debugOn, "Decrypted image string length: ", decryptedImageStr.length);
 
-                        const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decryptedImageStr);
-                        const link = window.URL.createObjectURL(new Blob([decryptedImageDataInUint8Array]), {
-                            type: 'image/*'
-                        });
+                            const decryptedImageDataInUint8Array = convertBinaryStringToUint8Array(decryptedImageStr);
+                            const link = window.URL.createObjectURL(new Blob([decryptedImageDataInUint8Array]), {
+                                type: 'image/*'
+                            });
 
-                        let img = new Image();
-                        img.src = link;
+                            let img = new Image();
+                            img.src = link;
 
-                        img.onload = () => {
-                            dispatch(imageDownloaded({ itemId, link, width: img.width, height: img.height }));
-                            resolve();
+                            img.onload = () => {
+                                dispatch(imageDownloaded({ itemId, link, width: img.width, height: img.height }));
+                                resolve();
+                            }
                         }
-
-
                     } catch (error) {
                         dispatch(imageDownloadFailed({ itemId }));
                         debugLog(debugOn, 'downloadFromS3 error: ', error)
@@ -2608,10 +2619,12 @@ export const downloadVideoThunk = (data) => async (dispatch, getState) => {
                         try {
                             let result = await preS3ChunkDownload(state.id, chunkIndex, s3KeyPrefix, false, dispatch);
                             let downloadedBinaryString = await getS3ObjectForAPage(state.id, result.s3Key, false, dispatch, getState, result.signedURL, fromContent ? downloadingContentVideo : downloadingVideo, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInVideosDownloadQueue)
-                            debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                            let decryptedChunkStr = await decryptChunkBinaryStringToBinaryStringAsync(downloadedBinaryString, state.itemKey)
-                            debugLog(debugOn, "Decrypted chunk string length: ", decryptedChunkStr.length);
-                            await writeAChunkToFile(chunkIndex, decryptedChunkStr);
+                            if (downloadedBinaryString) {
+                                debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                                let decryptedChunkStr = await decryptChunkBinaryStringToBinaryStringAsync(downloadedBinaryString, state.itemKey)
+                                debugLog(debugOn, "Decrypted chunk string length: ", decryptedChunkStr.length);
+                                await writeAChunkToFile(chunkIndex, decryptedChunkStr);
+                            }
                             resolve();
                         } catch (error) {
                             debugLog(debugOn, "downloadDecryptAndAssemble failed: ", error);
@@ -2634,14 +2647,16 @@ export const downloadVideoThunk = (data) => async (dispatch, getState) => {
                     const signedURL = await preS3Download(state.id, s3Key, dispatch);
                     dispatch(downloadingContentVideo({ itemId, progress: 10 }));
                     const downloadedBinaryString = await getS3ObjectForAPage(itemId, s3Key, false, dispatch, getState, signedURL, downloadingContentVideo)
-                    debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                    decryptedVideoStr = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
-                    debugLog(debugOn, "Decrypted image string length: ", decryptedVideoStr.length);
-                    const decryptedVideoDataInUint8Array = convertBinaryStringToUint8Array(decryptedVideoStr);
-                    const link = window.URL.createObjectURL(new Blob([decryptedVideoDataInUint8Array]), {
-                        type: 'video/*'
-                    });
-                    dispatch(contentVideoDownloaded({ itemId, indexInQueue, link }));
+                    if (downloadedBinaryString) {
+                        debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                        decryptedVideoStr = decryptLargeBinaryString(downloadedBinaryString, state.itemKey, state.itemIV)
+                        debugLog(debugOn, "Decrypted image string length: ", decryptedVideoStr.length);
+                        const decryptedVideoDataInUint8Array = convertBinaryStringToUint8Array(decryptedVideoStr);
+                        const link = window.URL.createObjectURL(new Blob([decryptedVideoDataInUint8Array]), {
+                            type: 'video/*'
+                        });
+                        dispatch(contentVideoDownloaded({ itemId, indexInQueue, link }));
+                    }
                     resolve();
                 } catch (error) {
                     debugLog(debugOn, 'downloadFromS3 error: ', error)
@@ -2838,14 +2853,16 @@ export const downloadAudioThunk = (data) => async (dispatch, getState) => {
                         try {
                             let result = await preS3ChunkDownload(state.id, chunkIndex, s3KeyPrefix, false, dispatch);
                             let downloadedBinaryString = await getS3ObjectForAPage(state.id, result.s3Key, false, dispatch, getState, result.signedURL, downloadingAudio, chunkIndex * 100 / numberOfChunks, 1 / numberOfChunks, indexInAudiosDownloadQueue);
-                            if (state.activeRequest !== itemId) {
-                                reject("Aborted");
-                                return;
+                            if (downloadedBinaryString) {
+                                if (state.activeRequest !== itemId) {
+                                    reject("Aborted");
+                                    return;
+                                }
+                                debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                                let decryptedChunkStr = await decryptChunkBinaryStringToBinaryStringAsync(downloadedBinaryString, state.itemKey)
+                                debugLog(debugOn, "Decrypted chunk string length: ", decryptedChunkStr.length);
+                                await writeAChunkToFile(chunkIndex, decryptedChunkStr);
                             }
-                            debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                            let decryptedChunkStr = await decryptChunkBinaryStringToBinaryStringAsync(downloadedBinaryString, state.itemKey)
-                            debugLog(debugOn, "Decrypted chunk string length: ", decryptedChunkStr.length);
-                            await writeAChunkToFile(chunkIndex, decryptedChunkStr);
                             resolve();
                         } catch (error) {
                             debugLog(debugOn, "downloadDecryptAndAssemble failed: ", error);
@@ -5408,10 +5425,12 @@ const downloadAnAttachment = (dispatch, getState, state, attachment, itemId) => 
                             throw new Error("Failed to read an image data from service worker DB!");
                         }
                     }
-                    debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
-                    decryptedChunkStr = await decryptChunkBinaryStringToBinaryStringAsync(downloadedBinaryString, state.itemKey, state.itemIV)
-                    debugLog(debugOn, "Decrypted chunk string length: ", decryptedChunkStr.length);
-                    await writeAChunkToFile(chunkIndex, decryptedChunkStr);
+                    if (downloadedBinaryString) {
+                        debugLog(debugOn, "Downloaded string length: ", downloadedBinaryString.length);
+                        decryptedChunkStr = await decryptChunkBinaryStringToBinaryStringAsync(downloadedBinaryString, state.itemKey, state.itemIV)
+                        debugLog(debugOn, "Decrypted chunk string length: ", decryptedChunkStr.length);
+                        await writeAChunkToFile(chunkIndex, decryptedChunkStr);
+                    }
                     resolve();
                 } catch (error) {
                     debugLog(debugOn, "downloadDecryptAndAssemble failed: ", error);

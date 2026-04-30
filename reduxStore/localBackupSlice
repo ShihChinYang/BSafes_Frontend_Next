@@ -20,7 +20,9 @@ const initialState = {
     error: null,
     signedUrlForBackup: null,
     newLocalItemUpdated: false,
+    lastUpdatedTime: 0,
     statusBarMessage: "",
+    updatingBackup: false,
 }
 
 const localBackupSlice = createSlice({
@@ -58,14 +60,23 @@ const localBackupSlice = createSlice({
         setNewLocalItemUpdated: (state, action) => {
             state.newLocalItemUpdated = action.payload;
         },
+        setLastUpdatedTime: (state, action) => {
+            state.lastUpdatedTime = action.payload;
+        },
         setStatusBarMessage: (state, action) => {
             state.statusBarMessage = action.payload;
+        },
+        setStatusBarProgress: (state, action) => {
+            state.statusBarMessage =  state.statusBarMessage.split("...")[0] + "... " + action.payload;
+        },
+        setUpdatingBackup: (state, action) => {
+            state.updatingBackup = action.payload;
         }
     }
 })
 
 
-export const { resetAuthActivity, activityStart, activityDone, activityError, setSignedUrlForBackup, setNewLocalItemUpdated, setStatusBarMessage } = localBackupSlice.actions;
+export const { resetAuthActivity, activityStart, activityDone, activityError, setSignedUrlForBackup, setNewLocalItemUpdated, setStatusBarMessage, setStatusBarProgress, setLastUpdatedTime, setUpdatingBackup } = localBackupSlice.actions;
 export const localBackupReducer = localBackupSlice.reducer;
 const newActivity = async (dispatch, type, activity) => {
     dispatch(activityStart(type));
@@ -196,6 +207,7 @@ export const getBackupTokenThunk = (data) => async (dispatch, getState) => {
 export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, localBackupActivity.DownloadItemVersionsBackup, () => {
         return new Promise(async (resolve, reject) => {
+            dispatch(setUpdatingBackup(true));
             if (!localStorage.getItem("backupToken")) {
                 await getBackupToken(dispatch);
             }
@@ -315,12 +327,10 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                                 for (let i = 0; i < signedUrls.length; i++) {
                                     let signedUrl = signedUrls[i];
                                     debugLog(debugOn, "signedUrl:", JSON.stringify(signedUrl));
+                                    dispatch(setStatusBarMessage(`Downloading item version: ${s3Keys[i]}...`));
                                     const data = await getS3Object(signedUrl);
                                     const itemVersion = JSON.parse(data.binaryString);
                                     const result = await window.desktopAPI.addAnItemVersion(memberId, keys[i].key, itemVersion);
-                                    if (result.status === "ok") {
-                                        dispatch(setNewLocalItemUpdated(true));
-                                    }
                                 }
                             } else {
                                 break;
@@ -340,19 +350,16 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                             const fsS3Key = s3Key.split('/').at(-1);
                             let response = await window.desktopAPI.isS3ObjectExisted(fsS3Key);
                             if (response.status === "ok") {
+                                const profressCallback = (percent) => {
+                                    dispatch(setStatusBarProgress(` ${percent.toFixed(2)}%`));
+                                }
                                 let downloadedBinaryString;
                                 if (!response.existed) {
                                     const signedUrl = await getBackupDownloadSignedUrl(s3Key, dispatch);
-                                    downloadedBinaryString = (await getS3Object(signedUrl)).binaryString;
+                                    downloadedBinaryString = (await getS3Object(signedUrl, profressCallback)).binaryString;
                                     response = await window.desktopAPI.putS3Object(fsS3Key, downloadedBinaryString);
                                     if (response.status === "ok") {
                                         resolve({ status: "ok", downloadedBinaryString });
-                                        /*
-                                        response = await window.desktopAPI.getS3Object(fsS3Key);
-                                        if (response.data === downloadedBinaryString) {
-                                            response = {};
-                                        }
-                                            */
                                     } else {
                                         resolve(response);
                                         return;
@@ -363,7 +370,6 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                                     downloadedBinaryString = response.data;
                                     resolve({ status: "ok", downloadedBinaryString });
                                 }
-
                             } else {
                                 resolve(response);
                             }
@@ -421,6 +427,7 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                                         });
                                         for (let i = 0; i < s3Objects.length; i++) {
                                             let s3Key = s3Objects[i];
+                                            dispatch(setStatusBarMessage(`Downloading object in html content: ${s3Key}...`));
                                             let response = await downloadAnObject(s3Key);
                                             if (response.status !== "ok") {
                                                 resolve(response);
@@ -431,6 +438,7 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                                     });
                                 }
                                 const s3Key = forge.util.decode64(content.substring(9));
+                                dispatch(setStatusBarMessage(`Downloading html content object: ${s3Key}...`));
                                 let response = await downloadAnObject(s3Key);
                                 let result;
                                 if (response.status === "ok") {
@@ -451,6 +459,7 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                                 resolve(result);
                             } else if (item.content && item.content.startsWith('s3DrawingObject/')) {
                                 const s3Key = forge.util.decode64(item.content.substring(16));
+                                dispatch(setStatusBarMessage(`Downloading drawing content object: ${s3Key}...`));
                                 let response = await downloadAnObject(s3Key);
                                 let result;
                                 if (response.status === "ok") {
@@ -478,6 +487,7 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                             }
                             for (let i = 0; i < s3Objects.length; i++) {
                                 let s3Key = s3Objects[i];
+                                dispatch(setStatusBarMessage(`Downloading video object: ${s3Key}...`));
                                 let response = await downloadAnObject(s3Key);
                                 if (response.status !== "ok") {
                                     resolve(response);
@@ -495,9 +505,12 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                                 let image = images[i];
                                 let s3Key = image.s3Key;
                                 s3Objects.push(s3Key);
+                                s3Key = image.s3Key + "_gallery";
+                                s3Objects.push(s3Key);
                             }
                             for (let i = 0; i < s3Objects.length; i++) {
                                 let s3Key = s3Objects[i];
+                                dispatch(setStatusBarMessage(`Downloading image object: ${s3Key}...`));
                                 let response = await downloadAnObject(s3Key);
                                 if (response.status !== "ok") {
                                     resolve(response);
@@ -521,6 +534,7 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                             }
                             for (let i = 0; i < s3Objects.length; i++) {
                                 let s3Key = s3Objects[i];
+                                dispatch(setStatusBarMessage(`Downloading audio object: ${s3Key}...`));
                                 let response = await downloadAnObject(s3Key);
                                 if (response.status !== "ok") {
                                     resolve(response);
@@ -544,6 +558,7 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                             }
                             for (let i = 0; i < s3Objects.length; i++) {
                                 let s3Key = s3Objects[i];
+                                dispatch(setStatusBarMessage(`Downloading attachment object: ${s3Key}...`));
                                 let response = await downloadAnObject(s3Key);
                                 if (response.status !== "ok") {
                                     resolve(response);
@@ -580,6 +595,9 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                             }
                             if (finished) {
                                 response = await window.desktopAPI.finishedDownloadingObjectsForAnItem(item.id, item.version);
+                                if (response.status === "ok") {
+                                    dispatch(setNewLocalItemUpdated(true));
+                                }
                             } else {
                                 break;
                             }
@@ -594,9 +612,17 @@ export const updateLocalBackupThunk = (data) => async (dispatch, getState) => {
                 await updateItemKeys();
                 await downloadItemObjects();
                 await downloadObjectsInItems();
+                const lastUpdatedTime = Date.now();
+                dispatch(setLastUpdatedTime(lastUpdatedTime));
+                const authId = getState().auth.authId;
+                await window.desktopAPI.updateMemberLastUpdatedTime(authId, lastUpdatedTime);
+                dispatch(setStatusBarMessage("Your local backup was last updated: " + new Date(lastUpdatedTime).toLocaleString()));
+                dispatch(setUpdatingBackup(false));
                 resolve();
             } catch (error) {
+                dispatch(setStatusBarMessage("Failed to update local backup: " + error.message));
                 debugLog(debugOn, "updateLocalBackupThunk failed: ", error)
+                dispatch(setUpdatingBackup(false));
                 reject(error);
             }
         });
@@ -672,23 +698,28 @@ export const getPageItemFromLocalBackup = (payload) => {
         resolve(response);
     });
 }
-export const updateStatusBarMessageThunk =  (data) => async (dispatch, getState) => {
+export const updateStatusBarMessageThunk = (data) => async (dispatch, getState) => {
     return new Promise(async (resolve, reject) => {
         const authId = data.authId;
+        const updatingBackup = getState().localBackup.updatingBackup;
+        if (updatingBackup) {
+            resolve();
+            return;
+        }
         const response = await window.desktopAPI.getAMmberByAuthId(authId);
-                if (response.status === "ok" && response.member) {
-                    const lastUpdatedTime = response.member.lastUpdatedTime;
-                    const offlineMode = getState().auth.offlineMode;
-                    let statusBarMessage = "";
-                    if(lastUpdatedTime){
-                        statusBarMessage =  "Your local backup was last updated: " + new Date(lastUpdatedTime).toLocaleString();
-                    } 
-                    if(offlineMode) {
-                        statusBarMessage = "Your are now offline. "+  statusBarMessage;
-                    } 
-                    dispatch(setStatusBarMessage(statusBarMessage));
-                    resolve();
-                }
+        if (response.status === "ok" && response.member) {
+            const lastUpdatedTime = response.member.lastUpdatedTime;
+            const offlineMode = getState().auth.offlineMode;
+            let statusBarMessage = "";
+            if (lastUpdatedTime) {
+                statusBarMessage = "Your local backup was last updated: " + new Date(lastUpdatedTime).toLocaleString();
+            }
+            if (offlineMode) {
+                statusBarMessage = "Your are now offline. " + statusBarMessage;
+            }
+            dispatch(setStatusBarMessage(statusBarMessage));
+            resolve();
+        }
     });
 }
 
