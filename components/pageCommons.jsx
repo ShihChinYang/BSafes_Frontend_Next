@@ -24,7 +24,7 @@ import Comments from "./comments";
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 
-import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraftThunk, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadDraftDataThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, loadPageTemplate, clearPageTemplate } from "../reduxStore/pageSlice";
+import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraftThunk, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadDraftDataThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, loadPageTemplate, clearPageTemplate, setContent } from "../reduxStore/pageSlice";
 import { debugLog, getDataURLFromFile } from '../lib/helper';
 import { products, productIdDelimiter } from "../lib/productID";
 import { prepareTwinPaperDraft } from "../lib/twinPaper";
@@ -241,7 +241,7 @@ export default function PageCommons() {
                 playVideo.remove();
             });
 
-            let contentByDOM = document.querySelector('.contenEditorRow').querySelector('.inner-html');
+            let contentByDOM = document.querySelector('.contentEditorRow').querySelector('.inner-html');
             if (contentByDOM)
                 setcontentEditorContentWithImagesAndVideos(contentByDOM.innerHTML);
         }
@@ -256,7 +256,7 @@ export default function PageCommons() {
     const handleDraftClicked = () => {
         dispatch(loadDraftThunk());
         if (editorScriptsLoaded) {
-            dispatch(setInitialContentRendered(true));
+            //dispatch(setInitialContentRendered(true));
         }
     }
 
@@ -266,7 +266,7 @@ export default function PageCommons() {
 
     function afterContentReadOnly() {
         if (editorScriptsLoaded) {
-            dispatch(setInitialContentRendered(true));
+            //dispatch(setInitialContentRendered(true));
         }
     }
 
@@ -380,6 +380,13 @@ export default function PageCommons() {
         }
     }
 
+    const handleContentRendered = (content) => {
+        dispatch(setInitialContentRendered(true));
+        if(draftLoaded && contentType === 'WritingPage'){
+            dispatch(startDownloadingContentImagesForDraftThunk());
+        }
+    }
+
     const handleSnapshotCaptured = (blob) => {
         setDrawingSnapshot(blob);
     }
@@ -415,7 +422,7 @@ export default function PageCommons() {
     const handleWrite = () => {
         debugLog(debugOn, "handleWrite");
         beforeWritingContent();
-        if (!draftLoaded || (draftLoaded && contentImagesDownloadQueue.length === 0)) {
+        if (!draftLoaded || (draftLoaded && (contentImagesDownloadQueue.length === 0 || contentImagesAllDownloaded))) {
             dispatch(setContentEditorMode("Writing"));
             setEditingEditorId("content");
         }
@@ -859,6 +866,9 @@ export default function PageCommons() {
                         }
                     }
                 }
+                let thisElement = document.querySelector('.contentEditorRow .inner-html');
+                let thisContent = thisElement.innerHTML;
+                //dispatch(setContent(thisContent));
                 dispatch(updateContentImagesDisplayIndex(i + 1));
             }
         }
@@ -934,7 +944,7 @@ export default function PageCommons() {
 
     useEffect(() => {
         if (renderingDraft) {
-            dispatch(startDownloadingContentImagesForDraftThunk());
+           // dispatch(startDownloadingContentImagesForDraftThunk());
         }
     }, [renderingDraft]);
 
@@ -945,12 +955,12 @@ export default function PageCommons() {
         }
     }, [contentImagesAllDownloaded, draftLoaded]);
 
-    useEffect(() => {
+   /* useEffect(() => {
         if (draftLoaded && contentEditorContentWithImagesAndVideos && contentEditorContentWithImagesAndVideos !== contentEditorContent) {
             dispatch(setContentEditorMode("Writing"));
             setEditingEditorId("content");
         }
-    }, [contentEditorContentWithImagesAndVideos])
+    }, [contentEditorContentWithImagesAndVideos]) */
 
     useEffect(() => {
         if (!activity) {
@@ -1045,8 +1055,8 @@ export default function PageCommons() {
                 {true &&
                     <div className={`justify-content-center ${contentType !== "DrawingPage" ? "row" : ""}`}>
                         <input ref={twinInputRef} onChange={handleTwinImage} type="file" accept="image/*" className="d-none editControl" id="twinImage" />
-                        <div className={`contenEditorRow ${contentType !== "DrawingPage" ? "col-sm-10 col-12" : ""}`} style={{ minHeight: "280px" }}>
-                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} drawingSnapshot={drawingSnapshot} />
+                        <div className={`contentEditorRow ${contentType !== "DrawingPage" ? "col-sm-10 col-12" : ""}`} style={{ minHeight: "280px" }}>
+                            <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentRendered={handleContentRendered} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} drawingSnapshot={drawingSnapshot} />
                         </div>
                     </div>
                 }

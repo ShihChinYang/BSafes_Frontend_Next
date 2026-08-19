@@ -16,7 +16,7 @@ export default function TeamCard({ index, team, onAdd }) {
 
     const cardStyle = '';
     const cardBodyStyle = '';
-    const cardRowStyle = ''    
+    const cardRowStyle = ''
 
     const teamId = team.id;
     let temp = document.createElement('span');
@@ -60,44 +60,44 @@ export default function TeamCard({ index, team, onAdd }) {
     const sortToggle = forwardRef(sortButton);
 
     const handleAddClicked = (action) => {
-        onAdd({action, index, targetTeam: teamId, targetPosition: team.position});
+        onAdd({ action, index, targetTeam: teamId, targetPosition: team.position });
     }
 
     return (
         <>
-        { true &&
-        <Card className={cardStyle} style={{cursor: 'pointer'}}>
-            <Card.Body className={cardBodyStyle}>
-                <Row className={cardRowStyle}>
-                    <Link href={`/team/${team.id}`} legacyBehavior>
-                        <Col xs={9}>
-                            <div >
-                                <h2 dangerouslySetInnerHTML={{ __html: teamText }} />
-                            </div>
-                        </Col>
-                    </Link>
-                    <Col xs={3}>
-                        <ButtonGroup className="pull-right">
-                            {/* <a className={BSafesStyle.externalLink} target="_blank" href={getItemLink(item)} rel="noopener noreferrer">
+            {true &&
+                <Card className={cardStyle} style={{ cursor: 'pointer' }}>
+                    <Card.Body className={cardBodyStyle}>
+                        <Row className={cardRowStyle}>
+                            <Col xs={9}>
+                                <Link href={`/team/${team.id}`} className={BSafesStyle.itemLink}>
+                                    <div >
+                                        <h2 dangerouslySetInnerHTML={{ __html: teamText }} />
+                                    </div>
+                                </Link>
+                            </Col>
+                            <Col xs={3}>
+                                <ButtonGroup className="pull-right">
+                                    {/* <a className={BSafesStyle.externalLink} target="_blank" href={getItemLink(item)} rel="noopener noreferrer">
                                 <i className="me-2 fa fa-external-link fa-lg text-dark" aria-hidden="true"></i>
                             </a> */}
 
-                            {true &&
-                                <Dropdown align="end" className="justify-content-end">
-                                        <Dropdown.Toggle as={plusToggle} variant="link" />
+                                    {true &&
+                                        <Dropdown align="end" className="justify-content-end">
+                                            <Dropdown.Toggle as={plusToggle} variant="link" />
 
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item onClick={() => handleAddClicked("addATeamBefore")}>Add before</Dropdown.Item>
-                                            <Dropdown.Item onClick={() => handleAddClicked("addATeamAfter")}>Add after</Dropdown.Item>
-                                        </Dropdown.Menu>
-                                </Dropdown>
-                            }
-                        </ButtonGroup>
-                    </Col>
-                </Row>
-            </Card.Body>
-        </Card>
-        }
+                                            <Dropdown.Menu>
+                                                <Dropdown.Item onClick={() => handleAddClicked("addATeamBefore")}>Add before</Dropdown.Item>
+                                                <Dropdown.Item onClick={() => handleAddClicked("addATeamAfter")}>Add after</Dropdown.Item>
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    }
+                                </ButtonGroup>
+                            </Col>
+                        </Row>
+                    </Card.Body>
+                </Card>
+            }
         </>
     )
 }

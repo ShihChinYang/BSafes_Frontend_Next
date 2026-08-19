@@ -17,13 +17,13 @@ import BSafesStyle from '../styles/BSafes.module.css'
 import { getItemLink } from '../lib/bSafesCommonUI';
 import { deselectItem, selectItem, clearSelected, dropItemsThunk, listItemsThunk } from '../reduxStore/containerSlice';
 
-export default function ItemCard({ itemIndex, item, onAdd, isOpenable=true}) {
+export default function ItemCard({ itemIndex, item, onAdd, isOpenable = true }) {
     const router = useRouter();
     const dispatch = useDispatch();
 
-    const cardStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/'))?BSafesStyle.boxItemCard:BSafesStyle.safeItem
-    const cardBodyStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/'))?BSafesStyle.boxItemCardBody:''
-    const cardRowStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/'))?'mx-1':''
+    const cardStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) ? BSafesStyle.boxItemCard : BSafesStyle.safeItem
+    const cardBodyStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) ? BSafesStyle.boxItemCardBody : ''
+    const cardRowStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) ? 'mx-1' : ''
 
     const [show, setShow] = useState(false);
     const [addAction, setAddAction] = useState(null);
@@ -81,9 +81,9 @@ export default function ItemCard({ itemIndex, item, onAdd, isOpenable=true}) {
         setShow(true);
     }
 
-    const optionSelected = (itemType) => {       
+    const optionSelected = (itemType) => {
         setShow(false);
-        onAdd(itemType, addAction, itemId, item.position );
+        onAdd(itemType, addAction, itemId, item.position);
     }
 
     const handleCheck = (e) => {
@@ -110,7 +110,7 @@ export default function ItemCard({ itemIndex, item, onAdd, isOpenable=true}) {
             targetPosition: item.position,
         }
 
-        switch(action) {
+        switch (action) {
             case 'dropItemsBefore':
                 break;
             case 'dropItemsAfter':
@@ -122,7 +122,7 @@ export default function ItemCard({ itemIndex, item, onAdd, isOpenable=true}) {
             default:
         }
         try {
-            dispatch(dropItemsThunk({action, payload}));
+            dispatch(dropItemsThunk({ action, payload }));
 
         } catch (error) {
             debugLog(debugOn, "Moving items failed.")
@@ -133,84 +133,84 @@ export default function ItemCard({ itemIndex, item, onAdd, isOpenable=true}) {
         <Card className={cardStyle} style={{ cursor: 'pointer' }}>
             <Card.Body className={cardBodyStyle}>
                 <Row className={cardRowStyle}>
-                    <Link href={isOpenable?getItemLink(item):'#'} legacyBehavior> 
-                        <Col xs={9}>   
+                    <Col xs={9}>
+                        <Link href={isOpenable ? getItemLink(item) : '#'} className={BSafesStyle.itemLink}>
                             {item.itemPack.type === 'D' &&
                                 <div >
                                     <span><i className="fa fa-calendar fa-lg me-3" aria-hidden="true"></i>
                                     </span>
-                                    <span dangerouslySetInnerHTML={{ __html: item.title}} />
+                                    <span dangerouslySetInnerHTML={{ __html: item.title }} />
                                 </div>
                             }
                             {item.itemPack.type === 'F' &&
                                 <div >
                                     <span><i className="fa fa-folder-o fa-lg me-3" aria-hidden="true"></i>
                                     </span>
-                                    <span dangerouslySetInnerHTML={{ __html: item.title}} />
+                                    <span dangerouslySetInnerHTML={{ __html: item.title }} />
                                 </div>
                             }
                             {item.itemPack.type === 'B' &&
                                 <div >
                                     <span><i className="fa fa-archive fa-lg me-3" aria-hidden="true"></i>
                                     </span>
-                                    <span dangerouslySetInnerHTML={{ __html: item.title}} />
+                                    <span dangerouslySetInnerHTML={{ __html: item.title }} />
                                 </div>
                             }
                             {item.itemPack.type === 'N' &&
                                 <div >
                                     <span><i className="fa fa-book fa-lg me-3" aria-hidden="true"></i>
                                     </span>
-                                    <div dangerouslySetInnerHTML={{__html: item.title}} />
+                                    <div dangerouslySetInnerHTML={{ __html: item.title }} />
                                 </div>
                             }
                             {(item.itemPack.type === 'P' || item.itemPack.type === 'NP' || item.itemPack.type === 'DP') &&
                                 <div >
                                     <span><i className="fa fa-file-text-o fa-lg me-3" aria-hidden="true"></i>
                                     </span>
-                                    <span className="h5" dangerouslySetInnerHTML={{__html: itemText}} />
+                                    <span className="h5" dangerouslySetInnerHTML={{ __html: itemText }} />
                                 </div>
-                            }       
-                        </Col>
-                    </Link>
+                            }
+                        </Link>
+                    </Col>
                     <Col xs={3}>
                         <ButtonGroup className="pull-right">
                             {isOpenable && <a className={BSafesStyle.externalLink} target="_blank" href={getItemLink(item)} rel="noopener noreferrer">
                                 <i className="me-2 fa fa-external-link fa-lg text-dark" aria-hidden="true"></i>
                             </a>}
                             <Form.Group className="me-2" >
-                                <Form.Check type="checkbox" checked={!!selectedItems.find(e=>e.id===item.id)}  onChange={handleCheck}/>
+                                <Form.Check type="checkbox" checked={!!selectedItems.find(e => e.id === item.id)} onChange={handleCheck} />
                             </Form.Group>
 
                             {isOpenable && !selectedItems.length &&
                                 <Dropdown align="end" className="justify-content-end">
-                                    <Dropdown.Toggle as={plusToggle}  variant="link">
-                                    
+                                    <Dropdown.Toggle as={plusToggle} variant="link">
+
                                     </Dropdown.Toggle>
 
                                     <Dropdown.Menu>
-                                        <Dropdown.Item onClick={()=> handleAddClicked("addAnItemBefore")}>Add before</Dropdown.Item>
-                                        <Dropdown.Item onClick={()=> handleAddClicked("addAnItemAfter")}>Add after</Dropdown.Item>                           
+                                        <Dropdown.Item onClick={() => handleAddClicked("addAnItemBefore")}>Add before</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => handleAddClicked("addAnItemAfter")}>Add after</Dropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
                             }
                             {isOpenable && !!selectedItems.length &&
                                 <Dropdown align="end" className="justify-content-end">
-                                    <Dropdown.Toggle as={sortToggle}  variant="link">
-                                    
+                                    <Dropdown.Toggle as={sortToggle} variant="link">
+
                                     </Dropdown.Toggle>
 
                                     <Dropdown.Menu>
-                                        <Dropdown.Item onClick={()=>handleDrop('dropItemsBefore')}>Drop before</Dropdown.Item>
-                                        {(item.id.startsWith('b:') || item.id.startsWith('f:')) && <Dropdown.Item onClick={()=>handleDrop('dropItemsInside')}>Drop inside</Dropdown.Item>}
-                                        <Dropdown.Item onClick={()=>handleDrop('dropItemsAfter')}>Drop after</Dropdown.Item>          
+                                        <Dropdown.Item onClick={() => handleDrop('dropItemsBefore')}>Drop before</Dropdown.Item>
+                                        {(item.id.startsWith('b:') || item.id.startsWith('f:')) && <Dropdown.Item onClick={() => handleDrop('dropItemsInside')}>Drop inside</Dropdown.Item>}
+                                        <Dropdown.Item onClick={() => handleDrop('dropItemsAfter')}>Drop after</Dropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
                             }
                         </ButtonGroup>
                     </Col>
                 </Row>
-                {   (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) && 
-                    <hr className="mt-1 mb-1 mx-3"/>
+                {(router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) &&
+                    <hr className="mt-1 mb-1 mx-3" />
                 }
             </Card.Body>
             <ItemTypeModal show={show} handleClose={handleClose} optionSelected={optionSelected} />

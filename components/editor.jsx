@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux'
-import { useRouter } from "next/router";
 
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -11,6 +10,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 
 const forge = require('node-forge');
+import parse from 'html-react-parser';
 
 import { Blocks } from 'react-loader-spinner';
 
@@ -27,6 +27,7 @@ import { products } from "../lib/productID";
 
 import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage, setDraftInterval } from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
+import { de } from "date-fns/locale";
 
 let Excalidraw = null;
 let FontsConfig = null;
@@ -54,7 +55,7 @@ let FontsConfig = null;
  */
 
 
-export default function Editor({ editorId, mode, content, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showTwinIcon = true, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null, drawingImageDone = null, drawingSnapshot = null }) {
+export default function Editor({ editorId, mode, content, onContentRendered, onContentChanged, onPenClicked, showPen = true, editable = true, hideIfEmpty = false, writingModeReady = null, readOnlyModeReady = null, onDraftSampled = null, onDraftClicked = null, onDraftDelete = null, showTwinIcon = true, showDrawIcon = false, showWriteIcon = false, onDrawingClicked = null, drawingImageDone = null, drawingSnapshot = null }) {
     const debugOn = false;
     const dispatch = useDispatch();
 
@@ -397,6 +398,13 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
             }
         }
     }, []);
+
+    useEffect(() => {
+        debugLog(debugOn, "content changed: ", content);
+        if(editorId === "content") {
+            onContentRendered(content);
+        }
+    }, [content])
 
     useEffect(() => {
         if (!(scriptsLoaded && window)) return;
@@ -794,7 +802,8 @@ export default function Editor({ editorId, mode, content, onContentChanged, onPe
                     {(editorId !== 'title' && (editorId !== 'content' || contentType === 'WritingPage') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div className="px-2">
                             <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
-                                <div className="inner-html" ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} style={{ overflowX: 'auto' }}>
+                                <div className="inner-html" ref={editorRef} style={{ overflowX: 'auto' }}>
+                                    {content && parse(content)}
                                 </div>
                             </Row>
                         </div>

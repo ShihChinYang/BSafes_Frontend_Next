@@ -71,6 +71,10 @@
   padding-right: 14px;
 }
 
+.itemLink {
+  color: black;
+  text-decoration: none;
+}
 /* End of general */
 
 /*--*****  Navigation bar */

@@ -17,7 +17,6 @@ import Col from 'react-bootstrap/Col';
 
 import { Blocks } from 'react-loader-spinner';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import ItemPath from '../itemPath'
 import ItemsToolbar from '../itemsToolbar'

@@ -26,7 +26,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
     const [showFeatureNotAvailableForDemoToast, setShowFeatureNotAvailableForDemoToast] = useState(false);
     const productId = useSelector(state => state.product.currentProduct);
     let theProduct = {};
-    if(productId !== ""){
+    if (productId !== "") {
         theProduct = products[productId];
     }
     let controlPanelStyle = "";
@@ -46,7 +46,6 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
 
     const extraProps = datePickerViewMode === 'monthYear' ? {
         showMonthYearPicker: true,
-        showFullMonthYearPicker: true
     } : {}
 
     const onShowSearchBarClicked = (e) => {
@@ -80,7 +79,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
     }, [showSearchBar])
 
     return (
-        <> {(productId==='' || productId) &&
+        <> {(productId === '' || productId) &&
             <>
                 <FeatureNotAvailableForDemoToast show={showFeatureNotAvailableForDemoToast} message="The Search feature is not available for demo!" handleClose={() => { setShowFeatureNotAvailableForDemoToast(false) }} />
                 <Row>
@@ -104,6 +103,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
                                                 onChange={(date) => setStartDate(date)}
                                                 customInput={<ExampleCustomInput />}
                                                 showPopperArrow={false}
+                                                popperPlacement="bottom-end"
                                                 {...extraProps}
                                             />
                                         </div>

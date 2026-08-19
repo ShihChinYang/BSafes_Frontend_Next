@@ -28,16 +28,16 @@ export default function Activities(props) {
 
     const [readyToList, setReadyToList] = useState(false);
 
-    const accountVersion = useSelector( state => state.auth.accountVersion);
+    const accountVersion = useSelector(state => state.auth.accountVersion);
     const loggedIn = useSelector(state => state.auth.isLoggedIn);
-    const expandedKey = useSelector( state => state.auth.expandedKey );
-    const personalSearchKey = useSelector( state => state.auth.searchKey);
-    const personalSearchIV = useSelector( state => state.auth.searchIV);
-    
+    const expandedKey = useSelector(state => state.auth.expandedKey);
+    const personalSearchKey = useSelector(state => state.auth.searchKey);
+    const personalSearchIV = useSelector(state => state.auth.searchIV);
+
     const activity = useSelector(state => state.container.activity);
-    const workspaceId = useSelector( state => state.container.workspace );
-    const workspaceKeyReady = useSelector( state => state.container.workspaceKeyReady);
-    const container = useSelector( state => state.container.container);
+    const workspaceId = useSelector(state => state.container.workspace);
+    const workspaceKeyReady = useSelector(state => state.container.workspaceKeyReady);
+    const container = useSelector(state => state.container.container);
     const activities = useSelector(state => state.container.activities);
 
     const moreActivities = () => {
@@ -46,14 +46,13 @@ export default function Activities(props) {
 
     useEffect(() => {
         const handleRouteChange = (url, { shallow }) => {
-          console.log(
-            `App is changing to ${url} ${
-              shallow ? 'with' : 'without'
-            } shallow routing`
-          )
-          dispatch(abort());
+            console.log(
+                `App is changing to ${url} ${shallow ? 'with' : 'without'
+                } shallow routing`
+            )
+            dispatch(abort());
         }
-    
+
         const handleRouteChangeComplete = () => {
             debugLog(debugOn, "handleRouteChangeComplete");
             dispatch(initPage());
@@ -67,48 +66,48 @@ export default function Activities(props) {
             router.events.off('routeChangeStart', handleRouteChange)
             router.events.off('routeChangeComplete', handleRouteChangeComplete);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(()=>{
-        dispatch(setWorkspaceKeyReady(false)); 
-    // eslint-disable-next-line react-hooks/exhaustive-deps  
+    useEffect(() => {
+        dispatch(setWorkspaceKeyReady(false));
+        // eslint-disable-next-line react-hooks/exhaustive-deps  
     }, [loggedIn]);
 
-    useEffect(()=>{
-        if(loggedIn && !workspaceKeyReady && router.query.spaceId) {
+    useEffect(() => {
+        if (loggedIn && !workspaceKeyReady && router.query.spaceId) {
             const spaceId = router.query.spaceId;
-            if(spaceId.startsWith('u:')){ // personal space
-                dispatch(initContainer({container: 'root', workspaceId:spaceId, workspaceKey:expandedKey, searchKey: personalSearchKey, searchIV: personalSearchIV }));
+            if (spaceId.startsWith('u:')) { // personal space
+                dispatch(initContainer({ container: 'root', workspaceId: spaceId, workspaceKey: expandedKey, searchKey: personalSearchKey, searchIV: personalSearchIV }));
                 dispatch(setWorkspaceKeyReady(true));
             } else { // team space
-                if(router.query.spaceId === workspaceId) {
-                    dispatch(changeContainerOnly({container: 'root'}))
+                if (router.query.spaceId === workspaceId) {
+                    dispatch(changeContainerOnly({ container: 'root' }))
                     dispatch(setWorkspaceKeyReady(true));
                 } else {
                     let teamId;
-                    if(accountVersion === 'v1') {
+                    if (accountVersion === 'v1') {
                         teamId = spaceId.substring(0, spaceId.length - 4);
                     } else {
                         teamId = spaceId;
                     }
-                    dispatch(initWorkspaceThunk({teamId, container:'root'}));
-                }     
+                    dispatch(initWorkspaceThunk({ teamId, container: 'root' }));
+                }
             }
             dispatch(clearActivities());
-            setReadyToList(true);   
+            setReadyToList(true);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loggedIn, workspaceKeyReady, router.query.spaceId]);
 
     useEffect(() => {
-        if(!readyToList || !workspaceId || !workspaceKeyReady || container !== 'root') return;
+        if (!readyToList || !workspaceId || !workspaceKeyReady || container !== 'root') return;
         dispatch(clearPage());
-        const itemPath = [{_id: workspaceId}, {_id:'ac:'+ workspaceId}];
+        const itemPath = [{ _id: workspaceId }, { _id: 'ac:' + workspaceId }];
         dispatch(itemPathLoaded(itemPath));
-        dispatch(listActivitiesThunk({pageNumber: 1}));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [readyToList, container, workspaceId, workspaceKeyReady ]);
+        dispatch(listActivitiesThunk({ pageNumber: 1 }));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [readyToList, container, workspaceId, workspaceKeyReady]);
 
     return (
         <div className={BSafesStyle.spaceBackground}>
@@ -130,7 +129,7 @@ export default function Activities(props) {
                         </Col>
                     </Row>
                     <br />
-                    { (activity === 0 ) &&
+                    {(activity === 0) &&
                         <Row className="justify-content-center">
                             <Button variant="link" onClick={moreActivities}>More</Button>
                         </Row>}
@@ -154,7 +153,7 @@ function GroupedActivity({ items }) {
                     {!open && <div className='text-center' onClick={() => setOpen(!open)}><i className='fa fa-caret-down' /></div>}
                     <Collapse in={open}>
                         <div>
-                            {rest.map((ra, i)=><ActivityCard {...ra} key={i} />)}
+                            {rest.map((ra, i) => <ActivityCard {...ra} key={i} />)}
                         </div>
                     </Collapse>
                     {open && <div className='text-center' onClick={() => setOpen(!open)}><i className='fa fa-caret-up' /></div>}
@@ -170,7 +169,7 @@ function ActivityCard({ root, ...activity }) {
     const itemLink = getItemLink(activity);
     const componnet = (
         <div>
-        
+
             <Row>
                 <Col xs={12}>
                     <h4 className="my-0">{activity.titleText}</h4>
@@ -193,14 +192,14 @@ function ActivityCard({ root, ...activity }) {
     )
 
     return (
-        <ListGroup.Item className={root?'':'bg-light bg-gradient'} style={{ cursor: 'pointer' }}>
+        <ListGroup.Item className={root ? '' : 'bg-light bg-gradient'} style={{ cursor: 'pointer' }}>
             <Row>
-                {itemLink?
-                    <Link href={itemLink} legacyBehavior>
-                        <Col xs={11}>
+                {itemLink ?
+                    <Col xs={11}>
+                        <Link href={itemLink} className={BSafesStyle.itemLink}>
                             {componnet}
-                        </Col>
-                    </Link>
+                        </Link>
+                    </Col>
                     :
                     <Col xs={11}>
                         {componnet}

@@ -134,7 +134,7 @@ export default function ProductCard({ itemIndex, item, onAdd, isOpenable = true 
             <Card.Body className={cardBodyStyle}>
                 <div className="d-flex">
                     <div style={{ width: "96px" }}>
-                        <Link href={isOpenable ? getItemLink(item) : '#'} legacyBehavior>
+                        <Link href={isOpenable ? getItemLink(item) : '#'} className={BSafesStyle.itemLink}>
                             <div style={{ width: "84px", height: "84px", borderRadius: "3px" }}>
                                 <img style={{ width: "auto", height: "auto", maxWidth: "100%", maxHeight: "100%" }} src="/images/A002_Icon.png" />
                             </div>
@@ -179,7 +179,7 @@ export default function ProductCard({ itemIndex, item, onAdd, isOpenable = true 
                                 </ButtonGroup>
                             </Col>
                         </Row>
-                        <Link href={isOpenable ? getItemLink(item) : '#'} legacyBehavior>
+                        <Link href={isOpenable ? getItemLink(item) : '#'} className={BSafesStyle.itemLink}>
                             <Row>
                                 <Col>
                                     <div dangerouslySetInnerHTML={{ __html: `<h2>${item.title}</h2>` }} />

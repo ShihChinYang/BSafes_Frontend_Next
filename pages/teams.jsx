@@ -85,7 +85,7 @@ export default function Teams() {
                     <Row>
                         <Col sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }}>
                             <Card>
-                                <Link href='/safe' legacyBehavior>
+                                <Link href='/safe' className={BSafesStyle.itemLink}>
                                     <Card.Body>
                                         <i className="fa fa-heart text-danger"></i>
                                         <h2>Personal</h2>

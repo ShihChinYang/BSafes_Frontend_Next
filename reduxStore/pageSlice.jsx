@@ -421,6 +421,9 @@ const pageSlice = createSlice({
             state.content = action.payload.item.content;
             findMediasInContent(state, state.content);
         },
+        setContent: (state, action) => {
+            state.content = action.payload;
+        },
         setInitialContentRendered: (state, action) => {
             state.initialContentRendered = action.payload;
         },
@@ -1088,6 +1091,7 @@ export const {
     dataFetched,
     setOldVersion,
     contentDecrypted,
+    setContent,
     setInitialContentRendered,
     itemPathLoaded,
     decryptPageItem,

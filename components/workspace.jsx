@@ -284,7 +284,7 @@ export default function Workspace({ readyToList = false }) {
             <br />
             {process.env.NEXT_PUBLIC_app !== "localBackup" && !hideFunction && workspaceId && <Row>
                 <Col xs={12}>
-                    <Link href={"/trashBox/" + workspaceId} legacyBehavior>
+                    <Link href={"/trashBox/" + workspaceId} className={BSafesStyle.itemLink}>
                         <Button variant="light" className='pull-right border-0 shadow-none'>
                             <i className="fa fa-5x fa-trash" aria-hidden="true" />
                         </Button>
