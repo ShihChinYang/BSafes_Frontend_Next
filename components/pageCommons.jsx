@@ -24,7 +24,7 @@ import Comments from "./comments";
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 
-import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraftThunk, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadDraftDataThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, loadPageTemplate, clearPageTemplate, setContent } from "../reduxStore/pageSlice";
+import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, setImageWordsMode, saveImageWordsThunk, saveDraftThunk, saveContentThunk, saveTitleThunk, uploadVideosThunk, setVideoWordsMode, saveVideoWordsThunk, uploadAudiosThunk, downloadAudioThunk, setAudioWordsMode, saveAudioWordsThunk, uploadImagesThunk, uploadAttachmentsThunk, setCommentEditorMode, saveCommentThunk, playingContentVideo, getS3SignedUrlForContentUploadThunk, setS3SignedUrlForContentUpload, loadDraftThunk, clearDraftThunk, setDraftLoaded, startDownloadingContentImagesForDraftThunk, loadDraftDataThunk, loadOriginalContentThunk, setContentType, setContentEditorMode, setInitialContentRendered, loadPageTemplate, clearPageTemplate, setContent, setNewContentRendered } from "../reduxStore/pageSlice";
 import { debugLog, getDataURLFromFile } from '../lib/helper';
 import { products, productIdDelimiter } from "../lib/productID";
 import { prepareTwinPaperDraft } from "../lib/twinPaper";
@@ -59,6 +59,7 @@ export default function PageCommons() {
     const contentEditorMode = useSelector(state => state.page.contentEditorMode);
     const contentEditorContent = useSelector(state => state.page.content);
     const initialContentRendered = useSelector(state => state.page.initialContentRendered);
+    const newContentRendered = useSelector(state => state.page.newContentRendered);
     const contentUploadProgress = useSelector(state => state.page.contentUploadProgress);
     const contentDownloadProgress = useSelector(state => state.page.contentDownloadProgress);
     const [contentEditorContentWithImagesAndVideos, setcontentEditorContentWithImagesAndVideos] = useState(null);
@@ -256,7 +257,7 @@ export default function PageCommons() {
     const handleDraftClicked = () => {
         dispatch(loadDraftThunk());
         if (editorScriptsLoaded) {
-            //dispatch(setInitialContentRendered(true));
+            dispatch(setInitialContentRendered(true));
         }
     }
 
@@ -266,7 +267,7 @@ export default function PageCommons() {
 
     function afterContentReadOnly() {
         if (editorScriptsLoaded) {
-            //dispatch(setInitialContentRendered(true));
+            dispatch(setInitialContentRendered(true));
         }
     }
 
@@ -381,8 +382,8 @@ export default function PageCommons() {
     }
 
     const handleContentRendered = (content) => {
-        dispatch(setInitialContentRendered(true));
-        if(draftLoaded && contentType === 'WritingPage'){
+        dispatch(setNewContentRendered(true));
+        if (draftLoaded && contentType === 'WritingPage') {
             dispatch(startDownloadingContentImagesForDraftThunk());
         }
     }
@@ -413,7 +414,7 @@ export default function PageCommons() {
             if (result.status === "ok") {
                 const draft = result.draft;
                 dispatch(loadDraftDataThunk({ draft, contentType: "DrawingPage" }));
-            }else {
+            } else {
                 alert("Error preparing twin paper draft with image file! Error:" + result.error.message);
             }
         }
@@ -801,8 +802,33 @@ export default function PageCommons() {
         // eslint-disable-next-line react-hooks/exhaustive-deps    
     }, [contentEditorContent]);
 
+    function findeAnElementById(parentElement, id) {
+        const images = parentElement.querySelectorAll(".bSafesImage");
+        
+        for (let i = 0; i < images.length; i++) {
+            const item = images[i];
+            if (item.id === id) {
+                return item;
+            }
+        }
+        const videos = parentElement.querySelectorAll(".bSafesDownloadVideo");
+        for (let i = 0; i < videos.length; i++) {
+            const item = videos[i];
+            if (item.id === id) {
+                return item;
+            }
+        }
+        const spinners = parentElement.querySelectorAll(".bsafesImageSpinner");
+        for (let i = 0; i < spinners.length; i++) {
+            const item = spinners[i];
+            if (item.id === id) {
+                return item;
+            }
+        }
+        return null;
+    }
     useEffect(() => {
-        if (!initialContentRendered || (draftLoaded && !renderingDraft)) return;
+        if (!initialContentRendered || !newContentRendered || (draftLoaded && !renderingDraft)) return;
         let image, imageElement, containerElement;
         let i = contentImagesDisplayIndex;
 
@@ -810,10 +836,11 @@ export default function PageCommons() {
         videoControlsElements.forEach((item) => {
             item.remove();
         });
-
+        var tempElement = document.createElement("div");
+        tempElement.innerHTML = contentEditorContent;
         if (i < contentImagesDownloadQueue.length) {
             image = contentImagesDownloadQueue[i];
-            imageElement = document.getElementById(image.id);
+            imageElement = findeAnElementById(tempElement, image.id);
             if (!imageElement) {
                 dispatch(updateContentImagesDisplayIndex(i + 1));
                 return;
@@ -833,30 +860,27 @@ export default function PageCommons() {
                 containerElement.appendChild(spinnerElement);
             } else {
                 containerElement = imageElement.parentNode;
-                let spinnerElement = document.getElementById('spinner_' + image.id);
+                let spinnerElement = tempElement.getElementById('spinner_' + image.id);
                 if (!spinnerElement) {
                     let spinnerElement = createSpinnerForImage(image.id);
                     containerElement.appendChild(spinnerElement);
                 }
             }
             if (image.status === "Downloading") {
-
                 return;
             } else if ((image.status === "Downloaded") || (image.status === "DownloadFailed")) {
-
-                let spinnerElement = document.getElementById('spinner_' + image.id);
+                let spinnerElement = findeAnElementById(tempElement, 'spinner_' + image.id);
                 if (spinnerElement) spinnerElement.remove();
                 if (image.status === "Downloaded") {
                     imageElement.src = image.src;
                 }
                 if (imageElement.classList.contains('bSafesDownloadVideo')) {
                     let playVideoCenterElement = null;
-                    playVideoCenterElement = document.getElementById('playVideoCenter_' + image.id)
+                    playVideoCenterElement = tempElement.getElementById('playVideoCenter_' + image.id)
 
                     if (!playVideoCenterElement && contentEditorMode === 'ReadOnly') {
                         playVideoCenterElement = createPlayVideoButton(image);
                         containerElement.appendChild(playVideoCenterElement);
-
                     }
                     if (contentEditorMode === 'ReadOnly') playVideoCenterElement.onclick = handleVideoClick;
                 } else {
@@ -866,9 +890,8 @@ export default function PageCommons() {
                         }
                     }
                 }
-                let thisElement = document.querySelector('.contentEditorRow .inner-html');
-                let thisContent = thisElement.innerHTML;
-                //dispatch(setContent(thisContent));
+                let thisContent = tempElement.innerHTML;
+                dispatch(setContent(thisContent));
                 dispatch(updateContentImagesDisplayIndex(i + 1));
             }
         }
@@ -944,7 +967,7 @@ export default function PageCommons() {
 
     useEffect(() => {
         if (renderingDraft) {
-           // dispatch(startDownloadingContentImagesForDraftThunk());
+            // dispatch(startDownloadingContentImagesForDraftThunk());
         }
     }, [renderingDraft]);
 
@@ -955,12 +978,12 @@ export default function PageCommons() {
         }
     }, [contentImagesAllDownloaded, draftLoaded]);
 
-   /* useEffect(() => {
-        if (draftLoaded && contentEditorContentWithImagesAndVideos && contentEditorContentWithImagesAndVideos !== contentEditorContent) {
-            dispatch(setContentEditorMode("Writing"));
-            setEditingEditorId("content");
-        }
-    }, [contentEditorContentWithImagesAndVideos]) */
+    /* useEffect(() => {
+         if (draftLoaded && contentEditorContentWithImagesAndVideos && contentEditorContentWithImagesAndVideos !== contentEditorContent) {
+             dispatch(setContentEditorMode("Writing"));
+             setEditingEditorId("content");
+         }
+     }, [contentEditorContentWithImagesAndVideos]) */
 
     useEffect(() => {
         if (!activity) {

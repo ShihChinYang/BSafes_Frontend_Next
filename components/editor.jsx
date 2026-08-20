@@ -401,7 +401,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
 
     useEffect(() => {
         debugLog(debugOn, "content changed: ", content);
-        if(editorId === "content") {
+        if(editorId === "content" && content) {
             onContentRendered(content);
         }
     }, [content])

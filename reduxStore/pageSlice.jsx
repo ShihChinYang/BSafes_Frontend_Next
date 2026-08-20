@@ -103,7 +103,8 @@ const initialState = {
     checkingLatest: false,
     contentUploadProgress: 0,
     contentDownloadProgress: 0,
-    generateDrawingSnapshot: false
+    generateDrawingSnapshot: false,
+    newContentRendered: false,
 }
 
 const dataFetchedFunc = (state, action) => {
@@ -1069,6 +1070,9 @@ const pageSlice = createSlice({
         setTitleTokens: (state, action) => {
             state.titleTokens = action.payload;
         },
+        setNewContentRendered: (state, action) => {
+            state.newContentRendered = action.payload;
+        }
     }
 })
 
@@ -1179,6 +1183,7 @@ export const {
     setContentDownloadProgress,
     setGenerateDrawingSnapshot,
     setTitleTokens,
+    setNewContentRendered
 } = pageSlice.actions;
 
 
