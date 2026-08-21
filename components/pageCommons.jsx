@@ -65,6 +65,8 @@ export default function PageCommons() {
     const contentDownloadProgress = useSelector(state => state.page.contentDownloadProgress);
     const [contentEditorContentWithImagesAndVideos, setcontentEditorContentWithImagesAndVideos] = useState(null);
     const [writingContentState, setWritingContentState] = useState("idle");
+    const [contentBeforeLoadingDraft, setContentBeforeLoadingDraft] = useState(null);
+    const [restoreContentBeforeLoadingDraft, setRestoreContentBeforeLoadingDraft] = useState(false);
 
     const [editingEditorId, setEditingEditorId] = useState(null);
     const [readyForSaving, setReadyForSaving] = useState(false);
@@ -263,6 +265,8 @@ export default function PageCommons() {
             } else {
                 openContentEditor();
             }
+        } else if (!contentEditorContent) {
+            openContentEditor();
         }
         dispatch(getS3SignedUrlForContentUploadThunk());
     }
@@ -273,6 +277,7 @@ export default function PageCommons() {
     }
 
     const handleDraftClicked = () => {
+        setContentBeforeLoadingDraft(contentEditorContent);
         dispatch(loadDraftThunk());
         if (editorScriptsLoaded) {
             dispatch(setInitialContentRendered(true));
@@ -521,12 +526,6 @@ export default function PageCommons() {
             if (!draft && !contentEditorContent) {
                 dispatch(setContentType(""))
             }
-            if (draftLoaded) {
-                //dispatch(setContentType(""));
-                //dispatch(clearDraftThunk());
-                dispatch(loadOriginalContentThunk());
-            }
-            dispatch(setDraftLoaded(false));
             setReadyForSaving(false);
         }
     }
@@ -738,7 +737,7 @@ export default function PageCommons() {
     }
 
     const handleContentReadOnlyModeReady = (e) => {
-        const playVideos = document.querySelectorAll('.bsafesPlayVideo');
+        /*const playVideos = document.querySelectorAll('.bsafesPlayVideo');
         playVideos.forEach((playVideo) => {
             playVideo.remove();
         });
@@ -750,7 +749,11 @@ export default function PageCommons() {
             let playVideoElement = createPlayVideoButton(image);
             containerElement.appendChild(playVideoElement);
         }
-        const images = document.querySelectorAll(".bSafesImage");
+        const images = document.querySelectorAll(".bSafesImage");*/
+        if (draftLoaded) {
+            dispatch(setContent('<p>ABC</p>'));
+            setRestoreContentBeforeLoadingDraft(true);
+        }
         return;
     }
 
@@ -993,15 +996,20 @@ export default function PageCommons() {
     }, [newContentRendered, writingContentState]);
 
     useEffect(() => {
-        if(draftLoaded) {
+        if (draftLoaded) {
             setRenderingDraft(false);
         }
     }, [draftLoaded]);
 
     useEffect(() => {
-        if(newContentRendered && draftLoaded &&!renderingDraft) {
+        if (newContentRendered && draftLoaded && !renderingDraft) {
             setRenderingDraft(true);
-            dispatch(startDownloadingContentImagesForDraftThunk());
+            if (contentImagesDownloadQueue.length) {
+                dispatch(startDownloadingContentImagesForDraftThunk());
+            } else {
+                handleWrite();
+                setRenderingDraft(false);
+            }
         }
     }, [newContentRendered, draftLoaded, renderingDraft]);
 
@@ -1009,9 +1017,17 @@ export default function PageCommons() {
         if (newContentRendered && contentImagesAllDownloaded && draftLoaded) {
             handleWrite();
             setRenderingDraft(false);
-            dispatch(setDraftLoaded(false));
         }
     }, [newContentRendered, contentImagesAllDownloaded, draftLoaded]);
+
+    useEffect(() => {
+        if (restoreContentBeforeLoadingDraft) {
+            dispatch(setContent('<p>123</p>'));
+            setContentBeforeLoadingDraft(null);
+            dispatch(setDraftLoaded(false));
+            setRestoreContentBeforeLoadingDraft(false);
+        }
+    }, [restoreContentBeforeLoadingDraft]);
 
     useEffect(() => {
         if (!activity) {

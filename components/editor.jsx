@@ -25,7 +25,7 @@ import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryStri
 import { rotateImage, downScaleImage } from '../lib/wnImage';
 import { products } from "../lib/productID";
 
-import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage, setDraftInterval, preProcessWritingContent} from "../reduxStore/pageSlice";
+import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage, setDraftInterval, preProcessWritingContent } from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 import { de } from "date-fns/locale";
 
@@ -60,6 +60,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
     const dispatch = useDispatch();
 
     const editorRef = useRef(null);
+    const contentEditorRef = useRef(null);
     const monitorExcalidrawCallback = useRef();
     const bottomBarRectBottomRef = useRef();
 
@@ -86,6 +87,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
     const [bottomBarRectBottom, setBottomBarRectBottom] = useState(0);
     const [needToUpdatePageCommonControls, setNeedToUpdatePageCommonControls] = useState(false);
     const [showTwinTip, setShowTwinTip] = useState(false);
+    const [showContentEditor, setShowContentEditor] = useState(false);
     debugLog(debugOn, "Rendering editor, id,  mode: ", `${editorId} ${mode}`);
 
     let product = {};
@@ -130,41 +132,44 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                 }
                 break;
             case 'content':
-                if (!itemKey) {
-                    const thisItemKey = generateNewItemKey();
-                    dispatch(newItemKey({ itemKey: thisItemKey }));
-                }
-                $(editorRef.current).html(content);
-                const fullOptions = ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', 'lineHeight', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo', 'clearFormatting'];
-                const minimumOptions = ['bold', 'italic', 'color', 'emoticons', 'paragraphFormat', 'fontFamily', 'formatOL', 'formatUL', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo'];
+                setShowContentEditor(true);
+                if (0) {
+                    if (!itemKey) {
+                        const thisItemKey = generateNewItemKey();
+                        dispatch(newItemKey({ itemKey: thisItemKey }));
+                    }
+                    $(editorRef.current).html(content);
+                    const fullOptions = ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', 'lineHeight', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo', 'clearFormatting'];
+                    const minimumOptions = ['bold', 'italic', 'color', 'emoticons', 'paragraphFormat', 'fontFamily', 'formatOL', 'formatUL', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo'];
 
-                const isMinimumOption = (window.innerWidth < 480);
-                froalaOptions = {
-                    key: froalaKey,
-                    toolbarButtons: fullOptions,
-                    toolbarButtonsMD: fullOptions,
-                    toolbarButtonsSM: fullOptions,
-                    toolbarButtonsXS: isMinimumOption ? minimumOptions : fullOptions,
-                    fontFamily: {
-                        'Arial,Helvetica,sans-serif': 'Arial',
-                        "'Edu SA Beginner Variable', cursive": 'Edu SA Beginner',
-                        'Georgia,serif': 'Georgia',
-                        'Impact,Charcoal,sans-serif': 'Impact',
-                        "'Montserrat Variable', sans-serif": 'Montserrat',
-                        "'Noto Serif Variable', serif": 'Noto Serif',
-                        "'Oswald Variable', sans-serif": 'Oswald',
-                        "'Roboto Flex Variable', sans-serif": 'Roboto Flex',
-                        "'Times New Roman',Times,serif": 'Times New Roman',
-                        "'Dancing Script Variable', cursive": 'Dancing Script',
-                    },
-                    fontFamilySelection: false,
-                    tableStyles: {
-                        'fr-dashed-borders': 'Dashed Borders',
-                        'fr-alternate-rows': 'Alternate Rows',
-                        'fr-no-borders': 'No Borders'
-                    },
-                };
-                break;
+                    const isMinimumOption = (window.innerWidth < 480);
+                    froalaOptions = {
+                        key: froalaKey,
+                        toolbarButtons: fullOptions,
+                        toolbarButtonsMD: fullOptions,
+                        toolbarButtonsSM: fullOptions,
+                        toolbarButtonsXS: isMinimumOption ? minimumOptions : fullOptions,
+                        fontFamily: {
+                            'Arial,Helvetica,sans-serif': 'Arial',
+                            "'Edu SA Beginner Variable', cursive": 'Edu SA Beginner',
+                            'Georgia,serif': 'Georgia',
+                            'Impact,Charcoal,sans-serif': 'Impact',
+                            "'Montserrat Variable', sans-serif": 'Montserrat',
+                            "'Noto Serif Variable', serif": 'Noto Serif',
+                            "'Oswald Variable', sans-serif": 'Oswald',
+                            "'Roboto Flex Variable', sans-serif": 'Roboto Flex',
+                            "'Times New Roman',Times,serif": 'Times New Roman',
+                            "'Dancing Script Variable', cursive": 'Dancing Script',
+                        },
+                        fontFamilySelection: false,
+                        tableStyles: {
+                            'fr-dashed-borders': 'Dashed Borders',
+                            'fr-alternate-rows': 'Alternate Rows',
+                            'fr-no-borders': 'No Borders'
+                        },
+                    };
+                }
+                return;
             default:
                 froalaOptions = {
                     key: froalaKey,
@@ -314,9 +319,16 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
     const readOnly = async () => {
         if (editorOn) {
             if ((editorId !== 'content') || (contentType === "WritingPage")) {
-                $(editorRef.current).froalaEditor('destroy');
-                $(editorRef.current).html(content);
-                editorRef.current.style.overflowX = 'auto';
+                if (editorId === 'content') {
+                    $(contentEditorRef.current).froalaEditor('destroy');
+                    $(contentEditorRef.current).html('');
+                    contentEditorRef.current.style.overflowX = 'auto';
+                    setShowContentEditor(false);
+                } else {
+                    $(editorRef.current).froalaEditor('destroy');
+                    $(editorRef.current).html(content);
+                    editorRef.current.style.overflowX = 'auto';
+                }
             }
             if (draftInterval) {
                 clearInterval(draftInterval);
@@ -402,7 +414,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
 
     useEffect(() => {
         debugLog(debugOn, "content changed: ", content);
-        if(editorId === "content" && content) {
+        if (editorId === "content" && content) {
             onContentRendered(content);
         }
     }, [content])
@@ -429,6 +441,57 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
         dispatch(setInitialContentRendered(true));
     }, [scriptsLoaded])
 
+    useEffect(() => {
+        let froalaOptions;
+        if (showContentEditor) {
+            if (!itemKey) {
+                const thisItemKey = generateNewItemKey();
+                dispatch(newItemKey({ itemKey: thisItemKey }));
+            }
+            $(contentEditorRef.current).html(content);
+            const fullOptions = ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', 'lineHeight', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo', 'clearFormatting'];
+            const minimumOptions = ['bold', 'italic', 'color', 'emoticons', 'paragraphFormat', 'fontFamily', 'formatOL', 'formatUL', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo'];
+
+            const isMinimumOption = (window.innerWidth < 480);
+            froalaOptions = {
+                key: froalaKey,
+                toolbarButtons: fullOptions,
+                toolbarButtonsMD: fullOptions,
+                toolbarButtonsSM: fullOptions,
+                toolbarButtonsXS: isMinimumOption ? minimumOptions : fullOptions,
+                fontFamily: {
+                    'Arial,Helvetica,sans-serif': 'Arial',
+                    "'Edu SA Beginner Variable', cursive": 'Edu SA Beginner',
+                    'Georgia,serif': 'Georgia',
+                    'Impact,Charcoal,sans-serif': 'Impact',
+                    "'Montserrat Variable', sans-serif": 'Montserrat',
+                    "'Noto Serif Variable', serif": 'Noto Serif',
+                    "'Oswald Variable', sans-serif": 'Oswald',
+                    "'Roboto Flex Variable', sans-serif": 'Roboto Flex',
+                    "'Times New Roman',Times,serif": 'Times New Roman',
+                    "'Dancing Script Variable', cursive": 'Dancing Script',
+                },
+                fontFamilySelection: false,
+                tableStyles: {
+                    'fr-dashed-borders': 'Dashed Borders',
+                    'fr-alternate-rows': 'Alternate Rows',
+                    'fr-no-borders': 'No Borders'
+                },
+            };
+            froalaOptions.videoInsertButtons = ['videoBack', '|', 'videoUpload']
+            froalaOptions.imageInsertButtons = ['imageBack', '|', 'imageUpload']
+            $(contentEditorRef.current).froalaEditor(froalaOptions);
+            contentEditorRef.current.style.overflowX = null;
+            if (!editorOn) {
+                debugLog(debugOn, "setEditorOn")
+                setEditorOn(true);
+            }
+            if (writingModeReady) writingModeReady();
+            const contentSample = $(editorRef.current).froalaEditor('html.get');
+            const result = preProcessWritingContent(contentSample);
+            setOriginalContent(result.content);
+        }
+    }, [showContentEditor])
     useEffect(() => {
         if (originalContent !== null) {
             if (editorId === 'content') {
@@ -805,9 +868,11 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                     {(editorId !== 'title' && (editorId !== 'content' || contentType === 'WritingPage') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div className="px-2">
                             <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
-                                <div className="inner-html" ref={editorRef} style={{ overflowX: 'auto' }}>
+                                {!showContentEditor && <div className="inner-html" style={{ overflowX: 'auto' }}>
                                     {content && parse(content)}
-                                </div>
+                                </div>}
+                                {showContentEditor && <div id='contentEditor' className="inner-html" ref={contentEditorRef} style={{ overflowX: 'auto' }}>
+                                </div>}
                             </Row>
                         </div>
                     }
