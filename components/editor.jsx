@@ -25,7 +25,7 @@ import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryStri
 import { rotateImage, downScaleImage } from '../lib/wnImage';
 import { products } from "../lib/productID";
 
-import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage, setDraftInterval } from "../reduxStore/pageSlice";
+import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage, setDraftInterval, preProcessWritingContent} from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
 import { de } from "date-fns/locale";
 
@@ -185,7 +185,8 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
         if (writingModeReady) writingModeReady();
         if (editorId === 'content') {
             const contentSample = $(editorRef.current).froalaEditor('html.get');
-            setOriginalContent(contentSample);
+            const result = preProcessWritingContent(contentSample);
+            setOriginalContent(result.content);
         }
     }
 
@@ -437,14 +438,16 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
     }, [originalContent])
 
     useEffect(() => {
-        let content;
+        let sampledContent = null, content = null;
         debugLog(debugOn, 'interval state:', intervalState);
         switch (intervalState) {
             case 'Start':
                 const interval = setInterval(async () => {
                     debugLog(debugOn, "Saving draft ...");
                     if (contentType === "WritingPage") {
-                        content = $(editorRef.current).froalaEditor('html.get');
+                        sampledContent = $(editorRef.current).froalaEditor('html.get');
+                        const result = preProcessWritingContent(sampledContent);
+                        content = result.content;
                         debugLog(debugOn, "editor content: ", content);
                         if (content !== originalContent) {
                             debugLog(debugOn, 'Content changed');

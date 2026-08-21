@@ -424,6 +424,7 @@ const pageSlice = createSlice({
         },
         setContent: (state, action) => {
             state.content = action.payload;
+            state.newContentRendered = false;
         },
         setInitialContentRendered: (state, action) => {
             state.initialContentRendered = action.payload;
@@ -1072,7 +1073,7 @@ const pageSlice = createSlice({
         },
         setNewContentRendered: (state, action) => {
             state.newContentRendered = action.payload;
-        }
+        },
     }
 })
 
@@ -3410,15 +3411,7 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
     })
 }
 
-async function preProcessEditorContentBeforeSaving(content, contentType) {
-    if (contentType === "DrawingPage") {
-        const ExcalidrawSerializedJSON = content.metadata.ExcalidrawSerializedJSON;
-        return {
-            content: "NA" + embeddJSONSeperator + ExcalidrawSerializedJSON,
-            s3ObjectsInContent: [],
-            s3ObjectsSize: 0
-        }
-    }
+export function preProcessWritingContent(content) {
     var tempElement = document.createElement("div");
     tempElement.innerHTML = content;
     //Remove all spinners, progress elements, videoControls
@@ -3490,7 +3483,7 @@ async function preProcessEditorContentBeforeSaving(content, contentType) {
         if (item.classList.contains('fr-fvr')) videoImg.classList.add('fr-fir');
 
         videoImg.id = videoId;
-        videoImg.style = videoStyle;
+        //videoImg.style = videoStyle;
 
         const placeholder = 'https://placehold.co/600x400?text=Video';
         videoImg.src = placeholder;
@@ -3515,6 +3508,19 @@ async function preProcessEditorContentBeforeSaving(content, contentType) {
         s3ObjectsInContent: s3ObjectsInContent,
         s3ObjectsSize: totalS3ObjectsSize
     };
+}
+
+async function preProcessEditorContentBeforeSaving(content, contentType) {
+    if (contentType === "DrawingPage") {
+        const ExcalidrawSerializedJSON = content.metadata.ExcalidrawSerializedJSON;
+        return {
+            content: "NA" + embeddJSONSeperator + ExcalidrawSerializedJSON,
+            s3ObjectsInContent: [],
+            s3ObjectsSize: 0
+        }
+    }
+    const result = preProcessWritingContent(content);
+    return result;
 };
 
 const getS3SignedUrlForContentUpload = (dispatch) => {

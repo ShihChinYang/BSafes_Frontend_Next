@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux'
 
 import Row from 'react-bootstrap/Row'
@@ -28,6 +28,7 @@ import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, se
 import { debugLog, getDataURLFromFile } from '../lib/helper';
 import { products, productIdDelimiter } from "../lib/productID";
 import { prepareTwinPaperDraft } from "../lib/twinPaper";
+import { set } from "date-fns";
 
 export default function PageCommons() {
     const debugOn = true;
@@ -63,6 +64,7 @@ export default function PageCommons() {
     const contentUploadProgress = useSelector(state => state.page.contentUploadProgress);
     const contentDownloadProgress = useSelector(state => state.page.contentDownloadProgress);
     const [contentEditorContentWithImagesAndVideos, setcontentEditorContentWithImagesAndVideos] = useState(null);
+    const [writingContentState, setWritingContentState] = useState("idle");
 
     const [editingEditorId, setEditingEditorId] = useState(null);
     const [readyForSaving, setReadyForSaving] = useState(false);
@@ -177,10 +179,10 @@ export default function PageCommons() {
         gallery.init();
     }
 
-    const handleVideoClick = (e) => {
-        let playVideoElement = e.target;
-        if (e.target.tagName === 'I') {
-            playVideoElement = e.target.parentNode;
+    const handleVideoClick = (target) => {
+        let playVideoElement = target;
+        if (target.tagName === 'I') {
+            playVideoElement = target.parentNode;
         }
         const videoId = playVideoElement.id.replace('playVideoCenter_', "");
         const containerElement = playVideoElement.parentNode;
@@ -230,21 +232,37 @@ export default function PageCommons() {
         return playVideoCenterElement;
     }
 
+    function writingContenthandler() {
+        beforeWritingContent();
+    }
+
+    function openContentEditor() {
+        dispatch(setContentEditorMode("Writing"));
+        setEditingEditorId("content");
+        setWritingContentState("writing");
+    }
+
     function beforeWritingContent() {
         if (contentType === "WritingPage") {
-            const spinners = document.querySelectorAll('.bsafesImageSpinner');
+            var tempElement = document.createElement("div");
+            tempElement.innerHTML = contentEditorContent;
+            const spinners = tempElement.querySelectorAll('.bsafesImageSpinner');
             spinners.forEach((spinner) => {
                 spinner.remove();
             });
 
-            const playVideos = document.querySelectorAll('.bsafesPlayVideo');
+            /*const playVideos = tempElement.querySelectorAll('.bsafesPlayVideo');
             playVideos.forEach((playVideo) => {
                 playVideo.remove();
-            });
+            });*/
 
-            let contentByDOM = document.querySelector('.contentEditorRow').querySelector('.inner-html');
-            if (contentByDOM)
-                setcontentEditorContentWithImagesAndVideos(contentByDOM.innerHTML);
+            let newContent = tempElement.innerHTML || '';
+            if (newContent !== contentEditorContent) {
+                dispatch(setContent(newContent));
+                setWritingContentState("beforeWriting");
+            } else {
+                openContentEditor();
+            }
         }
         dispatch(getS3SignedUrlForContentUploadThunk());
     }
@@ -291,9 +309,7 @@ export default function PageCommons() {
             }
         }
         if (editorId === 'content') {
-            beforeWritingContent();
-            dispatch(setContentEditorMode("Writing"));
-            setEditingEditorId("content");
+            writingContenthandler();
             thisReadyForSaving = false;
         } else if (editorId === 'title') {
             setTitleEditorMode("Writing");
@@ -323,7 +339,7 @@ export default function PageCommons() {
         if (editingEditorId === "content") {
             if (contentType === "DrawingPage" || draftLoaded || content !== contentEditorContent) {
                 if (contentType === "WritingPage") {
-                    setcontentEditorContentWithImagesAndVideos(content);
+                    setContent(content);
                 }
                 if (contentType === "DrawingPage") {
                     setDrawingSnapshot({ name: content.name, src: content.src })
@@ -331,6 +347,7 @@ export default function PageCommons() {
                 dispatch(saveContentThunk({ content, workspaceKey }));
             } else {
                 setEditingEditorMode("ReadOnly");
+                setWritingContentState("idle");
                 setEditingEditorId(null);
                 dispatch(clearPageTemplate());
                 dispatch(setDraftLoaded(false));
@@ -383,8 +400,17 @@ export default function PageCommons() {
 
     const handleContentRendered = (content) => {
         dispatch(setNewContentRendered(true));
-        if (draftLoaded && contentType === 'WritingPage') {
-            dispatch(startDownloadingContentImagesForDraftThunk());
+    }
+
+    const handleContentEditorClicked = (e) => {
+        debugLog(debugOn, "handleContentEditorClicked: ", e.target.id);
+        if (e.target.matches('.bSafesImage')) {
+            // Handle image click
+            buildContentImagesGallery(e.target.id);
+        } else if (e.target.matches('.bsafesPlayVideo')) {
+            handleVideoClick(e.target);
+        } else if (e.target.matches('.fa-play-circle-o')) {
+            handleVideoClick(e.target);
         }
     }
 
@@ -422,11 +448,7 @@ export default function PageCommons() {
 
     const handleWrite = () => {
         debugLog(debugOn, "handleWrite");
-        beforeWritingContent();
-        if (!draftLoaded || (draftLoaded && (contentImagesDownloadQueue.length === 0 || contentImagesAllDownloaded))) {
-            dispatch(setContentEditorMode("Writing"));
-            setEditingEditorId("content");
-        }
+        writingContenthandler();
     }
 
     const setEditingEditorMode = (mode) => {
@@ -495,6 +517,7 @@ export default function PageCommons() {
         } else {
             setEditingEditorMode("ReadOnly");
             setEditingEditorId(null);
+            setWritingContentState("idle");
             if (!draft && !contentEditorContent) {
                 dispatch(setContentType(""))
             }
@@ -671,14 +694,14 @@ export default function PageCommons() {
     };
 
     const handleContentWritingModeReady = (e) => {
-        const bSafesDownloadVideoImages = document.getElementsByClassName('bSafesDownloadVideo');
+        /*const bSafesDownloadVideoImages = document.getElementsByClassName('bSafesDownloadVideo');
         for (let i = 0; i < bSafesDownloadVideoImages.length; i++) {
             let image = bSafesDownloadVideoImages[i];
             let containerElement = image.parentNode;
             let playVideoElement = createPlayVideoButton(image);
             containerElement.appendChild(playVideoElement);
-            playVideoElement.onclick = handleVideoClick;
-        }
+            //playVideoElement.onclick = handleVideoClick;
+        }*/
         return;
     }
 
@@ -726,18 +749,8 @@ export default function PageCommons() {
             let containerElement = image.parentNode;
             let playVideoElement = createPlayVideoButton(image);
             containerElement.appendChild(playVideoElement);
-            playVideoElement.onclick = handleVideoClick;
         }
-
         const images = document.querySelectorAll(".bSafesImage");
-        images.forEach((item) => {
-            if (item.src.startsWith("blob")) {
-                item.onclick = () => {
-                    buildContentImagesGallery(item.id);
-                }
-            }
-        });
-
         return;
     }
 
@@ -804,7 +817,7 @@ export default function PageCommons() {
 
     function findeAnElementById(parentElement, id) {
         const images = parentElement.querySelectorAll(".bSafesImage");
-        
+
         for (let i = 0; i < images.length; i++) {
             const item = images[i];
             if (item.id === id) {
@@ -828,16 +841,16 @@ export default function PageCommons() {
         return null;
     }
     useEffect(() => {
-        if (!initialContentRendered || !newContentRendered || (draftLoaded && !renderingDraft)) return;
+        if (!initialContentRendered || (draftLoaded && !renderingDraft)) return;
         let image, imageElement, containerElement;
         let i = contentImagesDisplayIndex;
 
-        const videoControlsElements = document.querySelectorAll(".videoControls");
+        var tempElement = document.createElement("div");
+        tempElement.innerHTML = contentEditorContent;
+        const videoControlsElements = tempElement.querySelectorAll(".videoControls");
         videoControlsElements.forEach((item) => {
             item.remove();
         });
-        var tempElement = document.createElement("div");
-        tempElement.innerHTML = contentEditorContent;
         if (i < contentImagesDownloadQueue.length) {
             image = contentImagesDownloadQueue[i];
             imageElement = findeAnElementById(tempElement, image.id);
@@ -860,13 +873,15 @@ export default function PageCommons() {
                 containerElement.appendChild(spinnerElement);
             } else {
                 containerElement = imageElement.parentNode;
-                let spinnerElement = tempElement.getElementById('spinner_' + image.id);
+                let spinnerElement = findeAnElementById(tempElement, 'spinner_' + image.id);
                 if (!spinnerElement) {
                     let spinnerElement = createSpinnerForImage(image.id);
                     containerElement.appendChild(spinnerElement);
                 }
             }
             if (image.status === "Downloading") {
+                let thisContent = tempElement.innerHTML;
+                dispatch(setContent(thisContent));
                 return;
             } else if ((image.status === "Downloaded") || (image.status === "DownloadFailed")) {
                 let spinnerElement = findeAnElementById(tempElement, 'spinner_' + image.id);
@@ -876,18 +891,14 @@ export default function PageCommons() {
                 }
                 if (imageElement.classList.contains('bSafesDownloadVideo')) {
                     let playVideoCenterElement = null;
-                    playVideoCenterElement = tempElement.getElementById('playVideoCenter_' + image.id)
+                    playVideoCenterElement = findeAnElementById(tempElement, 'playVideoCenter_' + image.id)
 
                     if (!playVideoCenterElement && contentEditorMode === 'ReadOnly') {
                         playVideoCenterElement = createPlayVideoButton(image);
                         containerElement.appendChild(playVideoCenterElement);
                     }
-                    if (contentEditorMode === 'ReadOnly') playVideoCenterElement.onclick = handleVideoClick;
                 } else {
                     imageElement.onload = () => {
-                        imageElement.onclick = () => {
-                            buildContentImagesGallery(imageElement.id);
-                        }
                     }
                 }
                 let thisContent = tempElement.innerHTML;
@@ -961,29 +972,46 @@ export default function PageCommons() {
     }, [contentEditorMode]);
 
     useEffect(() => {
-        if (!draftLoaded) return;
-        setRenderingDraft(true);
+        if (newContentRendered) {
+            debugLog(debugOn, "newContentRendered");
+            dispatch(setNewContentRendered(false));
+        }
+    }, [newContentRendered]);
+
+    useEffect(() => {
+        if (newContentRendered && contentImagesAllDownloaded) {
+            debugLog(debugOn, "contentImagesAllDownloaded");
+        }
+    }, [newContentRendered, contentImagesAllDownloaded]);
+
+    useEffect(() => {
+        if (newContentRendered && writingContentState === "beforeWriting") {
+            if (!draftLoaded || (draftLoaded && (contentImagesDownloadQueue.length === 0 || contentImagesAllDownloaded))) {
+                openContentEditor();
+            }
+        }
+    }, [newContentRendered, writingContentState]);
+
+    useEffect(() => {
+        if(draftLoaded) {
+            setRenderingDraft(false);
+        }
     }, [draftLoaded]);
 
     useEffect(() => {
-        if (renderingDraft) {
-            // dispatch(startDownloadingContentImagesForDraftThunk());
+        if(newContentRendered && draftLoaded &&!renderingDraft) {
+            setRenderingDraft(true);
+            dispatch(startDownloadingContentImagesForDraftThunk());
         }
-    }, [renderingDraft]);
+    }, [newContentRendered, draftLoaded, renderingDraft]);
 
     useEffect(() => {
-        if (contentImagesAllDownloaded && draftLoaded) {
+        if (newContentRendered && contentImagesAllDownloaded && draftLoaded) {
             handleWrite();
             setRenderingDraft(false);
+            dispatch(setDraftLoaded(false));
         }
-    }, [contentImagesAllDownloaded, draftLoaded]);
-
-    /* useEffect(() => {
-         if (draftLoaded && contentEditorContentWithImagesAndVideos && contentEditorContentWithImagesAndVideos !== contentEditorContent) {
-             dispatch(setContentEditorMode("Writing"));
-             setEditingEditorId("content");
-         }
-     }, [contentEditorContentWithImagesAndVideos]) */
+    }, [newContentRendered, contentImagesAllDownloaded, draftLoaded]);
 
     useEffect(() => {
         if (!activity) {
@@ -1078,7 +1106,7 @@ export default function PageCommons() {
                 {true &&
                     <div className={`justify-content-center ${contentType !== "DrawingPage" ? "row" : ""}`}>
                         <input ref={twinInputRef} onChange={handleTwinImage} type="file" accept="image/*" className="d-none editControl" id="twinImage" />
-                        <div className={`contentEditorRow ${contentType !== "DrawingPage" ? "col-sm-10 col-12" : ""}`} style={{ minHeight: "280px" }}>
+                        <div className={`contentEditorRow ${contentType !== "DrawingPage" ? "col-sm-10 col-12" : ""}`} style={{ minHeight: "280px" }} onClick={handleContentEditorClicked}>
                             <Editor editorId="content" showDrawIcon={!contentType || contentType === 'DrawingPage'} showWriteIcon={!contentType || contentType === 'WritingPage'} mode={contentEditorMode} content={contentEditorContentWithImagesAndVideos || contentEditorContent} onContentRendered={handleContentRendered} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion) && contentImagesAllDisplayed} writingModeReady={handleContentWritingModeReady} readOnlyModeReady={handleContentReadOnlyModeReady} onDraftSampled={handleDraftSample} onDraftClicked={handleDraftClicked} onDraftDelete={handleDraftDelete} onDrawingClicked={handleDrawingClicked} drawingImageDone={handleDrawingImageDone} drawingSnapshot={drawingSnapshot} />
                         </div>
                     </div>
