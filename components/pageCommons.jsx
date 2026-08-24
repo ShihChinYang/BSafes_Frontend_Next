@@ -66,7 +66,7 @@ export default function PageCommons() {
     const [contentEditorContentWithImagesAndVideos, setcontentEditorContentWithImagesAndVideos] = useState(null);
     const [writingContentState, setWritingContentState] = useState("idle");
     const [contentBeforeLoadingDraft, setContentBeforeLoadingDraft] = useState(null);
-    const [restoreContentBeforeLoadingDraft, setRestoreContentBeforeLoadingDraft] = useState(false);
+    const [contentToBeSaved, setContentToBeSaved] = useState(null);
 
     const [editingEditorId, setEditingEditorId] = useState(null);
     const [readyForSaving, setReadyForSaving] = useState(false);
@@ -265,7 +265,7 @@ export default function PageCommons() {
             } else {
                 openContentEditor();
             }
-        } else if (!contentEditorContent) {
+        } else if (contentType === "DrawingPage" || !contentEditorContent) {
             openContentEditor();
         }
         dispatch(getS3SignedUrlForContentUploadThunk());
@@ -344,7 +344,7 @@ export default function PageCommons() {
         if (editingEditorId === "content") {
             if (contentType === "DrawingPage" || draftLoaded || content !== contentEditorContent) {
                 if (contentType === "WritingPage") {
-                    setContent(content);
+                    setContentToBeSaved(content);
                 }
                 if (contentType === "DrawingPage") {
                     setDrawingSnapshot({ name: content.name, src: content.src })
@@ -525,6 +525,10 @@ export default function PageCommons() {
             setWritingContentState("idle");
             if (!draft && !contentEditorContent) {
                 dispatch(setContentType(""))
+            }
+            if(draftLoaded) {
+                dispatch(setContent(contentBeforeLoadingDraft));
+                setContentBeforeLoadingDraft(null);
             }
             setReadyForSaving(false);
         }
@@ -736,24 +740,16 @@ export default function PageCommons() {
         gallery.init();
     }
 
-    const handleContentReadOnlyModeReady = (e) => {
-        /*const playVideos = document.querySelectorAll('.bsafesPlayVideo');
-        playVideos.forEach((playVideo) => {
-            playVideo.remove();
-        });
+    const handleReadOnlyModeReady = (e) => {
+        setEditingEditorId(null);
+        return;
+    }
 
-        const bSafesDownloadVideoImages = document.getElementsByClassName('bSafesDownloadVideo');
-        for (let i = 0; i < bSafesDownloadVideoImages.length; i++) {
-            let image = bSafesDownloadVideoImages[i];
-            let containerElement = image.parentNode;
-            let playVideoElement = createPlayVideoButton(image);
-            containerElement.appendChild(playVideoElement);
-        }
-        const images = document.querySelectorAll(".bSafesImage");*/
+    const handleContentReadOnlyModeReady = (e) => {
         if (draftLoaded) {
-            dispatch(setContent('<p>ABC</p>'));
-            setRestoreContentBeforeLoadingDraft(true);
+            dispatch(setDraftLoaded(false));
         }
+        setEditingEditorId(null);
         return;
     }
 
@@ -777,14 +773,15 @@ export default function PageCommons() {
     useEffect(() => {
         if (activity === 0) {
             if (editingEditorId) {
+                if(editingEditorId === 'content') setContent(contentToBeSaved);
                 setEditingEditorMode("ReadOnly");
-                setEditingEditorId(null);
             }
         } else if (activity === "Error") {
             if (editingEditorId) {
                 setEditingEditorMode("Writing");
             }
         }
+        setContentToBeSaved(null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activity]);
 
@@ -1014,29 +1011,12 @@ export default function PageCommons() {
     }, [newContentRendered, draftLoaded, renderingDraft]);
 
     useEffect(() => {
-        if (newContentRendered && contentImagesAllDownloaded && draftLoaded) {
+        if (newContentRendered && contentImagesAllDownloaded && draftLoaded && renderingDraft) {
             handleWrite();
             setRenderingDraft(false);
         }
     }, [newContentRendered, contentImagesAllDownloaded, draftLoaded]);
 
-    useEffect(() => {
-        if (restoreContentBeforeLoadingDraft) {
-            dispatch(setContent('<p>123</p>'));
-            setContentBeforeLoadingDraft(null);
-            dispatch(setDraftLoaded(false));
-            setRestoreContentBeforeLoadingDraft(false);
-        }
-    }, [restoreContentBeforeLoadingDraft]);
-
-    useEffect(() => {
-        if (!activity) {
-            /*const elem = document.getElementById("BSafesPage");
-            if (elem) {
-                elem.scrollIntoView({ behavior: "smooth" });
-            }*/
-        }
-    }, [activity])
     const photoSwipeGallery = () => {
         return (
             //<!-- Root element of PhotoSwipe. Must have class pswp. -->
@@ -1105,7 +1085,7 @@ export default function PageCommons() {
                         }
                         <Row className={`${BSafesProductsStyle[`_RowXMargins`]} justify-content-center`}>
                             <div className={product.fixedSize ? "" : "col-sm-10 col-12"}>
-                                <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />
+                                <Editor editorId="title" showWriteIcon={true} mode={titleEditorMode} content={titleEditorContent} onContentChanged={handleContentChanged} onPenClicked={handlePenClicked} readOnlyModeReady={handleReadOnlyModeReady} editable={!editingEditorId && (activity === 0) && !checkingLatest && (!oldVersion)} />
                             </div>
                         </Row>
                         {((productId === "" || product.fixedSize === undefined)) ?

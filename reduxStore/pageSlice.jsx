@@ -1969,7 +1969,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             }
                         }
                         const { draftId, draftContentTypeId } = formDraftId(data.itemId);
-                        const response = await readDraftInDB(draftId);
+                        const response = await readDraftInDB(draftId, dispatch, getState);
                         if (response.status === 'ok') {
                             const draft = response.data;
                             const draftContentType = localStorage.getItem(draftContentTypeId);
@@ -2061,7 +2061,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                                 }
                             }
                             const { draftId, draftContentTypeId } = formDraftId(data.itemId);
-                            const response = await readDraftInDB(draftId);
+                            const response = await readDraftInDB(draftId, dispatch, getState);
                             if (response.status === 'ok') {
                                 const draft = response.data;
                                 const draftContentType = localStorage.getItem(draftContentTypeId);
@@ -2237,7 +2237,7 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                         }
                     }
                     const { draftId, draftContentTypeId } = formDraftId(data.itemId);
-                    const response = await readDraftInDB(draftId);
+                    const response = await readDraftInDB(draftId, dispatch, getState);
                     if (response.status === 'ok') {
                         const draft = response.data;
                         const draftContentType = localStorage.getItem(draftContentTypeId);
@@ -3284,7 +3284,10 @@ export const saveTagsThunk = (tags, workspaceKey, searchKey, searchIV) => async 
                 }
                 if (!state.itemCopy) {
                     try {
-                        itemKey = generateNewItemKey();
+                        itemKey = state.itemKey;
+                        if (!itemKey) {
+                            itemKey = generateNewItemKey();
+                        }
                         keyEnvelope = encryptBinaryString(itemKey, workspaceKey);
 
                         encryptedTags = tokenfieldToEncryptedArray(tags, itemKey);
@@ -3355,7 +3358,10 @@ export const saveTitleThunk = (title, workspaceKey, searchKey, searchIV) => asyn
                 dispatch(setTitleTokens(titleTokens));
                 if (!state.itemCopy) {
                     try {
-                        itemKey = generateNewItemKey();
+                        itemKey = state.itemKey;
+                        if (!itemKey) {
+                            itemKey = generateNewItemKey();
+                        }
                         keyEnvelope = encryptBinaryString(itemKey, workspaceKey);
 
                         encryptedTitle = encryptBinaryString(encodedTitle, itemKey);
@@ -3589,12 +3595,27 @@ const saveDraftInDB = async (itemId, data) => {
     }
 }
 
-const readDraftInDB = async (itemId) => {
+const readDraftInDB = async (itemId, dispatch, getState) => {
     const params = {
         table: 'draftStore',
         itemId
     }
-    return readDataFromServiceWorkerDBTable(params);
+    try {
+        const result = await readDataFromServiceWorkerDBTable(params);
+        if (result.status === 'ok' && result.data) {
+            const itemDraft = result.data;
+            const itemDraftObj = JSON.parse(forge.util.decodeUtf8(itemDraft));
+            if (!getState().page.itemKey && itemDraftObj.itemKey) {
+                dispatch(newItemKey({ itemKey: itemDraftObj.itemKey }));
+            }
+            return { status: 'ok', data: itemDraftObj.draft };
+        } else {
+            return result;
+        }
+    } catch (error) {
+        return { status: 'error', error };
+    }
+
 }
 
 const deleteDraftInDB = async (itemId) => {
@@ -3616,7 +3637,11 @@ export const saveDraftThunk = (data) => async (dispatch, getState) => {
         try {
             const encodedContent = forge.util.encodeUtf8(result.content);
             const { draftId, draftContentTypeId } = formDraftId(state.id);
-            await saveDraftInDB(draftId, encodedContent);
+            const itemDraft = forge.util.encodeUtf8(JSON.stringify({
+                itemKey: getState().page.itemKey,
+                draft: encodedContent
+            }));
+            await saveDraftInDB(draftId, itemDraft);
             localStorage.setItem(draftContentTypeId, state.contentType);
             dispatch(setDraft({ draft: encodedContent, draftContentType: state.contentType }));
             resolve();
@@ -3632,7 +3657,7 @@ export const loadDraftThunk = (data) => async (dispatch, getState) => {
         const state = getState().page;
         const { draftId, draftContentTypeId } = formDraftId(state.id);
         try {
-            const result = await readDraftInDB(draftId);
+            const result = await readDraftInDB(draftId, dispatch, getState);
             if (result.status === 'ok') {
                 const draft = result.data;
                 dispatch(loadDraft(draft));
@@ -3768,7 +3793,6 @@ export const saveContentThunk = (data) => async (dispatch, getState) => {
                         if (!itemKey) {
                             itemKey = generateNewItemKey();
                         }
-
                         keyEnvelope = encryptBinaryString(itemKey, workspaceKey);
                         if (state.contentType === "DrawingPage")
                             encryptedContent = encryptLargeBinaryString(encodedContent, itemKey);
@@ -4122,7 +4146,8 @@ export const uploadVideosThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, pageActivity.UploadVideos, () => {
         return new Promise(async (resolve, reject) => {
             state = getState().page;
-            if (!state.itemCopy) {
+            itemKey = state.itemKey;
+            if (!state.itemCopy && !itemKey) {
                 itemKey = generateNewItemKey();
                 dispatch(newItemKey({ itemKey }));
             }
@@ -4500,7 +4525,8 @@ export const uploadAudiosThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, pageActivity.UploadAudios, () => {
         return new Promise(async (resolve, reject) => {
             state = getState().page;
-            if (!state.itemCopy) {
+            itemKey = state.itemKey;
+            if (!state.itemCopy && !itemKey) {
                 itemKey = generateNewItemKey();
                 dispatch(newItemKey({ itemKey }));
             }
@@ -4795,7 +4821,8 @@ export const uploadImagesThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, pageActivity.UploadImages, () => {
         return new Promise(async (resolve, reject) => {
             state = getState().page;
-            if (!state.itemCopy) {
+            itemKey = state.itemKey;
+            if (!state.itemCopy && !itemKey) {
                 itemKey = generateNewItemKey();
                 dispatch(newItemKey({ itemKey }));
             }
@@ -5129,7 +5156,8 @@ export const uploadAttachmentsThunk = (data) => async (dispatch, getState) => {
     newActivity(dispatch, pageActivity.UploadAttachments, () => {
         return new Promise(async (resolve, reject) => {
             state = getState().page;
-            if (!state.itemCopy) {
+            itemKey = state.itemKey;
+            if (!state.itemCopy && !itemKey) {
                 itemKey = generateNewItemKey();
                 dispatch(newItemKey({ itemKey }));
             }

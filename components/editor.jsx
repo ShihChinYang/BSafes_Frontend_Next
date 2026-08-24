@@ -60,7 +60,6 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
     const dispatch = useDispatch();
 
     const editorRef = useRef(null);
-    const contentEditorRef = useRef(null);
     const monitorExcalidrawCallback = useRef();
     const bottomBarRectBottomRef = useRef();
 
@@ -133,42 +132,6 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                 break;
             case 'content':
                 setShowContentEditor(true);
-                if (0) {
-                    if (!itemKey) {
-                        const thisItemKey = generateNewItemKey();
-                        dispatch(newItemKey({ itemKey: thisItemKey }));
-                    }
-                    $(editorRef.current).html(content);
-                    const fullOptions = ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', 'lineHeight', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo', 'clearFormatting'];
-                    const minimumOptions = ['bold', 'italic', 'color', 'emoticons', 'paragraphFormat', 'fontFamily', 'formatOL', 'formatUL', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo'];
-
-                    const isMinimumOption = (window.innerWidth < 480);
-                    froalaOptions = {
-                        key: froalaKey,
-                        toolbarButtons: fullOptions,
-                        toolbarButtonsMD: fullOptions,
-                        toolbarButtonsSM: fullOptions,
-                        toolbarButtonsXS: isMinimumOption ? minimumOptions : fullOptions,
-                        fontFamily: {
-                            'Arial,Helvetica,sans-serif': 'Arial',
-                            "'Edu SA Beginner Variable', cursive": 'Edu SA Beginner',
-                            'Georgia,serif': 'Georgia',
-                            'Impact,Charcoal,sans-serif': 'Impact',
-                            "'Montserrat Variable', sans-serif": 'Montserrat',
-                            "'Noto Serif Variable', serif": 'Noto Serif',
-                            "'Oswald Variable', sans-serif": 'Oswald',
-                            "'Roboto Flex Variable', sans-serif": 'Roboto Flex',
-                            "'Times New Roman',Times,serif": 'Times New Roman',
-                            "'Dancing Script Variable', cursive": 'Dancing Script',
-                        },
-                        fontFamilySelection: false,
-                        tableStyles: {
-                            'fr-dashed-borders': 'Dashed Borders',
-                            'fr-alternate-rows': 'Alternate Rows',
-                            'fr-no-borders': 'No Borders'
-                        },
-                    };
-                }
                 return;
             default:
                 froalaOptions = {
@@ -320,9 +283,9 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
         if (editorOn) {
             if ((editorId !== 'content') || (contentType === "WritingPage")) {
                 if (editorId === 'content') {
-                    $(contentEditorRef.current).froalaEditor('destroy');
-                    $(contentEditorRef.current).html('');
-                    contentEditorRef.current.style.overflowX = 'auto';
+                    $(editorRef.current).froalaEditor('destroy');
+                    $(editorRef.current).html('');
+                    editorRef.current.style.overflowX = 'auto';
                     setShowContentEditor(false);
                 } else {
                     $(editorRef.current).froalaEditor('destroy');
@@ -448,7 +411,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                 const thisItemKey = generateNewItemKey();
                 dispatch(newItemKey({ itemKey: thisItemKey }));
             }
-            $(contentEditorRef.current).html(content);
+            $(editorRef.current).html(content);
             const fullOptions = ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', 'lineHeight', '|', 'color', 'emoticons', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', 'quote', 'insertHR', '-', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo', 'clearFormatting'];
             const minimumOptions = ['bold', 'italic', 'color', 'emoticons', 'paragraphFormat', 'fontFamily', 'formatOL', 'formatUL', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo'];
 
@@ -480,8 +443,8 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
             };
             froalaOptions.videoInsertButtons = ['videoBack', '|', 'videoUpload']
             froalaOptions.imageInsertButtons = ['imageBack', '|', 'imageUpload']
-            $(contentEditorRef.current).froalaEditor(froalaOptions);
-            contentEditorRef.current.style.overflowX = null;
+            $(editorRef.current).froalaEditor(froalaOptions);
+            editorRef.current.style.overflowX = null;
             if (!editorOn) {
                 debugLog(debugOn, "setEditorOn")
                 setEditorOn(true);
@@ -865,17 +828,29 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                             }
                         </div>
                     }
-                    {(editorId !== 'title' && (editorId !== 'content' || contentType === 'WritingPage') && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
+
+                    {(editorId === 'content' && contentType === 'WritingPage' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div className="px-2">
                             <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                                 {!showContentEditor && <div className="inner-html" style={{ overflowX: 'auto' }}>
                                     {content && parse(content)}
                                 </div>}
-                                {showContentEditor && <div id='contentEditor' className="inner-html" ref={contentEditorRef} style={{ overflowX: 'auto' }}>
+                                {showContentEditor && <div id='contentEditor' className="inner-html" ref={editorRef} style={{ overflowX: 'auto' }}>
                                 </div>}
                             </Row>
                         </div>
                     }
+
+                    {(editorId !== 'title' && editorId !== 'content' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
+                        <div className="px-2">
+                            <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
+                                {true && <div className="inner-html" style={{ overflowX: 'auto' }}>
+                                    {content && parse(content)}
+                                </div>}
+                            </Row>
+                        </div>
+                    }
+
                     {editorId === 'content' && contentType === 'DrawingPage' &&
                         <>
                             {(mode == 'Writing' || mode === 'Saving' || mode === "GeneratingDrawingImage") ?

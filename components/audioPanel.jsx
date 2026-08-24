@@ -16,7 +16,7 @@ import { LoaderSpinner } from './loaderSpinner'
 import { uploadAudiosThunk, deleteAnAudioThunk } from '../reduxStore/pageSlice'
 import { debugLog } from '../lib/helper';
 
-export default function AudioPanel({ panelIndex, panel, onAudioClicked, editorMode, onContentChanged, onPenClicked, editable = true }) {
+export default function AudioPanel({ panelIndex, panel, onAudioClicked, editorMode, onContentChanged, readOnlyModeReady=null, onPenClicked, editable = true }) {
     const debugOn = false;
     const dispatch = useDispatch();
 
@@ -130,7 +130,7 @@ export default function AudioPanel({ panelIndex, panel, onAudioClicked, editorMo
             <Row className="pt-2">
                 <Col xs={8} sm={9}>
                     <div className="m-1">
-                        <Editor editorId={panelIndex} showWriteIcon={true} mode={editorMode} content={panel.words} onContentChanged={onContentChanged} showPen={false} editable={editable} hideIfEmpty={true} />
+                        <Editor editorId={panelIndex} showWriteIcon={true} mode={editorMode} content={panel.words} onContentChanged={onContentChanged} readOnlyModeReady={readOnlyModeReady} showPen={false} editable={editable} hideIfEmpty={true} />
                     </div>
                 </Col>
                 <Col xs={4} sm={3} className="p-0">

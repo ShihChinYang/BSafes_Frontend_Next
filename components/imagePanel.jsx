@@ -13,7 +13,7 @@ import Editor from './editor'
 import { uploadImagesThunk, deleteAnImageThunk } from '../reduxStore/pageSlice'
 import { debugLog } from '../lib/helper';
 
-export default function ImagePanel({panelIndex, panel, onImageClicked, editorMode, onContentChanged, onPenClicked, editable=true}) {
+export default function ImagePanel({panelIndex, panel, onImageClicked, editorMode, onContentChanged, readOnlyModeReady = null, onPenClicked, editable=true}) {
     const debugOn = false;
     const dispatch = useDispatch();
     const imageFilesInputRef = useRef(null);
@@ -73,7 +73,7 @@ export default function ImagePanel({panelIndex, panel, onImageClicked, editorMod
             <Row>
                 <Col xs={8} sm={9}>
                     <div className="pt-2">
-                        <Editor editorId={panelIndex} showWriteIcon={true} mode={editorMode} content={panel.words} onContentChanged={onContentChanged} showPen={false} editable={editable} hideIfEmpty={true} />
+                        <Editor editorId={panelIndex} showWriteIcon={true} mode={editorMode} content={panel.words} onContentChanged={onContentChanged} readOnlyModeReady={readOnlyModeReady} showPen={false} editable={editable} hideIfEmpty={true} />
                     </div>   
                 </Col>
                 <Col xs={4} sm={3} className="p-0">
