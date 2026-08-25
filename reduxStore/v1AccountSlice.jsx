@@ -342,7 +342,7 @@ export const signOutAsyncThunk = (data) => async (dispatch, getState) => {
                 debugLog(debugOn, "lock failed: ", error)
                 reject('Failed to sign out.');
             }) 
-            clearLocalData();
+            await clearLocalDataAndIndexDB();
             dispatch(cleanMemoryThunk());
         })
     })

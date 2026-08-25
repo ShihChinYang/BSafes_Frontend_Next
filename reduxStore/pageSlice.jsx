@@ -2121,6 +2121,15 @@ export const getPageItemThunk = (data) => async (dispatch, getState) => {
                             } else {
                                 dispatch(setGetPageContentDone(true));
                             }
+                            const { draftId, draftContentTypeId } = formDraftId(data.itemId);
+                            const response = await readDraftInDB(draftId, dispatch, getState);
+                            if (response.status === 'ok') {
+                                const draft = response.data;
+                                const draftContentType = localStorage.getItem(draftContentTypeId);
+                                if (draft) {
+                                    dispatch(setDraft({ draft, draftContentType }));
+                                }
+                            }
                             dispatch(setCheckingLatest(false));
                             PostCall({
                                 api: '/memberAPI/updateLastAccessedPage',

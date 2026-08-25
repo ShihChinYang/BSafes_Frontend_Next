@@ -466,9 +466,10 @@ export const recoverMFAThunk = (data) => async (dispatch, getState) => {
     });
 }
 
-function clearIndexDB() {
+export function clearLocalDataAndIndexDB() {
     return new Promise(async (resolve, reject) => {
-        debugLog(debugOn, "clearIndexDB");
+        debugLog(debugOn, "clearLocalDataAndIndexDB");
+        clearLocalData();
         navigator.serviceWorker.getRegistration("/").then((registration) => {
             debugLog(debugOn, "registration: ", registration);
             if (registration) {
@@ -476,6 +477,7 @@ function clearIndexDB() {
                 registration.active.postMessage({
                     type: 'DELETE_DB'
                 }, [messageChannel.port2]);
+                resolve();
             } else {
                 debugLog(debugOn, "serviceWorker.getRegistration error");
                 reject("serviceWorker.getRegistration error")
@@ -504,9 +506,8 @@ export const logOutAsyncThunk = (data) => async (dispatch, getState) => {
                     reject("Failed to log out.");
                 })
             }
-            clearLocalData();
             try {
-                await clearIndexDB();
+                await clearLocalDataAndIndexDB();
             } catch (error) {
             }
             dispatch(loggedOut());
@@ -555,9 +556,9 @@ export const preflightAsyncThunk = (data) => async (dispatch, getState) => {
                 dispatch
             };
             if (data && data.action) params.body = { action: data.action };
-            PostCall(params).then(data => {
+            PostCall(params).then(async data => {
                 debugLog(debugOn, data);
-                processPreflightResponse(data, dispatch);
+                await processPreflightResponse(data, dispatch);
                 resolve();
             }).catch(error => {
                 debugLog(debugOn, "woo... preflight failed.");

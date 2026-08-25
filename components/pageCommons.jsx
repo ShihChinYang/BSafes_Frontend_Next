@@ -523,10 +523,7 @@ export default function PageCommons() {
             setEditingEditorMode("ReadOnly");
             setEditingEditorId(null);
             setWritingContentState("idle");
-            if (!draft && !contentEditorContent) {
-                dispatch(setContentType(""))
-            }
-            if(draftLoaded) {
+            if (draftLoaded) {
                 dispatch(setContent(contentBeforeLoadingDraft));
                 setContentBeforeLoadingDraft(null);
             }
@@ -746,6 +743,9 @@ export default function PageCommons() {
     }
 
     const handleContentReadOnlyModeReady = (e) => {
+        if (!draft && !contentEditorContent) {
+            dispatch(setContentType(""))
+        }
         if (draftLoaded) {
             dispatch(setDraftLoaded(false));
         }
@@ -773,7 +773,7 @@ export default function PageCommons() {
     useEffect(() => {
         if (activity === 0) {
             if (editingEditorId) {
-                if(editingEditorId === 'content') setContent(contentToBeSaved);
+                if (editingEditorId === 'content') setContent(contentToBeSaved);
                 setEditingEditorMode("ReadOnly");
             }
         } else if (activity === "Error") {

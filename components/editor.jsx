@@ -844,9 +844,9 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                     {(editorId !== 'title' && editorId !== 'content' && ((mode === 'Writing' || mode === 'Saving') || mode === 'ReadOnly' || !(hideIfEmpty && (!content || content.length === 0)))) &&
                         <div className="px-2">
                             <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
-                                {true && <div className="inner-html" style={{ overflowX: 'auto' }}>
+                                <div className="inner-html" ref={editorRef} style={{ overflowX: 'auto' }}>
                                     {content && parse(content)}
-                                </div>}
+                                </div>
                             </Row>
                         </div>
                     }
