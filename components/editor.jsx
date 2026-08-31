@@ -156,6 +156,9 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
             const result = preProcessWritingContent(contentSample);
             setOriginalContent(result.content);
         }
+        setTimeout(() => {
+            $(editorRef.current).froalaEditor('events.focus', true);
+        }, 500);
     }
 
     const drawing = () => {

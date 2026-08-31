@@ -41,6 +41,7 @@ import { resetV1AccountActivity } from '../../reduxStore/v1AccountSlice';
 import { updateLocalBackupThunk, updateStatusBarMessageThunk } from '../../reduxStore/localBackupSlice';
 
 import { setNextAuthStep, lockAsyncThunk, signOutAsyncThunk, signedOut } from '../../reduxStore/v1AccountSlice';
+import BackButtonWorker from '../BackButtonWorker';
 
 const hideFunction = (process.env.NEXT_PUBLIC_functions.indexOf('hide') !== -1)
 
@@ -233,10 +234,10 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     const localSessionStateChanged = () => {
         debugLog(debugOn, `localSessionStateChanged(): preflightReady:${preflightReady}, state: ${JSON.stringify(localSessionState)}, isLoggedIn:${isLoggedIn}`);
 
+        const path = router.asPath;
         if (preflightReady && localSessionState.sessionExists) {
             if (localSessionState.unlocked) {
                 if (isLoggedIn) {
-                    const path = router.asPath;
                     if (checkIfPublicOrAuthPages(path)) {
                         if (accountVersion === 'v1') {
                             changePage('/teams');
@@ -303,6 +304,9 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                     } else {
                         goLogin();
                     }
+                   
+                } else if (checkIfPublicOrAuthPages(path)) {
+                    // Do nothing now
                 } else {
                     const storedNickname = getNickname();
                     if (storedNickname) {
@@ -498,6 +502,8 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     return (
         <div>
+            <BackButtonWorker/>
+
             {(generateDrawingSnapshot || (accountActivity !== 0) || (authActivity !== 0) || (v1AccountActivity !== 0) || (teamsActivity !== 0) || (containerActivity !== 0) || (pageActivity !== 0) || (iOSActivity !== 0)) &&
                 <div className={BSafesStyle.screenBottomLeft}>
                     <Blocks
