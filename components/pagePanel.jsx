@@ -6,6 +6,7 @@ import PageCommons from "./pageCommons";
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 import { products } from '../lib/productID';
+import { isTwinPaper } from '../lib/twinPaperAppTheme';
 
 export default function PagePanel() {
     const itemId = useSelector(state => state.page.id);
@@ -18,7 +19,7 @@ export default function PagePanel() {
         theProduct = products[productId];
     }
     let pagePanelStyle = "";
-    if ((productId === "")) {
+    if ((productId === "") || (theProduct.fixedSize === undefined) || isTwinPaper) {
         pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesStyle.pagePanel} ${pageStyle}`;
     } else {
         pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_PagePanel`] || BSafesProductsStyle[`_PagePanelGeneral`]} ${pageStyle}`;

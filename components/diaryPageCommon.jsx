@@ -10,6 +10,7 @@ import format from "date-fns/format";
 import isSameDay from "date-fns/isSameDay";
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../lib/twinPaperAppTheme';
 
 import Scripts from "./scripts";
 import ContentPageLayout from './layouts/contentPageLayout';
@@ -38,6 +39,8 @@ export default function DiaryPageCommon({ demo = false }) {
 
     const pageItemId = useSelector(state => state.page.id);
     const pageStyle = useSelector(state => state.page.style);
+
+    useTwinPaperAppThemeBody();
 
     const product = demo ? DiaryDemo : 'diary';
     const gotoAnotherDate = (anotherDate) => {
@@ -122,7 +125,7 @@ export default function DiaryPageCommon({ demo = false }) {
     }, [router.query.itemId]);
 
     return (
-        <div className={BSafesStyle.pageBackground}>
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.pageBackground}>
             <ContentPageLayout>
                 <PageItemWrapper itemId={router.query.itemId}>
                     <br />

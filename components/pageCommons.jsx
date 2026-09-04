@@ -28,6 +28,7 @@ import { setIOSActivity, updateContentImagesDisplayIndex, downloadVideoThunk, se
 import { debugLog, getDataURLFromFile } from '../lib/helper';
 import { products, productIdDelimiter } from "../lib/productID";
 import { prepareTwinPaperDraft } from "../lib/twinPaper";
+import { isTwinPaper } from "../lib/twinPaperAppTheme";
 import { set } from "date-fns";
 
 export default function PageCommons() {
@@ -1117,8 +1118,9 @@ export default function PageCommons() {
                                 <input ref={videoFilesInputRef} onChange={handleVideoFiles} type="file" accept="video/*" multiple className="d-none editControl" id="videos" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
                                     <Col id="videos" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} xs={{ span: 10, offset: 1 }} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.videosDragDropZoneActive : BSafesStyle.videosDragDropZone}`}>
-                                        <Button id="videos" onClick={handleVideoButton} variant="link" className="text-dark btn btn-labeled">
+                                        <Button id="videos" onClick={handleVideoButton} variant="link" className="text-dark btn btn-labeled tw-dropzone-btn">
                                             <h4><i id="videos" className="fa fa-video-camera fa-lg" aria-hidden="true"></i></h4>
+                                            {isTwinPaper && <span className="tw-dropzone-label">Video</span>}
                                         </Button>
                                     </Col>
                                 </div>
@@ -1135,8 +1137,9 @@ export default function PageCommons() {
                                 <input ref={imageFilesInputRef} onChange={handleImageFiles} type="file" multiple accept="image/*" className="d-none editControl" id="images" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
                                     <Col id="images" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} xs={{ span: 10, offset: 1 }} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${imagesDragActive ? BSafesStyle.imagesDragDropZoneActive : BSafesStyle.imagesDragDropZone}`}>
-                                        <Button id="images" onClick={handleImageButton} variant="link" className="text-dark btn btn-labeled">
+                                        <Button id="images" onClick={handleImageButton} variant="link" className="text-dark btn btn-labeled tw-dropzone-btn">
                                             <h4><i id="images" className="fa fa-picture-o fa-lg" aria-hidden="true"></i></h4>
+                                            {isTwinPaper && <span className="tw-dropzone-label">Photo</span>}
                                         </Button>
                                     </Col>
                                 </div>
@@ -1153,8 +1156,9 @@ export default function PageCommons() {
                                 <input ref={audioFilesInputRef} onChange={handleAudioFiles} type="file" accept="audio/*" multiple className="d-none editControl" id="audios" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
                                     <Col id="audios" onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} xs={{ span: 10, offset: 1 }} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${videosDragActive ? BSafesStyle.audiosDragDropZoneActive : BSafesStyle.audiosDragDropZone}`}>
-                                        <Button id="audios" onClick={handleAudioButton} variant="link" className="text-dark btn btn-labeled">
-                                            <h4><i id="audios" className="fa fa-volume-up fa-lg" aria-hidden="true"></i></h4>
+                                        <Button id="audios" onClick={handleAudioButton} variant="link" className="text-dark btn btn-labeled tw-dropzone-btn">
+                                            <h4><i id="audios" className="fa fa-microphone fa-lg" aria-hidden="true"></i></h4>
+                                            {isTwinPaper && <span className="tw-dropzone-label">Audio</span>}
                                         </Button>
                                     </Col>
                                 </div>
@@ -1171,8 +1175,9 @@ export default function PageCommons() {
                                 <input ref={attachmentsInputRef} onChange={handleAttachments} type="file" multiple className="d-none editControl" id="attachments" />
                                 <div className={product.fixedSize ? `${BSafesProductsStyle[`${productId}_RowXMargins`]}` : "row"}>
                                     <Col id="attachments" onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop} xs={{ span: 10, offset: 1 }} sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }} className={`text-center ${attachmentsDragActive ? BSafesStyle.attachmentsDragDropZoneActive : BSafesStyle.attachmentsDragDropZone}`}>
-                                        <Button id="attachments" onClick={handleAttachmentButton} variant="link" className="text-dark btn btn-labeled">
+                                        <Button id="attachments" onClick={handleAttachmentButton} variant="link" className="text-dark btn btn-labeled tw-dropzone-btn">
                                             <h4><i id="attachments" className="fa fa-paperclip fa-lg" aria-hidden="true"></i></h4>
+                                            {isTwinPaper && <span className="tw-dropzone-label">File</span>}
                                         </Button>
                                     </Col>
                                 </div>

@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../lib/twinPaperAppTheme';
 
 import Scripts from "./scripts";
 import ContentPageLayout from './layouts/contentPageLayout';
@@ -34,6 +35,8 @@ export default function NotebookPageCommon({demo=false}) {
     debugLog(debugOn, "pageNumber: ", pageNumber);
 
     const containerInWorkspace = useSelector( state => state.container.container);
+
+    useTwinPaperAppThemeBody();
 
     const product = demo?NotebookDemo:'notebook';
     function gotoAnotherPage (anotherPageNumber) {
@@ -112,8 +115,8 @@ export default function NotebookPageCommon({demo=false}) {
     }
     
     return (
-        <div className={BSafesStyle.pageBackground}>
-            <ContentPageLayout>            
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.pageBackground}>
+            <ContentPageLayout>
                 <PageItemWrapper itemId={router.query.itemId}>
                     <br />
                     <TopControlPanel pageNumber={pageNumber} onCoverClicked={handleCoverClicked} onContentsClicked={handleContentsClicked} onPageNumberChanged={handlePageNumberChanged} onGotoFirstItem={handleGoToFirstItem} onGotoLastItem={handleGoToLastItem}></TopControlPanel>

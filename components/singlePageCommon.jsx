@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import Button from 'react-bootstrap/Button'
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../lib/twinPaperAppTheme';
 
 import Scripts from "./scripts";
 import ContentPageLayout from './layouts/contentPageLayout';
@@ -34,6 +35,8 @@ export default function SinglePageCommon({demo=false}) {
     const dispatch = useDispatch();
 
     const [endOfContainer, setEndOfContainer] = useState(false);
+
+    useTwinPaperAppThemeBody();
 
     const changingPage = useSelector(state => state.page.changingPage);
     const pageItemId = useSelector(state => state.page.id);
@@ -131,7 +134,7 @@ export default function SinglePageCommon({demo=false}) {
     debugLog(debugOn, "router.query.itemId: ", router.query.itemId);
 
     return (
-        <div className={BSafesStyle.pageBackground}>
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.pageBackground}>
             <ContentPageLayout>
                 <PageItemWrapper itemId={router.query.itemId}>
                     <br />

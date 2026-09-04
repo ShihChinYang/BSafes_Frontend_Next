@@ -12,6 +12,7 @@ import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 
 import { products } from '../lib/productID';
+import { isTwinPaper } from '../lib/twinPaperAppTheme';
 
 export default function DiaryPagePanel({pageStyle="", distance="", pageDate}) {
     const contentType = useSelector(state => state.page.contentType) || 'WritingPage';
@@ -22,7 +23,7 @@ export default function DiaryPagePanel({pageStyle="", distance="", pageDate}) {
         theProduct = products[productId];
     }
     let pagePanelStyle = "";
-    if ((productId === "") || theProduct.fixedSize === undefined) {
+    if ((productId === "") || theProduct.fixedSize === undefined || isTwinPaper) {
         pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesStyle.pagePanel}`;
     } else {
         pagePanelStyle = (contentType === 'DrawingPage' && contentEditorMode === "Writing") ? "" : `${BSafesProductsStyle[`${productId}_General`] || BSafesProductsStyle[`_General`]} ${BSafesProductsStyle[`${productId}_PagePanel`]} ${pageStyle}`;

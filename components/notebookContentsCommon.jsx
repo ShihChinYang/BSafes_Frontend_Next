@@ -7,6 +7,7 @@ import Col from 'react-bootstrap/Col'
 
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../lib/twinPaperAppTheme';
 
 import ContentPageLayout from './layouts/contentPageLayout';
 import PageItemWrapper from "./pageItemWrapper";
@@ -28,6 +29,8 @@ export default function NotebookContentsCommon({ demo = false }) {
     const router = useRouter();
 
     const [searchValue, setSearchValue] = useState(null);
+
+    useTwinPaperAppThemeBody();
 
     const workspace = useSelector( state => state.container.workspace);
     const containerInWorkspace = useSelector(state => state.container.container);
@@ -162,7 +165,7 @@ export default function NotebookContentsCommon({ demo = false }) {
     }, [pageNumber]);
 
     return (
-        <div className={BSafesStyle.pageBackground}>
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.pageBackground}>
             <ContentPageLayout>
                 <PageItemWrapper itemId={router.query.itemId}>
                     <br />
@@ -173,7 +176,7 @@ export default function NotebookContentsCommon({ demo = false }) {
                             <div className={`${panelStyle}`}>
                                 <br />
                                 <br />
-                                <p className='fs-1 text-center'>Contents</p>
+                                <p className='fs-1 text-center tw-contents-title'>Contents</p>
                                 <Row>
                                     <Col xs={{ span: 2, offset: 1 }} sm={{ span: 2, offset: 1 }}>
                                         <p className="fs-5">Page</p>

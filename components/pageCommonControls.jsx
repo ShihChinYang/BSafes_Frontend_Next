@@ -7,6 +7,7 @@ import Popover from 'react-bootstrap/Popover';
 import BSafesStyle from '../styles/BSafes.module.css'
 
 import { saveTipsSetting, getTipsSetting } from '../lib/helper';
+import { isTwinPaper } from '../lib/twinPaperAppTheme';
 
 export default function PageCommonControls({ showWriteBtn = true, isEditing, onWrite, readyForSaving = true, onSave, onCancel, canEdit = true }) {
     const contentType = useSelector(state => state.page.contentType) || 'WritingPage';
@@ -53,7 +54,7 @@ export default function PageCommonControls({ showWriteBtn = true, isEditing, onW
 
     return (
         <>
-            {(showWriteBtn && canEdit && !isEditing) ? <Button onClick={onWrite} className={`${BSafesStyle.btnCircle} ${BSafesStyle.btnFloating} ${BSafesStyle.btnFloatingWrite}`}>
+            {(showWriteBtn && canEdit && !isEditing && !isTwinPaper) ? <Button onClick={onWrite} className={`${BSafesStyle.btnCircle} ${BSafesStyle.btnFloating} ${BSafesStyle.btnFloatingWrite}`}>
                 {contentType === "DrawingPage" ?
                     <i className="fa fa-paint-brush fa-2x" aria-hidden="true"></i>
                     :

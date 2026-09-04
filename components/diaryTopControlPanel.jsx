@@ -16,6 +16,7 @@ import FeatureNotAvailableForDemoToast from "./featureNotAvailabeForDemoToast";
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
 import { products } from '../lib/productID';
+import { isTwinPaper } from '../lib/twinPaperAppTheme';
 
 export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", startDate, setStartDate, showListIcon = false, showSearchIcon = false, handleSearch, onCoverClicked, onContentsClicked, onSubmitSearch = null, onCancelSearch = null }) {
     const router = useRouter();
@@ -31,7 +32,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
     }
     let controlPanelStyle = "";
     let searchPanelStyle = "";
-    if ((productId === "") || theProduct.fixedSize === undefined) {
+    if ((productId === "") || theProduct.fixedSize === undefined || isTwinPaper) {
         controlPanelStyle = BSafesStyle.containerControlPanel;
         searchPanelStyle = BSafesStyle.containerSearchPanel;
     } else {
@@ -84,7 +85,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
                 <FeatureNotAvailableForDemoToast show={showFeatureNotAvailableForDemoToast} message="The Search feature is not available for demo!" handleClose={() => { setShowFeatureNotAvailableForDemoToast(false) }} />
                 <Row>
                     <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
-                        <Card className={controlPanelStyle}>
+                        <Card className={`${controlPanelStyle} tw-navbar-card`}>
                             <Card.Body className={BSafesStyle.diaryControlPanelBody}>
                                 <Row>
                                     <Col xs={4}>

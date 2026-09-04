@@ -19,11 +19,12 @@ import jquery from "jquery"
 import BSafesStyle from '../styles/BSafes.module.css'
 
 import { getEditorConfig, newResultItem } from "../lib/bSafesCommonUI";
-import { debugLog, PostCall, convertUint8ArrayToBinaryString, getBrowserInfo, arraryBufferToStr } from "../lib/helper";
+import { debugLog, PostCall, convertUint8ArrayToBinaryString, getBrowserInfo, arraryBufferToStr, getTipsSetting, saveTipsSetting } from "../lib/helper";
 import { putS3Object } from "../lib/s3Helper";
 import { generateNewItemKey, compareArraryBufferAndUnit8Array, encryptBinaryString, encryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync } from "../lib/crypto";
 import { rotateImage, downScaleImage } from '../lib/wnImage';
 import { products } from "../lib/productID";
+import { isTwinPaper } from "../lib/twinPaperAppTheme";
 
 import { newItemKey, putS3ObjectInServiceWorkerDB, setInitialContentRendered, setPageCommonControlsBottom, saveAFileThunk, setDrawingTemplateImage, setDraftInterval, preProcessWritingContent } from "../reduxStore/pageSlice";
 import { setEditorScriptsLoaded } from "../reduxStore/scriptsSlice";
@@ -87,6 +88,8 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
     const [needToUpdatePageCommonControls, setNeedToUpdatePageCommonControls] = useState(false);
     const [showTwinTip, setShowTwinTip] = useState(false);
     const [showContentEditor, setShowContentEditor] = useState(false);
+    const [showTwinCaptureTip, setShowTwinCaptureTip] = useState(false);
+    const [isTwinCaptureHovered, setIsTwinCaptureHovered] = useState(false);
     debugLog(debugOn, "Rendering editor, id,  mode: ", `${editorId} ${mode}`);
 
     let product = {};
@@ -97,6 +100,22 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
     const handleTwinTipToggle = (nextShow) => {
         setShowTwinTip(nextShow);
     };
+
+    const handleGotTwinCaptureTip = () => {
+        let tipsSetting = JSON.parse(getTipsSetting());
+        if (!tipsSetting) tipsSetting = {};
+        tipsSetting.twinCapture = true;
+        saveTipsSetting(JSON.stringify(tipsSetting));
+        setShowTwinCaptureTip(false);
+    }
+
+    useEffect(() => {
+        if (isTwinPaper && editorId === 'content' && !content) {
+            let tipsSetting = JSON.parse(getTipsSetting());
+            if (!tipsSetting) tipsSetting = {};
+            if (!tipsSetting.twinCapture) setShowTwinCaptureTip(true);
+        }
+    }, [editorId, content])
 
     const updatePageCommonControlsBottom = () => {
         if (!window || !document || !ExcalidrawRef.current) return;
@@ -739,6 +758,12 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
         }
         dispatch(saveAFileThunk({ attachment }));
     }
+
+    // Twin Paper only: while the content editor is empty (the very first page),
+    // the Twin button moves out of the small icon row and becomes a centered,
+    // larger call-to-action with a one-time tip.
+    const centerTwinCapture = isTwinPaper && editorId === 'content' && showTwinIcon && !content;
+
     return (
         <>
             {scriptsLoaded ?
@@ -770,7 +795,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                                                 </Tooltip>
                                             )}
                                         ><Button id="draw-1" variant="link" className="text-dark p-0 mx-3" onClick={handlePenClicked.bind(null, 'excalidraw')}><i className="fa fa-paint-brush" aria-hidden="true"></i></Button></OverlayTrigger> </span>}
-                                        {editorId === "content" && showTwinIcon && <span className='pull-right'><OverlayTrigger
+                                        {editorId === "content" && showTwinIcon && !centerTwinCapture && <span className='pull-right'><OverlayTrigger
                                             placement="top"
                                             show={showTwinTip}
                                             onToggle={handleTwinTipToggle}
@@ -793,6 +818,31 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                                     }
                                 </Col>
                             </Row>
+                            {centerTwinCapture &&
+                                <Row className="justify-content-center">
+                                    <Col
+                                        xs="auto"
+                                        className="text-center tw-twin-capture-wrap"
+                                        onMouseEnter={() => setIsTwinCaptureHovered(true)}
+                                        onMouseLeave={() => setIsTwinCaptureHovered(false)}
+                                    >
+                                        {(showTwinCaptureTip || isTwinCaptureHovered) &&
+                                            <div className="tw-twin-tip">
+                                                <div className="tw-twin-tip-header">
+                                                    <strong>Capture your first page</strong>
+                                                    <button type="button" className="tw-twin-tip-close" onClick={handleGotTwinCaptureTip} aria-label="Close">
+                                                        <i className="fa fa-times" aria-hidden="true"></i>
+                                                    </button>
+                                                </div>
+                                                <p className="tw-twin-tip-body">Tap the Twin button to capture your paper page.</p>
+                                            </div>
+                                        }
+                                        <button type="button" className="tw-twin-capture-btn" onClick={handlePenClicked.bind(null, 'twin')} aria-label="Capture with Twin Paper">
+                                            <img src="/images/twinPaper.png" alt="Twin Paper" />
+                                        </button>
+                                    </Col>
+                                </Row>
+                            }
                         </>
                         :
                         <>{editorId === 'content' ?

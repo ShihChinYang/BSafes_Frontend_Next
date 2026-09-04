@@ -1,8 +1,9 @@
 /* ============================================================================
    Shared Twin Paper theme for the authenticated "workspace" pages — currently
-   /safe and /team/[teamId] — and every component they render (ContentPageLayout,
-   Workspace, ItemCard, ItemPath, ItemsToolbar, modals, …). One stylesheet: a
-   tweak here changes every page that opts in.
+   /safe, /team/[teamId] and /page/[itemId] — and every component they render
+   (ContentPageLayout, Workspace, ItemCard, ItemPath, ItemsToolbar, modals,
+   SinglePageCommon and its page/editor panels …). One stylesheet: a tweak
+   here changes every page that opts in.
 
    Opt in from a page (see lib/twinPaperAppTheme.js):
      - put `tw-app-theme` + the next/font variable classes on the page wrapper
@@ -56,6 +57,25 @@
   --tw-itemstoolbar-bg: var(--tw-navy);
   --tw-itempath-bg: var(--tw-paper-2);
   --tw-item-link-color: var(--tw-navy);
+
+  /* Single page view (components/singlePageCommon.jsx, pagePanel.jsx,
+     topControlPanel.jsx, pageCommons.jsx, turningPageControls.jsx). */
+  --tw-page-panel-bg: var(--tw-card);
+  --tw-page-panel-border: 1px solid var(--tw-card-border);
+  --tw-page-panel-radius: 16px;
+  --tw-page-panel-shadow: 0 1px 2px rgba(26, 29, 37, 0.05), 0 8px 18px rgba(26, 29, 37, 0.08);
+  --tw-control-panel-bg: var(--tw-navy);
+  --tw-search-panel-bg: var(--tw-card);
+  --tw-page-btn-color: var(--tw-navy);
+  --tw-page-btn-hover-color: var(--tw-orange-ink);
+  --tw-dropzone-border: var(--tw-border);
+  --tw-dropzone-active-bg: var(--tw-card);
+  --tw-dropzone-video-bg: var(--tw-paper-2);
+  --tw-dropzone-image-bg: var(--tw-paper-2);
+  --tw-dropzone-audio-bg: var(--tw-paper-2);
+  --tw-dropzone-attachment-bg: var(--tw-paper-2);
+  --tw-dropzone-gap: 6px;
+  --tw-dropzone-br-display: none;
 
   /* --- Bootstrap globals --- */
   --bs-body-bg: var(--tw-ground);
@@ -144,6 +164,15 @@ body.tw-app-theme .navbar {
 }
 .tw-app-theme .card .card:hover { transform: none; }
 .tw-app-theme .card-title { font-family: var(--tw-font-display); color: var(--tw-navy); }
+
+/* The top navigation bar (containerControlPanel, components/topControlPanel.jsx
+   and diaryTopControlPanel.jsx) is itself a .card — opt it out of the generic
+   card hover lift/orange-border treatment above. */
+.tw-app-theme .card.tw-navbar-card:hover {
+  border-color: var(--bs-card-border-color);
+  box-shadow: 0 1px 2px rgba(26, 29, 37, 0.05), 0 8px 18px rgba(26, 29, 37, 0.08);
+  transform: none;
+}
 
 /* Workspace / teams item list: one seamless stack, no gaps between rows.
    `.tw-item-list` wraps the mapped ItemCard / ProductCard / TeamCard <Card>s
@@ -322,11 +351,17 @@ body.tw-app-theme .tw-title-modal .modal-body {
   padding: 24px 26px 20px;
 }
 body.tw-app-theme .tw-title-modal .tw-title-prompt {
-  margin: 0 0 16px;
+  margin: 0 0 6px;
   font-family: var(--tw-font-display);
   font-size: 1.7rem;
   line-height: 1.1;
   color: var(--tw-navy);
+}
+body.tw-app-theme .tw-title-modal .tw-title-subtitle {
+  margin: 0 0 16px;
+  font-family: var(--tw-font-serif);
+  color: var(--tw-muted);
+  font-size: 0.95rem;
 }
 /* The field is a bottom rule, not a box — same treatment as the workspace search. */
 body.tw-app-theme .tw-title-modal .tw-title-input {
@@ -440,6 +475,117 @@ body.tw-app-theme .modal {
   --bs-modal-footer-border-color: var(--tw-border);
 }
 
+/* --- Notebook navigation bar (components/topControlPanel.jsx). Three zones
+   — cover/contents, a page-jump, first/last/search/info — separated by
+   hairline dividers, replacing the plain left/right icon rows used
+   everywhere else TopControlPanel renders. A grid (rather than flex with
+   justify-content:space-between) is used so the outer two groups get equal
+   `1fr` tracks regardless of how many icons each holds — that's what keeps
+   the page-jump group genuinely centered on the bar, not just centered
+   within whatever space happens to be left over. */
+.tw-app-theme .tw-notebook-toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto 1fr;
+  align-items: center;
+  gap: 2px;
+}
+.tw-app-theme .tw-notebook-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.tw-app-theme .tw-notebook-toolbar-group:first-child {
+  justify-self: start;
+}
+.tw-app-theme .tw-notebook-toolbar-group:last-child {
+  justify-self: end;
+}
+.tw-app-theme .tw-notebook-toolbar-jump {
+  justify-self: center;
+  gap: 8px;
+}
+.tw-app-theme .tw-notebook-toolbar-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 8px 2px;
+  background-color: rgba(255, 255, 255, 0.14);
+}
+.tw-app-theme .tw-notebook-page-input {
+  width: 60px;
+  height: 34px;
+  padding: 0;
+  text-align: center;
+  background-color: var(--tw-paper);
+  border: 1px solid var(--tw-border);
+  border-radius: 9px;
+  color: var(--tw-ink);
+  font-family: var(--tw-font-body);
+  font-weight: 500;
+}
+.tw-app-theme .tw-notebook-page-input:focus {
+  background-color: var(--tw-card);
+  border-color: var(--tw-orange);
+  box-shadow: none;
+  color: var(--tw-ink);
+}
+
+/* "Page navigation" help (components/topControlPanel.jsx, notebook nav bar
+   only) — an icon-chip row list, the same language as .tw-type-modal below. */
+body.tw-app-theme .tw-navhelp-modal .modal-header {
+  border-bottom: 0;
+  padding-bottom: 4px;
+}
+body.tw-app-theme .tw-navhelp-title {
+  font-family: var(--tw-font-serif);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--tw-navy);
+}
+body.tw-app-theme .tw-navhelp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+body.tw-app-theme .tw-navhelp-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 4px;
+}
+body.tw-app-theme .tw-navhelp-icon {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--tw-navy);
+  background: var(--tw-paper-2);
+  border-radius: 11px;
+}
+body.tw-app-theme .tw-navhelp-text {
+  color: var(--tw-muted);
+  font-family: var(--tw-font-serif);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+body.tw-app-theme .tw-navhelp-text strong {
+  color: var(--tw-navy);
+  font-family: var(--tw-font-body);
+  font-weight: 600;
+}
+
+/* Notebook contents listing (components/notebookContentsCommon.jsx). "Contents"
+   is a plain <p> (not a heading), so it misses the generic h1-h6 rule above —
+   give it the same display serif treatment as other page titles. */
+.tw-app-theme .tw-contents-title {
+  font-family: var(--tw-font-display);
+  font-weight: 400;
+  color: var(--tw-navy);
+  letter-spacing: -0.01em;
+}
+
 /* --- Offcanvas (v2 services menu) --- */
 body.tw-app-theme .offcanvas {
   --bs-offcanvas-bg: var(--tw-paper);
@@ -550,4 +696,162 @@ body.tw-app-theme .tw-type-modal .tw-type-item::after {
   font-size: 1.5rem;
   line-height: 1;
   font-weight: 300;
+}
+
+/* --- Single page view (pages/page/[itemId].jsx -> components/singlePageCommon.jsx).
+   The "paper", top control bar and turning-page arrows are styled here via the
+   --tw-page-* / --tw-control-panel-* / --tw-search-panel-* tokens set above and
+   consumed by styles/BSafes.module.css (.pagePanel, .containerControlPanel,
+   .containerSearchPanel, .pageBtnFixed / .coverBtnFixed, .pageCommonsExtension,
+   the *DragDropZone classes). Third-party, non-module classes are themed
+   directly below. --- */
+
+/* Tags row (components/itemTopRows.jsx) — react-tagsinput-special, a plain
+   (non-module) stylesheet, so it can be targeted directly. Used only here,
+   so it's safe to nudge the whole container up to line up with the tag
+   icon's baseline, rather than re-aligning the row (which would also move
+   the icon column). */
+.tw-app-theme .react-tagsinput {
+  background-color: transparent;
+  border: 0;
+  padding-left: 2px;
+  margin-top: 10px;
+}
+.tw-app-theme .react-tagsinput-tag {
+  background-color: var(--tw-paper-2);
+  border: 1px solid var(--tw-border);
+  border-radius: 999px;
+  color: var(--tw-navy);
+  font-family: var(--tw-font-body);
+  padding: 4px 10px;
+}
+.tw-app-theme .react-tagsinput-input {
+  color: var(--tw-ink);
+  font-family: var(--tw-font-body);
+  outline: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(18, 30, 58, 0.3) !important;
+}
+.tw-app-theme .react-tagsinput-input:focus {
+  border-bottom-color: var(--tw-orange) !important;
+}
+
+/* Title + content editors (components/editor.jsx, rendered inside
+   components/pageCommons.jsx's `.pageCommons` wrapper). Both are plain
+   (non-module) classes: styles/froala-editor-bsafes.css hard-codes
+   `.pageCommons .fr-element.fr-view { background-color: #fff }`, which read
+   as a stray white box against the pagePanel's paper card — repoint it to
+   the same --tw-page-panel-bg token so title/content sit flush with the rest
+   of the page. */
+.tw-app-theme .pageCommons .fr-element.fr-view {
+  background-color: var(--tw-page-panel-bg);
+}
+
+/* Video/photo/audio/attachment drop zones (components/pageCommons.jsx).
+   `.tw-dropzone-btn` (always on the Button, harmless outside Twin Paper) stacks
+   the icon and its `.tw-dropzone-label` caption on top of one another. */
+.tw-app-theme .tw-dropzone-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.tw-app-theme .tw-dropzone-btn h4 {
+  margin: 0;
+}
+.tw-app-theme .tw-dropzone-label {
+  font-family: var(--tw-font-body);
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--tw-muted);
+}
+
+/* Centered "Twin capture" call-to-action (components/editor.jsx), shown in
+   place of the small inline Twin icon while the content editor is empty. */
+.tw-app-theme .tw-twin-capture-wrap {
+  position: relative;
+  margin: 150px auto 40px;
+}
+.tw-app-theme .tw-twin-capture-btn {
+  width: 72px;
+  height: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--tw-card);
+  border: 1px solid var(--tw-border);
+  border-radius: 50%;
+  box-shadow: 0 6px 16px rgba(18, 30, 58, 0.12);
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+.tw-app-theme .tw-twin-capture-btn:hover {
+  border-color: var(--tw-orange);
+  box-shadow: 0 8px 20px rgba(18, 30, 58, 0.16);
+  transform: translateY(-1px);
+}
+.tw-app-theme .tw-twin-capture-btn img {
+  width: 44px;
+  height: 44px;
+}
+/* Absolutely positioned above the button (rather than in normal flow) so
+   showing/hiding it on hover never shifts the button's own position. The
+   wrap's generous top margin (above) keeps its full height clear so nothing
+   above can visually collide with it, and the z-index is a safety net. */
+.tw-app-theme .tw-twin-tip {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 280px;
+  padding: 16px 18px;
+  background-color: var(--tw-paper-2);
+  border: 1px solid var(--tw-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(18, 30, 58, 0.1);
+  text-align: left;
+}
+.tw-app-theme .tw-twin-tip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: var(--tw-paper-2);
+}
+.tw-app-theme .tw-twin-tip-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tw-app-theme .tw-twin-tip-header strong {
+  font-family: var(--tw-font-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--tw-navy);
+}
+.tw-app-theme .tw-twin-tip-close {
+  flex: 0 0 auto;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--tw-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.tw-app-theme .tw-twin-tip-close:hover {
+  color: var(--tw-navy);
+}
+.tw-app-theme .tw-twin-tip-body {
+  margin: 8px 0 0;
+  font-family: var(--tw-font-serif);
+  color: var(--tw-muted);
+  font-size: 0.95rem;
+  line-height: 1.35;
 }

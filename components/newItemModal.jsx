@@ -34,7 +34,8 @@ export default function NewItemModal({show=false, handleClose, handleCreateANewI
         return (
             <Modal show={show} onHide={handleClose} onEntered={handleOnEntered} className="tw-title-modal">
                 <Modal.Body>
-                    <h3 className="tw-title-prompt">Name your {typeLabel}</h3>
+                    <h3 className="tw-title-prompt">Give this {typeLabel} a title</h3>
+                    <p className="tw-title-subtitle">So you can find it easily later.</p>
                     <Form.Control
                         ref={inputRef}
                         size="lg"

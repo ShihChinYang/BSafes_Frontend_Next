@@ -10,6 +10,7 @@ import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Card from 'react-bootstrap/Card'
 import Form from 'react-bootstrap/Form'
 import Dropdown from 'react-bootstrap/Dropdown'
+import Modal from 'react-bootstrap/Modal'
 
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
@@ -17,6 +18,7 @@ import NewItemModal from "./newItemModal";
 
 import { debugLog } from "../lib/helper";
 import { products } from "../lib/productID";
+import { isTwinPaper } from "../lib/twinPaperAppTheme";
 
 import { createANewItemThunk, clearNewItem, selectItem, clearReoloadAPage, setItemTrashed } from "../reduxStore/containerSlice";
 import { getItemLink, isItemAContainer } from "../lib/bSafesCommonUI";
@@ -37,6 +39,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     const [targetItem, setTargetItem] = useState(null);
     const [targetPosition, setTargetPosition] = useState(null);
     const [showNewItemModal, setShowNewItemModal] = useState(false);
+    const [showNavHelpModal, setShowNavHelpModal] = useState(false);
 
     const pageActivity = useSelector(state => state.page.activity);
     const pageItemId = useSelector(state => state.page.id);
@@ -61,7 +64,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
     }
     let controlPanelStyle = "";
     let searchPanelStyle = "";
-    if ((productId === "") || (theProduct.fixedSize === undefined)) {
+    if ((productId === "") || (theProduct.fixedSize === undefined) || isTwinPaper) {
         controlPanelStyle = BSafesStyle.containerControlPanel;
         searchPanelStyle = BSafesStyle.containerSearchPanel;
     } else {
@@ -183,13 +186,41 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
         }
     }, [itemTrashed]);
 
+    const isTwinNotebookNav = isTwinPaper && (pageNumber || (containerInWorkspace && containerInWorkspace.startsWith('n')));
+
     return (
         <>{( productId==='' || productId) &&
             <>
                 <Row>
                     <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
-                        <Card className={controlPanelStyle}>
+                        <Card className={`${controlPanelStyle} tw-navbar-card`}>
                             <Card.Body className=''>
+                                {isTwinNotebookNav ? (
+                                    <div className="tw-notebook-toolbar">
+                                        <div className="tw-notebook-toolbar-group">
+                                            {((pageActivity === 0) && (containerActivity === 0)) &&
+                                                <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-square-o fa-lg" aria-hidden="true"></i></Button>
+                                            }
+                                            {(pageNumber || (containerInWorkspace && containerInWorkspace.startsWith('n') && !router.asPath.includes('\/contents\/'))) &&
+                                                <Button variant='link' size='sm' className='text-white' onClick={onContentsClicked}><i className="fa fa-list-ul fa-lg" aria-hidden="true"></i></Button>
+                                            }
+                                        </div>
+                                        <div className="tw-notebook-toolbar-divider" />
+                                        <div className="tw-notebook-toolbar-group tw-notebook-toolbar-jump">
+                                            <Form.Control ref={pageNumberInputRef} type="text" defaultValue={pageNumber ? pageNumber : ''} className="tw-notebook-page-input" />
+                                            <Button variant='link' size='sm' className='text-white' id="gotoPageBtn" onClick={pageNumberChanged}><i className="fa fa-arrow-right fa-lg" aria-hidden="true"></i></Button>
+                                        </div>
+                                        <div className="tw-notebook-toolbar-divider" />
+                                        <div className="tw-notebook-toolbar-group">
+                                            <Button variant='link' size='sm' className='text-white' id="gotoFirstItemBtn" onClick={onGotoFirstItem}><i className="fa fa-step-backward fa-lg" aria-hidden="true"></i></Button>
+                                            <Button variant='link' size='sm' className='text-white' id="gotoLastItemBtn" onClick={onGotoLastItem}><i className="fa fa-step-forward fa-lg" aria-hidden="true"></i></Button>
+                                            {router.asPath.includes('\/contents\/') && !showSearchBar &&
+                                                <Button variant='link' size='sm' className='text-white' onClick={onShowSearchBarClicked}><i className="fa fa-search fa-lg" aria-hidden="true"></i></Button>
+                                            }
+                                            <Button variant='link' size='sm' className='text-white' id="navHelpBtn" onClick={() => setShowNavHelpModal(true)} aria-label="Navigation help" title="Navigation help"><i className="fa fa-info-circle fa-lg" aria-hidden="true"></i></Button>
+                                        </div>
+                                    </div>
+                                ) : (
                                 <Row>
                                     <Col xs={5}>
                                         {((pageActivity === 0) && (containerActivity === 0)) && (workspaceId && workspaceId.startsWith("d:") && (containerInWorkspace === workspaceId || (pageItemId && pageItemId.startsWith("p:")))) && <Button onClick={onHomeClicked} variant='link' size='sm' className='text-white'><i className="fa fa-home fa-lg" aria-hidden="true"></i></Button>}
@@ -253,6 +284,7 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
                                         }
                                     </Col>
                                 </Row>
+                                )}
                             </Card.Body>
                         </Card>
                     </Col>
@@ -283,6 +315,37 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
                     </>
                 }
                 <NewItemModal show={showNewItemModal} handleClose={handleClose} handleCreateANewItem={handleCreateANewItem} />
+                {isTwinPaper &&
+                    <Modal show={showNavHelpModal} onHide={() => setShowNavHelpModal(false)} centered className="tw-navhelp-modal">
+                        <Modal.Header closeButton>
+                            <Modal.Title className="tw-navhelp-title">Page navigation</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div className="tw-navhelp-list">
+                                <div className="tw-navhelp-item">
+                                    <span className="tw-navhelp-icon"><i className="fa fa-square-o" aria-hidden="true"></i></span>
+                                    <span className="tw-navhelp-text"><strong>Cover</strong> — open the notebook cover.</span>
+                                </div>
+                                <div className="tw-navhelp-item">
+                                    <span className="tw-navhelp-icon"><i className="fa fa-list-ul" aria-hidden="true"></i></span>
+                                    <span className="tw-navhelp-text"><strong>Contents</strong> — view the notebook contents.</span>
+                                </div>
+                                <div className="tw-navhelp-item">
+                                    <span className="tw-navhelp-icon"><i className="fa fa-arrow-right" aria-hidden="true"></i></span>
+                                    <span className="tw-navhelp-text"><strong>Page number</strong> — enter a page and go directly to it.</span>
+                                </div>
+                                <div className="tw-navhelp-item">
+                                    <span className="tw-navhelp-icon"><i className="fa fa-step-backward" aria-hidden="true"></i></span>
+                                    <span className="tw-navhelp-text"><strong>First page</strong> — jump to the beginning.</span>
+                                </div>
+                                <div className="tw-navhelp-item">
+                                    <span className="tw-navhelp-icon"><i className="fa fa-step-forward" aria-hidden="true"></i></span>
+                                    <span className="tw-navhelp-text"><strong>Last page</strong> — jump to the end.</span>
+                                </div>
+                            </div>
+                        </Modal.Body>
+                    </Modal>
+                }
             </>}
         </>
     )

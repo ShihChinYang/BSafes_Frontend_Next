@@ -380,14 +380,14 @@
 }
 
 .containerControlPanel {
-  background-color: black;
+  background-color: var(--tw-control-panel-bg, black);
   margin: auto;
   max-width: 600px;
   min-height: 61px;
 }
 
 .containerSearchPanel {
-  background-color: white;
+  background-color: var(--tw-search-panel-bg, white);
   min-height: 61px;
 }
 
@@ -502,7 +502,11 @@
   background-color: transparent;
   display: inline-block;
   z-index: 80;
-  color: black;
+  color: var(--tw-page-btn-color, black);
+}
+
+.pageBtnFixed:hover {
+  color: var(--tw-page-btn-hover-color, black);
 }
 
 .coverBtnFixed {
@@ -510,7 +514,11 @@
   background-color: transparent;
   display: inline-block;
   z-index: 1000;
-  color: black;
+  color: var(--tw-page-btn-color, black);
+}
+
+.coverBtnFixed:hover {
+  color: var(--tw-page-btn-hover-color, black);
 }
 
 
@@ -630,7 +638,10 @@
 
 .pagePanel {
   /*background-color:faf5f1*/
-  background-color: #fff;
+  background-color: var(--tw-page-panel-bg, #fff);
+  border: var(--tw-page-panel-border, none);
+  border-radius: var(--tw-page-panel-radius, 0);
+  box-shadow: var(--tw-page-panel-shadow, none);
   margin-top: 20px;
   margin-bottom: 20px;
   padding-left: 15px;
@@ -653,51 +664,51 @@
 }
 
 .videosDragDropZone {
-  border: 2px dashed #e4e1e1;
-  background-color: lavender;
-  margin-bottom: 10px;
+  border: 2px dashed var(--tw-dropzone-border, #e4e1e1);
+  background-color: var(--tw-dropzone-video-bg, lavender);
+  margin-bottom: var(--tw-dropzone-gap, 10px);
 }
 
 .videosDragDropZoneActive {
-  border: 2px dashed #e4e1e1;
-  background-color: white;
-  margin-bottom: 10px;
+  border: 2px dashed var(--tw-dropzone-border, #e4e1e1);
+  background-color: var(--tw-dropzone-active-bg, white);
+  margin-bottom: var(--tw-dropzone-gap, 10px);
 }
 
 .imagesDragDropZone {
-  border: 2px dashed #e4e1e1;
-  background-color: aliceblue;
-  margin-bottom: 10px;
+  border: 2px dashed var(--tw-dropzone-border, #e4e1e1);
+  background-color: var(--tw-dropzone-image-bg, aliceblue);
+  margin-bottom: var(--tw-dropzone-gap, 10px);
 }
 
 .imagesDragDropZoneActive {
-  border: 2px dashed #e4e1e1;
-  background-color: white;
-  margin-bottom: 10px;
+  border: 2px dashed var(--tw-dropzone-border, #e4e1e1);
+  background-color: var(--tw-dropzone-active-bg, white);
+  margin-bottom: var(--tw-dropzone-gap, 10px);
 }
 
 .audiosDragDropZone {
-  border: 2px dashed #e4e1e1;
-  background-color: #d1f2eb;
-  margin-bottom: 10px;
+  border: 2px dashed var(--tw-dropzone-border, #e4e1e1);
+  background-color: var(--tw-dropzone-audio-bg, #d1f2eb);
+  margin-bottom: var(--tw-dropzone-gap, 10px);
 }
 
 .audiosDragDropZoneActive {
-  border: 2px dashed #e4e1e1;
-  background-color: white;
-  margin-bottom: 10px;
+  border: 2px dashed var(--tw-dropzone-border, #e4e1e1);
+  background-color: var(--tw-dropzone-active-bg, white);
+  margin-bottom: var(--tw-dropzone-gap, 10px);
 }
 
 .attachmentsDragDropZone {
-  border: 2px dashed #e4e1e1;
-  background-color: blanchedalmond;
-  margin-bottom: 10px;
+  border: 2px dashed var(--tw-dropzone-border, #e4e1e1);
+  background-color: var(--tw-dropzone-attachment-bg, blanchedalmond);
+  margin-bottom: var(--tw-dropzone-gap, 10px);
 }
 
 .attachmentsDragDropZoneActive {
-  border: 2px dashed #e4e1e1;
-  background-color: white;
-  margin-bottom: 10px;
+  border: 2px dashed var(--tw-dropzone-border, #e4e1e1);
+  background-color: var(--tw-dropzone-active-bg, white);
+  margin-bottom: var(--tw-dropzone-gap, 10px);
 }
 
 .attachmentMoreBtn button {
@@ -705,7 +716,14 @@
 }
 
 .pageCommonsExtension {
-  background-color: #fff;
+  background-color: var(--tw-page-panel-bg, #fff);
+}
+
+/* The <br/> spacers between the video/photo/audio/attachment drop zones
+   (components/pageCommons.jsx) — collapsed in Twin Paper via --tw-dropzone-br-display
+   so the boxes sit closer together; "revert" keeps the default BSafes spacing. */
+.pageCommonsExtension br {
+  display: var(--tw-dropzone-br-display, revert);
 }
 
 /* End of Page */
