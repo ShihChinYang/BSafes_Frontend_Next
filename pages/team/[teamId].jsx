@@ -11,6 +11,7 @@ import ContentPageLayout from '../../components/layouts/contentPageLayout'
 import Workspace from '../../components/workspace'
 
 import BSafesStyle from '../../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../../lib/twinPaperAppTheme';
 
 import { changeContainerOnly, clearItems, initWorkspaceThunk, setWorkspaceKeyReady } from '../../reduxStore/containerSlice';
 import { abort } from '../../reduxStore/pageSlice';
@@ -24,6 +25,8 @@ export default function Team(props) {
     const dispatch = useDispatch();
 
     const [readyToList, setReadyToList] = useState(false);
+
+    useTwinPaperAppThemeBody();
 
     const loggedIn = useSelector(state => state.auth.isLoggedIn);
     const workspaceId = useSelector( state => state.container.workspace );
@@ -75,8 +78,8 @@ export default function Team(props) {
     }, [loggedIn, workspaceKeyReady, router.query.teamId]);
 
     return (
-        <div className={BSafesStyle.spaceBackground}>
-          <ContentPageLayout key={router.pathname}> 
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.spaceBackground}>
+          <ContentPageLayout key={router.pathname}>
               <Container fluid>
                   <br />
                   <br />

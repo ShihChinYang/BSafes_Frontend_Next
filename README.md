@@ -1,34 +1,53 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# BSafes + Twin Paper — merged frontend
 
-## Getting Started
+One Next.js (Pages Router, `output: 'export'`) codebase that builds and serves
+**either** site. The environment variable `NEXT_PUBLIC_isTwinPaper` decides which.
 
-First, run the development server:
+| `NEXT_PUBLIC_isTwinPaper` | Site | Home page (`/`) |
+|---|---|---|
+| unset / `false` | bsafes.com | BSafes home (`components/bsafes/bSafesHome.jsx`) |
+| `true` | twinpaper.com | Twin Paper landing (`components/twinPaper/twinPaperHome.jsx`) |
+
+## Run / build
 
 ```bash
-npm run dev
-# or
-yarn dev
+npm install
+
+# Twin Paper
+NEXT_PUBLIC_isTwinPaper=true npm run dev      # dev server
+NEXT_PUBLIC_isTwinPaper=true npm run build    # static export -> ./out
+
+# BSafes (unchanged from before the merge — still pass the platform vars the
+# BSafes build has always required)
+NEXT_PUBLIC_platform=Web NEXT_PUBLIC_app=bsafes NEXT_PUBLIC_functions=default npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`resolved_fonts.json` (git-ignored, consumed by the Excalidraw editor) is produced
+by `node tools/generate-fontfaces.js` — run it once after a fresh clone.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+## How the switch works
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+- **`next.config.js`** — reads `NEXT_PUBLIC_isTwinPaper`; sets `trailingSlash` for
+  the twinPaper static host, and defaults the BSafes `NEXT_PUBLIC_*` platform vars
+  in twinPaper mode so the shared `pages/` tree still compiles.
+- **`pages/index.jsx`** — hook-free dispatcher: renders `TwinPaperHome` or `BSafesHome`.
+- **`pages/unlock.jsx`, `pages/create.jsx`** — Twin Paper account routes; in a
+  BSafes build they redirect to `/logIn` / `/getStarted`.
+- **`pages/_app.jsx`** — loads the Twin Paper fonts + (wrapper-scoped) CSS, and
+  skips the BSafes native-bridge / service-worker wiring when in twinPaper mode.
+- Every build still compiles all pages from both sites; only `/` swaps. The
+  BSafes routes are simply unreachable from the Twin Paper navigation.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Twin Paper source layout
 
-## Learn More
+```
+components/twinPaper/landing/*   landing page sections + landing.css / sections.css
+components/twinPaper/account/*   Unlock / Create pages + account.css
+components/twinPaper/twinPaperHome.jsx
+lib/twinPaperFonts.js            next/font/google (Inter, Instrument Serif, JetBrains Mono, Newsreader)
+styles/twinPaper-globals.css     reset, scoped to .tw-landing / .tw-account
+public/assets/twinPaper/*        images
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+All Twin Paper CSS is scoped to `.tw-landing` / `.tw-account` / `.tp-*` /
+`.twin-demo-section`, so it is inert in a BSafes build.

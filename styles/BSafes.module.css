@@ -24,7 +24,7 @@
 }
 
 .spaceBackground {
-  background-color: #f8f8f8;
+  background-color: var(--tw-space-bg, #f8f8f8);
   min-height: 100vh;
 }
 
@@ -72,7 +72,7 @@
 }
 
 .itemLink {
-  color: black;
+  color: var(--tw-item-link-color, black);
   text-decoration: none;
 }
 /* End of general */
@@ -83,7 +83,8 @@
 }
 
 .navbarTeamName {
-  color: black !important;
+  color: var(--tw-navbar-brand-color, black) !important;
+  font-family: var(--tw-navbar-brand-font, inherit);
   font-size: 2rem;
   font-weight: bold;
   margin-right: 5px;
@@ -91,7 +92,7 @@
 
 @media only screen and (min-width: 420px) {
   .navbarTeamName {
-    color: black !important;
+    color: var(--tw-navbar-brand-color, black) !important;
     font-size: 2rem;
     font-weight: bold;
     margin-right: 20px;
@@ -100,7 +101,7 @@
 
 @media only screen and (min-width: 768px) {
   .navbarTeamName {
-    color: black !important;
+    color: var(--tw-navbar-brand-color, black) !important;
     font-size: 2rem;
     font-weight: bold;
     margin-right: 40px;
@@ -109,7 +110,7 @@
 
 @media only screen and (min-width: 1200px) {
   .navbarTeamName {
-    color: black !important;
+    color: var(--tw-navbar-brand-color, black) !important;
     font-size: 2rem;
     font-weight: bold;
     margin-right: 60px;
@@ -135,8 +136,8 @@
   border-radius: 50%;
   font-size: 22px;
   font-weight: bold;
-  color: #fff;
-  background-color: #000;
+  color: var(--tw-member-badge-color, #fff);
+  background-color: var(--tw-member-badge-bg, #000);
 }
 
 .navLink {
@@ -173,8 +174,8 @@
   bottom: 0;       /* Anchors it to the bottom */
   left: 0;
   width: 100%;
-  background-color: #f0e117; /* Dark gray for a bottom status feel */
-  color: black;
+  background-color: var(--tw-statusbar-bg, #f0e117); /* Dark gray for a bottom status feel */
+  color: var(--tw-statusbar-color, black);
   padding: 12px;
   font-size: 18px;
   z-index: 100; 
@@ -267,7 +268,7 @@
 
 /*--****** Items Toolbar ***/
 .itemsToolbar {
-  background-color: #666666;
+  background-color: var(--tw-itemstoolbar-bg, #666666);
   position: fixed;
   bottom: 0px;
   width: 100%;
@@ -321,7 +322,7 @@
 }
 
 .itemPath {
-  background-color: #f5f5f5;
+  background-color: var(--tw-itempath-bg, #f5f5f5);
 }
 
 .itemPathBreadcrumb {

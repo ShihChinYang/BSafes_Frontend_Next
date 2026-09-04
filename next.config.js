@@ -1,7 +1,24 @@
+// Which site does this build serve? Set NEXT_PUBLIC_isTwinPaper=true to build/serve
+// twinpaper.com; leave it unset (or =false) to build/serve bsafes.com.
+const isTwinPaper =
+  !!process.env.NEXT_PUBLIC_isTwinPaper && process.env.NEXT_PUBLIC_isTwinPaper !== 'false';
+
+// The BSafes routes (still compiled in every build) read these NEXT_PUBLIC_* vars
+// unguarded. A BSafes build is expected to pass them itself, exactly as before.
+// A twinPaper build shouldn't have to know about them, so default them here so
+// the shared pages/ tree still compiles.
+if (isTwinPaper) {
+  process.env.NEXT_PUBLIC_platform = process.env.NEXT_PUBLIC_platform || 'Web';
+  process.env.NEXT_PUBLIC_app = process.env.NEXT_PUBLIC_app || 'bsafes';
+  process.env.NEXT_PUBLIC_functions = process.env.NEXT_PUBLIC_functions || 'default';
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'export',
+  // twinPaper's static host resolves /create/ -> /create/index.html.
+  trailingSlash: isTwinPaper,
   images: {
     unoptimized: true
   },

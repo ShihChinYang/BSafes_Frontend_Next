@@ -21,9 +21,26 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 
+// twinPaper styles. Every rule is scoped to .tw-landing / .tw-account / .tp-* /
+// .twin-demo-section, so loading them in the BSafes build is inert.
+import '../components/twinPaper/landing/landing.css';
+import '../components/twinPaper/landing/sections.css';
+import '../components/twinPaper/account/account.css';
+import '../styles/twinPaper-globals.css';
+// Shared Twin Paper skin for the authenticated workspace pages (/safe, /team/[teamId]).
+// Scoped to .tw-app-theme, inert everywhere else. See lib/twinPaperAppTheme.js.
+import '../styles/twinPaperAppTheme.css';
+
 import { debugLog } from '../lib/helper';
 import { setServiceWorkerRegistered } from '../reduxStore/auth';
 import { set } from 'date-fns';
+
+import { inter, instrumentSerif, jetbrainsMono, newsreader } from '../lib/twinPaperFonts';
+
+const isTwinPaper =
+  !!process.env.NEXT_PUBLIC_isTwinPaper && process.env.NEXT_PUBLIC_isTwinPaper !== 'false';
+
+const twinFontVars = `${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${newsreader.variable}`;
 
 function MyApp({ Component, pageProps }) {
   const debugOn = true;
@@ -33,6 +50,9 @@ function MyApp({ Component, pageProps }) {
 
   useEffect(() => {
     import("bootstrap/dist/js/bootstrap.min.js");
+    // twinPaper is a plain marketing/account site: skip all the BSafes-only
+    // native bridge, excalidraw and service-worker wiring.
+    if (isTwinPaper) return;
     window.EXCALIDRAW_ASSET_PATH = "/js/excalidraw/";
     if (process.env.NEXT_PUBLIC_platform === 'iOS') {
       function getAccessKeyFromNative() {
@@ -138,9 +158,11 @@ function MyApp({ Component, pageProps }) {
           name="viewport"
           content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
-        <link rel='icon' href='/favicon.png' />
+        <link rel='icon' href={isTwinPaper ? '/assets/twinPaper/logo.jpg' : '/favicon.png'} />
       </Head>
-      <Component {...pageProps} />
+      <div className={isTwinPaper ? twinFontVars : undefined} style={{ display: 'contents' }}>
+        <Component {...pageProps} />
+      </div>
       <Script
         strategy="beforeInteractive"
         src="/js/globalThis_0.4.4_min.js"

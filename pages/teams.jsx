@@ -15,6 +15,7 @@ import TeamCard from '../components/teamCard';
 import PaginationControl from '../components/paginationControl';
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../lib/twinPaperAppTheme';
 
 import { clearContainer } from '../reduxStore/containerSlice';
 import { createANewTeamThunk, listTeamsThunk } from '../reduxStore/teamSlice';
@@ -25,6 +26,8 @@ export default function Teams() {
     const dispatch = useDispatch();
 
     const [containerCleared, setContainerCleared] = useState(false);
+
+    useTwinPaperAppThemeBody();
 
     const loggedIn = useSelector(state => state.auth.isLoggedIn);
     const publicKeyPem = useSelector(state => state.auth.publicKey);
@@ -78,7 +81,7 @@ export default function Teams() {
     }, [containerCleared]);
 
     return (
-        <div className={BSafesStyle.teamsBackground}>
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.teamsBackground}>
             <ContentPageLayout>
                 <Container fluid>
                     <br />
@@ -108,9 +111,12 @@ export default function Teams() {
                     <br />
                     <Row>
                         <Col sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }}>
-                            {teams.map((team, index) => {
-                                return <TeamCard key={index} index={index} team={team} onAdd={addATeam} />
-                            })}
+                            {(() => {
+                                const cards = teams.map((team, index) => (
+                                    <TeamCard key={index} index={index} team={team} onAdd={addATeam} />
+                                ));
+                                return isTwinPaper ? <div className="tw-item-list">{cards}</div> : cards;
+                            })()}
                         </Col>
                     </Row>
                     {teams && teams.length > 0 &&

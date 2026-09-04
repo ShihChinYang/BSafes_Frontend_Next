@@ -1,0 +1,30 @@
+/* twinPaper base reset.
+   Ported from the standalone twinPaper styles/globals.css, but every rule is
+   scoped to the .tw-landing / .tw-account wrappers so it never fights the
+   BSafes global CSS (styles/materia.css, bootstrapOverride.css, bootstrap).
+   Page-specific design tokens still live in components/twinPaper/landing/*.css
+   and components/twinPaper/account/account.css. */
+
+.tw-landing,
+.tw-account,
+.tw-landing *,
+.tw-account *,
+.tw-landing *::before,
+.tw-account *::before,
+.tw-landing *::after,
+.tw-account *::after {
+  box-sizing: border-box;
+}
+
+.tw-landing,
+.tw-account {
+  -webkit-font-smoothing: antialiased;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+.tw-landing img,
+.tw-account img {
+  display: block;
+  max-width: 100%;
+}

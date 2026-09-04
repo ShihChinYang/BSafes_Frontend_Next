@@ -1,0 +1,553 @@
+/* ============================================================================
+   Shared Twin Paper theme for the authenticated "workspace" pages — currently
+   /safe and /team/[teamId] — and every component they render (ContentPageLayout,
+   Workspace, ItemCard, ItemPath, ItemsToolbar, modals, …). One stylesheet: a
+   tweak here changes every page that opts in.
+
+   Opt in from a page (see lib/twinPaperAppTheme.js):
+     - put `tw-app-theme` + the next/font variable classes on the page wrapper
+     - call useTwinPaperAppThemeBody() so the same classes land on <body> too,
+       covering portalled react-bootstrap Modals / Offcanvas / Toasts / Dropdowns.
+   Active only when NEXT_PUBLIC_isTwinPaper is set; otherwise pages keep the
+   default BSafes styling and every rule below matches nothing.
+
+   Strategy:
+   - Re-point Bootstrap 5.3's per-component `--bs-*-*` custom properties, so all
+     react-bootstrap widgets retint with no per-widget CSS.
+   - Feed the handful of BSafes CSS-module classes on these pages through
+     `--tw-*` tokens (see styles/BSafes.module.css) and set them here.
+   - Base element polish: paper background, Instrument Serif headings, Inter body.
+
+   Palette matches components/twinPaper/landing/landing.css.
+   ========================================================================== */
+
+.tw-app-theme {
+  /* --- Twin Paper palette --- */
+  --tw-paper: #fdf8f0;
+  --tw-paper-2: #f5efe6;
+  /* Page ground is deepened (vs the landing's --paper) so the workspace item
+     cards read as lifted surfaces instead of blending in. */
+  --tw-ground: #efe6d6;
+  --tw-card: #fffdf9;
+  /* A defined-but-thin 1px hairline so each item reads as its own object.
+     Warm gray rather than tan. */
+  --tw-card-border: #c6c1b5;
+  --tw-ink: #1a1d25;
+  --tw-navy: #121e3a;
+  --tw-orange: #ff6a1a;
+  --tw-orange-ink: #c8500f;
+  --tw-border: #e8e0d2;
+  --tw-muted: #6f6a63;
+
+  --tw-font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --tw-font-display: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  --tw-font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
+
+  /* --- tokens consumed by styles/BSafes.module.css --- */
+  --tw-space-bg: var(--tw-ground);
+  --tw-navbar-bg: var(--tw-paper);
+  --tw-navbar-brand-color: var(--tw-navy);
+  --tw-navbar-brand-font: var(--tw-font-display);
+  --tw-member-badge-bg: var(--tw-navy);
+  --tw-member-badge-color: var(--tw-paper);
+  --tw-statusbar-bg: var(--tw-navy);
+  --tw-statusbar-color: var(--tw-paper);
+  --tw-itemstoolbar-bg: var(--tw-navy);
+  --tw-itempath-bg: var(--tw-paper-2);
+  --tw-item-link-color: var(--tw-navy);
+
+  /* --- Bootstrap globals --- */
+  --bs-body-bg: var(--tw-ground);
+  --bs-body-color: var(--tw-ink);
+  --bs-emphasis-color: var(--tw-navy);
+  --bs-secondary-color: var(--tw-muted);
+  --bs-tertiary-bg: var(--tw-paper-2);
+  --bs-secondary-bg: var(--tw-paper-2);
+  --bs-border-color: var(--tw-border);
+  --bs-border-color-translucent: var(--tw-border);
+  --bs-link-color: var(--tw-orange);
+  --bs-link-color-rgb: 255, 106, 26;
+  --bs-link-hover-color: var(--tw-orange-ink);
+  --bs-link-hover-color-rgb: 200, 80, 15;
+  --bs-primary: var(--tw-orange);
+  --bs-primary-rgb: 255, 106, 26;
+  --bs-light-rgb: 253, 248, 240;
+  --bs-font-sans-serif: var(--tw-font-body);
+  --bs-border-radius: 14px;
+  --bs-border-radius-sm: 10px;
+  --bs-border-radius-lg: 20px;
+  --bs-border-radius-xl: 26px;
+
+  background-color: var(--tw-ground);
+  color: var(--tw-ink);
+  font-family: var(--tw-font-body);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Body gets the class too (for portals); keep the page ground consistent. */
+body.tw-app-theme {
+  background-color: var(--tw-ground);
+}
+
+/* --- Typography --- */
+.tw-app-theme h1, .tw-app-theme h2, .tw-app-theme h3,
+.tw-app-theme h4, .tw-app-theme h5, .tw-app-theme h6,
+.tw-app-theme .h1, .tw-app-theme .h2, .tw-app-theme .h3,
+.tw-app-theme .modal-title {
+  font-family: var(--tw-font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--tw-navy);
+}
+.tw-app-theme a { text-decoration: none; }
+.tw-app-theme a:hover { text-decoration: underline; }
+
+/* --- Navbar (BSafes light navbar + public nav) --- */
+.tw-app-theme .navbar,
+body.tw-app-theme .navbar {
+  --bs-navbar-color: var(--tw-navy);
+  --bs-navbar-hover-color: var(--tw-orange);
+  --bs-navbar-active-color: var(--tw-orange);
+  --bs-navbar-brand-color: var(--tw-navy);
+  --bs-navbar-brand-hover-color: var(--tw-navy);
+  background-color: var(--tw-paper) !important;
+  border-bottom: 1px solid var(--tw-border);
+}
+.tw-app-theme .navbar-brand span { font-family: var(--tw-font-display); }
+
+/* --- Cards (item cards, welcome cards) --- */
+.tw-app-theme .card {
+  --bs-card-bg: var(--tw-card);
+  --bs-card-color: var(--tw-ink);
+  --bs-card-border-color: var(--tw-card-border);
+  --bs-card-border-width: 1px;
+  --bs-card-border-radius: 8px;
+  --bs-card-inner-border-radius: 7px;
+  --bs-card-cap-bg: var(--tw-paper-2);
+  --bs-card-cap-color: var(--tw-navy);
+  /* Items stack flush; the 2px border is the separator. */
+  margin-bottom: 0;
+  box-shadow: 0 1px 2px rgba(26, 29, 37, 0.05), 0 8px 18px rgba(26, 29, 37, 0.08);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+.tw-app-theme .card:hover {
+  border-color: var(--tw-orange);
+  box-shadow: 0 2px 4px rgba(26, 29, 37, 0.06), 0 12px 26px rgba(26, 29, 37, 0.12);
+  transform: translateY(-1px);
+}
+/* Cards nested inside another card (e.g. box-contents rows) stay flat. */
+.tw-app-theme .card .card {
+  margin-bottom: 0;
+  box-shadow: none;
+}
+.tw-app-theme .card .card:hover { transform: none; }
+.tw-app-theme .card-title { font-family: var(--tw-font-display); color: var(--tw-navy); }
+
+/* Workspace / teams item list: one seamless stack, no gaps between rows.
+   `.tw-item-list` wraps the mapped ItemCard / ProductCard / TeamCard <Card>s
+   (components/workspace.jsx, pages/teams.jsx — Twin Paper only). Adjacent
+   borders are collapsed with a -1px margin rather than an overflow:hidden
+   container, so in-card dropdown menus are not clipped. */
+.tw-app-theme .tw-item-list > .card {
+  margin: 0 0 -1px 0;
+  border: 1px solid var(--tw-card-border);
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+  position: relative;
+}
+.tw-app-theme .tw-item-list > .card:first-child {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.tw-app-theme .tw-item-list > .card:last-child {
+  margin-bottom: 0;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+.tw-app-theme .tw-item-list > .card:hover {
+  z-index: 1; /* keep the full orange outline above the collapsed neighbour borders */
+  border-color: var(--tw-orange);
+  box-shadow: none;
+  transform: none;
+}
+
+/* --- Buttons --- */
+.tw-app-theme .btn {
+  --bs-btn-border-radius: 999px;
+  --bs-btn-font-weight: 500;
+}
+.tw-app-theme .btn-primary {
+  --bs-btn-bg: var(--tw-orange);
+  --bs-btn-border-color: var(--tw-orange);
+  --bs-btn-hover-bg: var(--tw-orange-ink);
+  --bs-btn-hover-border-color: var(--tw-orange-ink);
+  --bs-btn-active-bg: var(--tw-orange-ink);
+  --bs-btn-active-border-color: var(--tw-orange-ink);
+  --bs-btn-disabled-bg: var(--tw-orange);
+  --bs-btn-disabled-border-color: var(--tw-orange);
+}
+.tw-app-theme .btn-dark,
+.tw-app-theme .btn-secondary {
+  --bs-btn-bg: var(--tw-navy);
+  --bs-btn-border-color: var(--tw-navy);
+  --bs-btn-color: #fff;
+  --bs-btn-hover-bg: #0c1730;
+  --bs-btn-hover-border-color: #0c1730;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: #0c1730;
+  --bs-btn-active-border-color: #0c1730;
+  --bs-btn-active-color: #fff;
+}
+.tw-app-theme .btn-light {
+  --bs-btn-bg: var(--tw-card);
+  --bs-btn-border-color: var(--tw-border);
+  --bs-btn-hover-bg: var(--tw-paper-2);
+  --bs-btn-hover-border-color: var(--tw-border);
+}
+.tw-app-theme .btn-link {
+  --bs-btn-color: var(--tw-orange);
+  --bs-btn-hover-color: var(--tw-orange-ink);
+}
+
+/* Materia (styles/materia.css) hard-codes a literal background-color / color on
+   .btn-*:hover / :focus / :active — a blue, so e.g. the round "+" add button
+   turns blue once it has been clicked and keeps focus. Those Materia rules are
+   `.btn-primary:focus` (0,2,0); the rules below at (0,3,0)+ win and route the
+   states back to the palette. Order matters: :focus first, then hover/active. */
+.tw-app-theme .btn-primary:focus {
+  background-color: var(--tw-orange);
+  border-color: var(--tw-orange);
+  color: #fff;
+}
+.tw-app-theme .btn-primary:hover,
+.tw-app-theme .btn-primary:active,
+.tw-app-theme .btn-primary:active:hover,
+.tw-app-theme .btn-primary.active,
+.tw-app-theme .btn-primary.show {
+  background-color: var(--tw-orange-ink);
+  border-color: var(--tw-orange-ink);
+  color: #fff;
+}
+.tw-app-theme .btn-secondary:focus,
+.tw-app-theme .btn-dark:focus {
+  background-color: var(--tw-navy);
+  border-color: var(--tw-navy);
+  color: #fff;
+}
+.tw-app-theme .btn-secondary:hover,
+.tw-app-theme .btn-secondary:active,
+.tw-app-theme .btn-secondary:active:hover,
+.tw-app-theme .btn-secondary.active,
+.tw-app-theme .btn-secondary.show,
+.tw-app-theme .btn-dark:hover,
+.tw-app-theme .btn-dark:active,
+.tw-app-theme .btn-dark:active:hover,
+.tw-app-theme .btn-dark.active,
+.tw-app-theme .btn-dark.show {
+  background-color: #0c1730;
+  border-color: #0c1730;
+  color: #fff;
+}
+.tw-app-theme .btn-light:focus {
+  background-color: var(--tw-card);
+  border-color: var(--tw-border);
+  color: var(--tw-ink);
+}
+.tw-app-theme .btn-light:hover,
+.tw-app-theme .btn-light:active,
+.tw-app-theme .btn-light:active:hover,
+.tw-app-theme .btn-light.active,
+.tw-app-theme .btn-light.show {
+  background-color: var(--tw-paper-2);
+  border-color: var(--tw-border);
+  color: var(--tw-ink);
+}
+.tw-app-theme .btn-link:hover,
+.tw-app-theme .btn-link:focus {
+  color: var(--tw-orange-ink);
+}
+
+/* --- Forms (search field, new-item title) --- */
+.tw-app-theme .form-control,
+.tw-app-theme .form-select {
+  background-color: var(--tw-card);
+  border-color: var(--tw-border);
+  color: var(--tw-ink);
+  border-radius: 12px;
+}
+.tw-app-theme .form-control:focus,
+.tw-app-theme .form-select:focus {
+  background-color: #fff;
+  border-color: var(--tw-orange);
+  box-shadow: 0 0 0 0.2rem rgba(255, 106, 26, 0.18);
+}
+
+/* Workspace search (components/workspace.jsx): the input is a bottom rule, not a
+   box; the search-icon button is just the bare icon (no underline).
+   `.tw-search` is the InputGroup wrapper. */
+.tw-app-theme .tw-search {
+  max-width: 520px;
+  margin-inline: auto;
+}
+.tw-app-theme .tw-search > * { margin-left: 0; }
+.tw-app-theme .tw-search .form-control {
+  background-color: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(18, 30, 58, 0.3);
+  border-radius: 0;
+  box-shadow: none;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.tw-app-theme .tw-search .form-control:focus {
+  background-color: transparent;
+  border-bottom-color: var(--tw-orange);
+  box-shadow: 0 1px 0 0 var(--tw-orange);
+}
+.tw-app-theme .tw-search .btn,
+.tw-app-theme .tw-search .btn:hover,
+.tw-app-theme .tw-search .btn:focus,
+.tw-app-theme .tw-search .btn:active {
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* "Name your …" prompt (components/newItemModal.jsx, Twin Paper only). */
+body.tw-app-theme .tw-title-modal .modal-body {
+  padding: 24px 26px 20px;
+}
+body.tw-app-theme .tw-title-modal .tw-title-prompt {
+  margin: 0 0 16px;
+  font-family: var(--tw-font-display);
+  font-size: 1.7rem;
+  line-height: 1.1;
+  color: var(--tw-navy);
+}
+/* The field is a bottom rule, not a box — same treatment as the workspace search. */
+body.tw-app-theme .tw-title-modal .tw-title-input {
+  background-color: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(18, 30, 58, 0.3);
+  border-radius: 0;
+  box-shadow: none;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+body.tw-app-theme .tw-title-modal .tw-title-input:focus {
+  background-color: transparent;
+  border-bottom-color: var(--tw-orange);
+  box-shadow: 0 1px 0 0 var(--tw-orange);
+}
+body.tw-app-theme .tw-title-modal .tw-title-help {
+  margin: 9px 0 0;
+  font-family: var(--tw-font-serif);
+  color: var(--tw-muted);
+  font-size: 0.95rem;
+}
+body.tw-app-theme .tw-title-modal .tw-title-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+/* --- Pagination --- */
+.tw-app-theme .pagination {
+  --bs-pagination-color: var(--tw-navy);
+  --bs-pagination-bg: var(--tw-card);
+  --bs-pagination-border-color: var(--tw-border);
+  --bs-pagination-hover-color: var(--tw-orange-ink);
+  --bs-pagination-hover-bg: var(--tw-paper-2);
+  --bs-pagination-hover-border-color: var(--tw-border);
+  --bs-pagination-focus-color: var(--tw-orange-ink);
+  --bs-pagination-active-bg: var(--tw-orange);
+  --bs-pagination-active-border-color: var(--tw-orange);
+  --bs-pagination-border-radius: 10px;
+}
+
+/* --- Breadcrumb (item path) --- */
+.tw-app-theme .breadcrumb {
+  --bs-breadcrumb-divider-color: var(--tw-muted);
+  --bs-breadcrumb-item-active-color: var(--tw-navy);
+}
+.tw-app-theme .breadcrumb-item a { color: var(--tw-orange); }
+
+/* --- "New tab" — a tab hanging off the bottom of the navbar, right side
+   (components/itemPath.jsx, Twin Paper only). ItemPath renders flush under the
+   navbar, so the toggle just needs square top / rounded bottom corners, the
+   navbar's own paper colour, and no top border to read as attached. --- */
+.tw-app-theme .tw-newtab-col {
+  padding-right: 0;
+  margin-top: -1px; /* sit on top of the navbar's 1px bottom border */
+}
+.tw-app-theme .tw-newtab.btn,
+.tw-app-theme .tw-newtab.btn:hover,
+.tw-app-theme .tw-newtab.btn:focus,
+.tw-app-theme .tw-newtab.btn:active,
+.tw-app-theme .tw-newtab.btn.show,
+.tw-app-theme .show > .tw-newtab.btn.dropdown-toggle {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 6px;
+  background-color: var(--tw-paper);
+  border: 1px solid var(--tw-border);
+  border-top: 0;
+  border-radius: 0 0 9px 9px;
+  color: var(--tw-navy);
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  text-transform: none; /* Materia's `.btn { text-transform: uppercase }` -> "New tab", not "NEW TAB" */
+  box-shadow: 0 6px 13px rgba(18, 30, 58, 0.08);
+}
+.tw-app-theme .tw-newtab.btn:hover,
+.tw-app-theme .tw-newtab.btn:focus {
+  background-color: var(--tw-card);
+  border-color: var(--tw-border);
+  color: var(--tw-navy);
+}
+.tw-app-theme .tw-newtab.btn::after { display: none; } /* no dropdown caret */
+.tw-app-theme .tw-newtab .bi { font-size: 0.9rem; line-height: 1; }
+
+/* --- Dropdown menus (member menu, item actions) --- */
+.tw-app-theme .dropdown-menu,
+body.tw-app-theme .dropdown-menu {
+  --bs-dropdown-bg: var(--tw-card);
+  --bs-dropdown-color: var(--tw-ink);
+  --bs-dropdown-border-color: var(--tw-border);
+  --bs-dropdown-border-radius: 14px;
+  --bs-dropdown-link-color: var(--tw-ink);
+  --bs-dropdown-link-hover-bg: var(--tw-paper-2);
+  --bs-dropdown-link-hover-color: var(--tw-orange-ink);
+  --bs-dropdown-link-active-bg: var(--tw-orange);
+}
+
+/* --- Modals (new item, save-recovery, preflight, item-type) --- */
+body.tw-app-theme .modal {
+  --bs-modal-bg: var(--tw-card);
+  --bs-modal-color: var(--tw-ink);
+  --bs-modal-border-color: var(--tw-border);
+  --bs-modal-border-radius: 20px;
+  --bs-modal-header-border-color: var(--tw-border);
+  --bs-modal-footer-border-color: var(--tw-border);
+}
+
+/* --- Offcanvas (v2 services menu) --- */
+body.tw-app-theme .offcanvas {
+  --bs-offcanvas-bg: var(--tw-paper);
+  --bs-offcanvas-color: var(--tw-ink);
+  --bs-offcanvas-border-color: var(--tw-border);
+}
+
+/* --- ListGroup (move-item picker in the items toolbar) --- */
+body.tw-app-theme .list-group {
+  --bs-list-group-bg: var(--tw-card);
+  --bs-list-group-color: var(--tw-ink);
+  --bs-list-group-border-color: var(--tw-border);
+  --bs-list-group-action-hover-bg: var(--tw-paper-2);
+  --bs-list-group-active-bg: var(--tw-orange);
+  --bs-list-group-active-border-color: var(--tw-orange);
+}
+
+/* --- Toasts --- */
+body.tw-app-theme .Toastify__toast {
+  border-radius: 14px;
+}
+
+/* --- "New Twin" type picker (components/itemTypeModal.jsx, Twin Paper only).
+   Icons keep their BSafes glyphs; text is serif — display for the title, italic
+   display for the type names, Newsreader for the supporting copy. */
+body.tw-app-theme .tw-type-modal .modal-content {
+  padding: 8px 12px 16px;
+  background: var(--tw-ground);
+  border-color: var(--tw-border);
+}
+body.tw-app-theme .tw-type-modal .modal-header {
+  border-bottom: 0;
+  padding-bottom: 4px;
+  align-items: flex-start;
+}
+body.tw-app-theme .tw-type-modal .modal-title {
+  font-family: var(--tw-font-display);
+  font-size: 2rem;
+  line-height: 1.05;
+  color: var(--tw-navy);
+}
+body.tw-app-theme .tw-type-modal .tw-type-subtitle {
+  margin: 6px 0 0;
+  font-family: var(--tw-font-serif);
+  color: var(--tw-muted);
+  font-size: 1.05rem;
+}
+body.tw-app-theme .tw-type-modal .list-group {
+  background: var(--tw-card);
+  border: 1px solid var(--tw-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+body.tw-app-theme .tw-type-modal .tw-type-item {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 18px;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--tw-border);
+  border-radius: 0;
+  color: var(--tw-ink);
+}
+body.tw-app-theme .tw-type-modal .tw-type-item:first-child {
+  border-top: 0;
+}
+body.tw-app-theme .tw-type-modal .tw-type-item:hover,
+body.tw-app-theme .tw-type-modal .tw-type-item:focus {
+  background: rgba(18, 30, 58, 0.035);
+  color: var(--tw-ink);
+}
+body.tw-app-theme .tw-type-modal .tw-type-icon {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  color: var(--tw-navy);
+  background: var(--tw-paper-2);
+  border-radius: 14px;
+}
+body.tw-app-theme .tw-type-modal .tw-type-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+body.tw-app-theme .tw-type-modal .tw-type-name {
+  font-family: var(--tw-font-display);
+  font-style: italic;
+  font-size: 1.4rem;
+  line-height: 1.1;
+  color: var(--tw-navy);
+}
+body.tw-app-theme .tw-type-modal .tw-type-desc {
+  margin-top: 3px;
+  font-family: var(--tw-font-serif);
+  color: var(--tw-muted);
+  font-size: 1rem;
+}
+body.tw-app-theme .tw-type-modal .tw-type-item::after {
+  content: "\203A"; /* › */
+  flex: 0 0 auto;
+  color: var(--tw-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  font-weight: 300;
+}

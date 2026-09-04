@@ -12,6 +12,7 @@ import Workspace from '../components/workspace'
 import SaveAccountRecoveryModal from '../components/saveAccountRecoverModal';
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../lib/twinPaperAppTheme';
 
 import { setDataCenterModal } from '../reduxStore/accountSlice';
 import { setWorkspaceKeyReady, initContainer } from '../reduxStore/containerSlice';
@@ -36,6 +37,8 @@ export default function Safe() {
     dispatch(setDataCenterModal(true));
     router.push('/services/dataCenterSetup');
   }
+
+  useTwinPaperAppThemeBody();
 
   useEffect(() => {
     const handleRouteChange = (url, { shallow }) => {
@@ -74,7 +77,7 @@ export default function Safe() {
   }, [memberId, workspaceKey])
 
   return (
-    <div className={BSafesStyle.spaceBackground}>
+    <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.spaceBackground}>
       <ContentPageLayout>
         <Container fluid>
           <br />

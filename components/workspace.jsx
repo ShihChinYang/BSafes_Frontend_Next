@@ -13,6 +13,7 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import Card from 'react-bootstrap/Card'
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import { isTwinPaper } from '../lib/twinPaperAppTheme';
 
 import AddAnItemButton from './addAnItemButton'
 import NewItemModal from './newItemModal'
@@ -189,7 +190,7 @@ export default function Workspace({ readyToList = false }) {
             }
             <Row hidden={hideFunction}>
                 <Form onSubmit={onSubmit}>
-                    <InputGroup className="mb-3">
+                    <InputGroup className="mb-3 tw-search">
                         <Form.Control size="lg" type="text"
                             value={searchValue}
                             onChange={onSearchValueChanged}
@@ -208,7 +209,7 @@ export default function Workspace({ readyToList = false }) {
                 }
             </Row>
 
-            <NewItemModal show={showNewItemModal} handleClose={handleClose} handleCreateANewItem={handleCreateANewItem} />
+            <NewItemModal show={showNewItemModal} handleClose={handleClose} handleCreateANewItem={handleCreateANewItem} itemType={selectedItemType} />
             <br />
             <br />
             {mode === 'search' &&
@@ -261,7 +262,7 @@ export default function Workspace({ readyToList = false }) {
                     </Col>
                 </Row>
             }
-            {items}
+            {isTwinPaper ? <div className="tw-item-list">{items}</div> : items}
             {itemsState && itemsState.length > 0 &&
                 <Row>
                     <Col sm={{ span: 10, offset: 1 }} md={{ span: 8, offset: 2 }}>

@@ -14,6 +14,7 @@ import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 import BSafesStyle from '../styles/BSafes.module.css'
+import { isTwinPaper } from '../lib/twinPaperAppTheme';
 
 import { debugLog } from '../lib/helper'
 import { decryptBinaryString } from '../lib/crypto';
@@ -154,31 +155,47 @@ export default function ItemPath() {
         // eslint-disable-next-line react-hooks/exhaustive-deps    
     }, [aborted, itemPath, workspaceKeyReady])
 
+    const newTabMenu = (
+        <Dropdown.Menu>
+            {newTabItems}
+            <Dropdown.Item href='/teams' target='_blank'><span className='fw-bold'>Spaces</span></Dropdown.Item>
+            <Dropdown.Item href='/safe' target='_blank'><span className='fw-bold'>Personal</span></Dropdown.Item>
+        </Dropdown.Menu>
+    );
+
+    const showNewTab = process.env.NEXT_PUBLIC_platform !== 'iOS' && process.env.NEXT_PUBLIC_platform !== 'android';
+
     return (
         <>
             <Container fluid>
                 <Row>
-                    <Col xs={10} md={11} className={`${BSafesStyle.itemPath} rounded-end`}>
+                    <Col xs={isTwinPaper ? true : 10} md={isTwinPaper ? true : 11} className={`${BSafesStyle.itemPath} rounded-end`}>
                         <Breadcrumb className={`${BSafesStyle.itemPathBreadcrumb}`}>
                             <Breadcrumb.Item onClick={() => router.push('/teams')} active={false} className={`${BSafesStyle.teamsPathItem}`} linkProps={{ className: BSafesStyle.teamsPathLink }}><i className="fa fa-building" aria-hidden="true" /> Spaces </Breadcrumb.Item>
                             {breadItems}
                         </Breadcrumb>
                     </Col>
-                    { process.env.NEXT_PUBLIC_platform !=='iOS' && process.env.NEXT_PUBLIC_platform !=='android' &&
+                    {showNewTab && (isTwinPaper ?
+                        <Col xs="auto" className="ms-auto tw-newtab-col">
+                            <Dropdown align="end">
+                                <Dropdown.Toggle size='sm' variant="light" className="tw-newtab">
+                                    <i className="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                                    <span>New tab</span>
+                                </Dropdown.Toggle>
+                                {newTabMenu}
+                            </Dropdown>
+                        </Col>
+                        :
                         <Col xs={2} md={1}>
                             <Dropdown align="end" className="justify-content-end pull-right">
                                 <Dropdown.Toggle size='sm' variant="primary" bsPrefix='px-3 py-2'>
                                     <span><i className="fa fa-plus" aria-hidden="true"></i></span>
                                 </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    {newTabItems}
-                                    <Dropdown.Item href='/teams' target='_blank'><span className='fw-bold'>Spaces</span></Dropdown.Item>
-                                    <Dropdown.Item href='/safe' target='_blank'><span className='fw-bold'>Personal</span></Dropdown.Item>
-                                </Dropdown.Menu>
+                                {newTabMenu}
                             </Dropdown>
 
                         </Col>
-                    }
+                    )}
                 </Row>
             </Container>
         </>
