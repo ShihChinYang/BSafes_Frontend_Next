@@ -186,7 +186,14 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
         }
     }, [itemTrashed]);
 
-    const isTwinNotebookNav = isTwinPaper && (pageNumber || (containerInWorkspace && containerInWorkspace.startsWith('n')));
+    // Twin Paper toolbar: which controls apply to the current item/container,
+    // regardless of product (notebook, box, folder, single page, …). Mirrors
+    // the visibility rules of the classic layout below so no button is lost.
+    const showContentsIcon = !!(pageNumber || (containerInWorkspace && (containerInWorkspace.startsWith('n') || containerInWorkspace.startsWith('f') || containerInWorkspace.startsWith('b')) && !router.asPath.includes('\/contents\/')));
+    const showFirstLastButtons = !!(pageNumber || (containerInWorkspace && containerInWorkspace.startsWith('n')) || (containerInWorkspace && containerInWorkspace.startsWith('f')));
+    const showAddItemDropdown = !!(pageItemId && pageItemId.startsWith('p'));
+    const showMoreButton = !!(!router.asPath.includes('\/contents\/') && pageItemId && (pageItemId.startsWith('p') || pageItemId.startsWith('b') || pageItemId.startsWith('f')));
+    const showSearchIcon = router.asPath.includes('\/contents\/') && !showSearchBar;
 
     return (
         <>{( productId==='' || productId) &&
@@ -195,26 +202,52 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
                     <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
                         <Card className={`${controlPanelStyle} tw-navbar-card`}>
                             <Card.Body className=''>
-                                {isTwinNotebookNav ? (
-                                    <div className="tw-notebook-toolbar">
+                                {isTwinPaper ? (
+                                    <div className={`tw-notebook-toolbar${pageNumber ? '' : ' tw-notebook-toolbar-plain'}`}>
                                         <div className="tw-notebook-toolbar-group">
+                                            {((pageActivity === 0) && (containerActivity === 0)) && (workspaceId && workspaceId.startsWith("d:") && (containerInWorkspace === workspaceId || (pageItemId && pageItemId.startsWith("p:")))) &&
+                                                <Button onClick={onHomeClicked} variant='link' size='sm' className='text-white'><i className="fa fa-home fa-lg" aria-hidden="true"></i></Button>
+                                            }
                                             {((pageActivity === 0) && (containerActivity === 0)) &&
                                                 <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-square-o fa-lg" aria-hidden="true"></i></Button>
                                             }
-                                            {(pageNumber || (containerInWorkspace && containerInWorkspace.startsWith('n') && !router.asPath.includes('\/contents\/'))) &&
+                                            {showContentsIcon &&
                                                 <Button variant='link' size='sm' className='text-white' onClick={onContentsClicked}><i className="fa fa-list-ul fa-lg" aria-hidden="true"></i></Button>
                                             }
                                         </div>
-                                        <div className="tw-notebook-toolbar-divider" />
-                                        <div className="tw-notebook-toolbar-group tw-notebook-toolbar-jump">
-                                            <Form.Control ref={pageNumberInputRef} type="text" defaultValue={pageNumber ? pageNumber : ''} className="tw-notebook-page-input" />
-                                            <Button variant='link' size='sm' className='text-white' id="gotoPageBtn" onClick={pageNumberChanged}><i className="fa fa-arrow-right fa-lg" aria-hidden="true"></i></Button>
-                                        </div>
-                                        <div className="tw-notebook-toolbar-divider" />
+                                        {pageNumber &&
+                                            <>
+                                                <div className="tw-notebook-toolbar-divider" />
+                                                <div className="tw-notebook-toolbar-group tw-notebook-toolbar-jump">
+                                                    <Form.Control ref={pageNumberInputRef} type="text" defaultValue={pageNumber ? pageNumber : ''} className="tw-notebook-page-input" />
+                                                    <Button variant='link' size='sm' className='text-white' id="gotoPageBtn" onClick={pageNumberChanged}><i className="fa fa-arrow-right fa-lg" aria-hidden="true"></i></Button>
+                                                </div>
+                                                <div className="tw-notebook-toolbar-divider" />
+                                            </>
+                                        }
                                         <div className="tw-notebook-toolbar-group">
-                                            <Button variant='link' size='sm' className='text-white' id="gotoFirstItemBtn" onClick={onGotoFirstItem}><i className="fa fa-step-backward fa-lg" aria-hidden="true"></i></Button>
-                                            <Button variant='link' size='sm' className='text-white' id="gotoLastItemBtn" onClick={onGotoLastItem}><i className="fa fa-step-forward fa-lg" aria-hidden="true"></i></Button>
-                                            {router.asPath.includes('\/contents\/') && !showSearchBar &&
+                                            {showFirstLastButtons &&
+                                                <>
+                                                    <Button variant='link' size='sm' className='text-white' id="gotoFirstItemBtn" onClick={onGotoFirstItem}><i className="fa fa-step-backward fa-lg" aria-hidden="true"></i></Button>
+                                                    <Button variant='link' size='sm' className='text-white' id="gotoLastItemBtn" onClick={onGotoLastItem}><i className="fa fa-step-forward fa-lg" aria-hidden="true"></i></Button>
+                                                </>
+                                            }
+                                            {showAddItemDropdown &&
+                                                <Dropdown align="end" className={`justify-content-end ${BSafesStyle.mt3px}`}>
+                                                    <Dropdown.Toggle as={plusToggle} variant="link">
+
+                                                    </Dropdown.Toggle>
+
+                                                    <Dropdown.Menu>
+                                                        <Dropdown.Item onClick={() => handleAddClicked("addAnItemBefore")}>Add before</Dropdown.Item>
+                                                        <Dropdown.Item onClick={() => handleAddClicked("addAnItemAfter")}>Add after</Dropdown.Item>
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                            }
+                                            {showMoreButton &&
+                                                <Button variant='link' size='sm' className='text-white' onClick={onMore}><i className="fa fa-ellipsis-v fa-lg" aria-hidden="true"></i></Button>
+                                            }
+                                            {showSearchIcon &&
                                                 <Button variant='link' size='sm' className='text-white' onClick={onShowSearchBarClicked}><i className="fa fa-search fa-lg" aria-hidden="true"></i></Button>
                                             }
                                             <Button variant='link' size='sm' className='text-white' id="navHelpBtn" onClick={() => setShowNavHelpModal(true)} aria-label="Navigation help" title="Navigation help"><i className="fa fa-info-circle fa-lg" aria-hidden="true"></i></Button>
@@ -324,24 +357,50 @@ export default function TopControlPanel({ pageNumber = null, onCoverClicked = nu
                             <div className="tw-navhelp-list">
                                 <div className="tw-navhelp-item">
                                     <span className="tw-navhelp-icon"><i className="fa fa-square-o" aria-hidden="true"></i></span>
-                                    <span className="tw-navhelp-text"><strong>Cover</strong> — open the notebook cover.</span>
+                                    <span className="tw-navhelp-text"><strong>Cover</strong> — open this item&apos;s cover.</span>
                                 </div>
-                                <div className="tw-navhelp-item">
-                                    <span className="tw-navhelp-icon"><i className="fa fa-list-ul" aria-hidden="true"></i></span>
-                                    <span className="tw-navhelp-text"><strong>Contents</strong> — view the notebook contents.</span>
-                                </div>
-                                <div className="tw-navhelp-item">
-                                    <span className="tw-navhelp-icon"><i className="fa fa-arrow-right" aria-hidden="true"></i></span>
-                                    <span className="tw-navhelp-text"><strong>Page number</strong> — enter a page and go directly to it.</span>
-                                </div>
-                                <div className="tw-navhelp-item">
-                                    <span className="tw-navhelp-icon"><i className="fa fa-step-backward" aria-hidden="true"></i></span>
-                                    <span className="tw-navhelp-text"><strong>First page</strong> — jump to the beginning.</span>
-                                </div>
-                                <div className="tw-navhelp-item">
-                                    <span className="tw-navhelp-icon"><i className="fa fa-step-forward" aria-hidden="true"></i></span>
-                                    <span className="tw-navhelp-text"><strong>Last page</strong> — jump to the end.</span>
-                                </div>
+                                {showContentsIcon &&
+                                    <div className="tw-navhelp-item">
+                                        <span className="tw-navhelp-icon"><i className="fa fa-list-ul" aria-hidden="true"></i></span>
+                                        <span className="tw-navhelp-text"><strong>Contents</strong> — view the contents list.</span>
+                                    </div>
+                                }
+                                {!!pageNumber &&
+                                    <div className="tw-navhelp-item">
+                                        <span className="tw-navhelp-icon"><i className="fa fa-arrow-right" aria-hidden="true"></i></span>
+                                        <span className="tw-navhelp-text"><strong>Page number</strong> — enter a page and go directly to it.</span>
+                                    </div>
+                                }
+                                {showFirstLastButtons &&
+                                    <div className="tw-navhelp-item">
+                                        <span className="tw-navhelp-icon"><i className="fa fa-step-backward" aria-hidden="true"></i></span>
+                                        <span className="tw-navhelp-text"><strong>First item</strong> — jump to the beginning.</span>
+                                    </div>
+                                }
+                                {showFirstLastButtons &&
+                                    <div className="tw-navhelp-item">
+                                        <span className="tw-navhelp-icon"><i className="fa fa-step-forward" aria-hidden="true"></i></span>
+                                        <span className="tw-navhelp-text"><strong>Last item</strong> — jump to the end.</span>
+                                    </div>
+                                }
+                                {showAddItemDropdown &&
+                                    <div className="tw-navhelp-item">
+                                        <span className="tw-navhelp-icon"><i className="fa fa-plus" aria-hidden="true"></i></span>
+                                        <span className="tw-navhelp-text"><strong>Add</strong> — insert a new item before or after this one.</span>
+                                    </div>
+                                }
+                                {showMoreButton &&
+                                    <div className="tw-navhelp-item">
+                                        <span className="tw-navhelp-icon"><i className="fa fa-ellipsis-v" aria-hidden="true"></i></span>
+                                        <span className="tw-navhelp-text"><strong>More</strong> — rename, move, or delete this item.</span>
+                                    </div>
+                                }
+                                {showSearchIcon &&
+                                    <div className="tw-navhelp-item">
+                                        <span className="tw-navhelp-icon"><i className="fa fa-search" aria-hidden="true"></i></span>
+                                        <span className="tw-navhelp-text"><strong>Search</strong> — search this contents list.</span>
+                                    </div>
+                                }
                             </div>
                         </Modal.Body>
                     </Modal>

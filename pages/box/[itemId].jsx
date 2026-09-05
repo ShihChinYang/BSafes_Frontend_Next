@@ -8,6 +8,7 @@ import Col from 'react-bootstrap/Col'
 import Pagination from 'react-bootstrap/Pagination'
 
 import BSafesStyle from '../../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../../lib/twinPaperAppTheme';
 
 import Scripts from "../../components/scripts";
 import ContentPageLayout from '../../components/layouts/contentPageLayout';
@@ -33,6 +34,8 @@ export default function Box() {
     const router = useRouter();
 
     const [endOfContainer, setEndOfContainer] = useState(false);
+
+    useTwinPaperAppThemeBody();
 
     const changingPage = useSelector(state => state.page.changingPage);
     const pageItemId = useSelector(state => state.page.id);
@@ -203,7 +206,7 @@ export default function Box() {
 
     return (
         <div>
-            <div className={BSafesStyle.pageBackground}>
+            <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.pageBackground}>
                 <ContentPageLayout>
                     <PageItemWrapper itemId={router.query.itemId}>
                         <br />

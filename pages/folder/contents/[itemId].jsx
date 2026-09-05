@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 import BSafesStyle from '../../../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../../../lib/twinPaperAppTheme';
 
 import ContentPageLayout from '../../../components/layouts/contentPageLayout';
 import PageItemWrapper from "../../../components/pageItemWrapper";
@@ -34,6 +35,7 @@ export default function FolderContents() {
     const [showNewItemModal, setShowNewItemModal] = useState(false);
     const [searchValue, setSearchValue] = useState(null);
 
+    useTwinPaperAppThemeBody();
 
     const containerInWorkspace = useSelector(state => state.container.container);
     const mode = useSelector(state => state.container.mode);
@@ -142,7 +144,7 @@ export default function FolderContents() {
     }, [newItem]);
 
     return (
-        <div className={BSafesStyle.pageBackground}>
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.pageBackground}>
             <ContentPageLayout>
                 <PageItemWrapper itemId={router.query.itemId}>
                     <br />
@@ -152,7 +154,7 @@ export default function FolderContents() {
                             <div className={`${BSafesStyle.pagePanel}`}>
                                 <br />
                                 <br />
-                                <p className='fs-1 text-center'>Contents</p>
+                                <p className='fs-1 text-center tw-contents-title'>Contents</p>
                                 <Row className="justify-content-center">
                                     <AddAnItemButton pageOnly={true} addAnItem={addAnItem} />
                                 </Row>

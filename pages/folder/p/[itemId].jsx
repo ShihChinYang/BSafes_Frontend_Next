@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 import BSafesStyle from '../../../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../../../lib/twinPaperAppTheme';
 
 import Scripts from "../../../components/scripts";
 import ContentPageLayout from '../../../components/layouts/contentPageLayout';
@@ -27,7 +28,9 @@ export default function FolderPage() {
     const dispatch = useDispatch();
 
     const router = useRouter();
-    
+
+    useTwinPaperAppThemeBody();
+
     const changingPage = useSelector(state => state.page.changingPage);
     const pageItemId = useSelector(state => state.page.id);
     const container = useSelector(state => state.page.container);
@@ -122,8 +125,8 @@ export default function FolderPage() {
     }
 
     return (
-        <div className={BSafesStyle.pageBackground}>
-            <ContentPageLayout>            
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.pageBackground}>
+            <ContentPageLayout>
                 <PageItemWrapper itemId={router.query.itemId}>
                     <br />
                     <TopControlPanel onCoverClicked={handleCoverClicked} onContentsClicked={handleContentsClicked} onGotoFirstItem={handleGoToFirstItem} onGotoLastItem={handleGoToLastItem}></TopControlPanel>

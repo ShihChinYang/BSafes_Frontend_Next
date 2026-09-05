@@ -463,7 +463,7 @@
 }
 
 .containerOpenBtn {
-  background: #7F8C8D;
+  background: var(--tw-container-open-btn-bg, #7F8C8D);
   display: inline-block;
   margin: 0 1em 1em 0;
   padding-top: 16px;
@@ -549,7 +549,9 @@
 .boxCoverPanel {
   margin-bottom: 10px;
   background-color: #EBF5FB;
-  border-radius: 10px 10px 10px 10px;
+  border: var(--tw-page-panel-border, none);
+  border-radius: var(--tw-page-panel-radius, 10px 10px 10px 10px);
+  box-shadow: var(--tw-page-panel-shadow, none);
 }
 
 .boxItemCard {
@@ -575,7 +577,9 @@
 
 .folderCoverPanel {
   background-color: #FCF3CF;
-  border-radius: 0 20px 20px 0;
+  border: var(--tw-page-panel-border, none);
+  border-radius: var(--tw-page-panel-radius, 0 20px 20px 0);
+  box-shadow: var(--tw-page-panel-shadow, none);
   margin-right: 20px;
 }
 
@@ -600,7 +604,8 @@
 .notebookCoverPanel {
   border-left: 30px solid #000;
   background-color: #F2F3F4;
-  border-radius: 0 20px 20px 0;
+  border-radius: var(--tw-page-panel-radius, 0 20px 20px 0);
+  box-shadow: var(--tw-page-panel-shadow, none);
 }
 
 /* End of notebook */
@@ -616,8 +621,9 @@
 
 .diaryCoverPanel {
   border-left: 30px solid #000;
-  background-color: #FEF5E7;
-  border-radius: 0 20px 20px 0;
+  background-color: var(--tw-diary-cover-bg, #FEF5E7);
+  border-radius: var(--tw-page-panel-radius, 0 20px 20px 0);
+  box-shadow: var(--tw-page-panel-shadow, none);
 }
 
 .diaryWeekendItem {

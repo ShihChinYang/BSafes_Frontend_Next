@@ -7,6 +7,7 @@ import Col from 'react-bootstrap/Col'
 
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../lib/twinPaperAppTheme';
 
 import Scripts from "./scripts";
 import ContentPageLayout from './layouts/contentPageLayout';
@@ -43,6 +44,8 @@ export default function NotebookCoverCommon({ demo = false }) {
 
     const [titleEditorMode, setTitleEditorMode] = useState("ReadOnly");
     const titleEditorContent = useSelector(state => state.page.title);
+
+    useTwinPaperAppThemeBody();
 
     const product = demo ? NotebookDemo : 'notebook';
     let productId = ""
@@ -139,7 +142,7 @@ export default function NotebookCoverCommon({ demo = false }) {
     }, [activity]);
     return (
         <div>
-            <div className={BSafesStyle.pageBackground}>
+            <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.pageBackground}>
                 <ContentPageLayout>
                     <PageItemWrapper itemId={router.query.itemId}>
                         <br />

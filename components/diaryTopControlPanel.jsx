@@ -8,6 +8,7 @@ import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import InputGroup from 'react-bootstrap/InputGroup';
 import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
 
 import ReactDatePicker from 'react-datepicker'
 
@@ -25,6 +26,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
     const [showSearchBar, setShowSearchBar] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [showFeatureNotAvailableForDemoToast, setShowFeatureNotAvailableForDemoToast] = useState(false);
+    const [showNavHelpModal, setShowNavHelpModal] = useState(false);
     const productId = useSelector(state => state.product.currentProduct);
     let theProduct = {};
     if (productId !== "") {
@@ -86,7 +88,33 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
                 <Row>
                     <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
                         <Card className={`${controlPanelStyle} tw-navbar-card`}>
-                            <Card.Body className={BSafesStyle.diaryControlPanelBody}>
+                            <Card.Body className={isTwinPaper ? '' : BSafesStyle.diaryControlPanelBody}>
+                                {isTwinPaper ? (
+                                    <div className="tw-notebook-toolbar">
+                                        <div className="tw-notebook-toolbar-group">
+                                            <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-square-o fa-lg" aria-hidden="true"></i></Button>
+                                            {showListIcon && <Button variant='link' size='sm' className='text-white' onClick={onContentsClicked}><i className="fa fa-list-ul fa-lg" aria-hidden="true"></i></Button>}
+                                        </div>
+                                        <div className="tw-notebook-toolbar-divider" />
+                                        <div className="tw-notebook-toolbar-group tw-notebook-toolbar-jump">
+                                            <ReactDatePicker
+                                                selected={startDate}
+                                                onChange={(date) => setStartDate(date)}
+                                                customInput={<ExampleCustomInput />}
+                                                showPopperArrow={false}
+                                                popperPlacement="bottom-end"
+                                                {...extraProps}
+                                            />
+                                        </div>
+                                        <div className="tw-notebook-toolbar-divider" />
+                                        <div className="tw-notebook-toolbar-group">
+                                            {router.asPath.includes('\/contents\/') && !showSearchBar &&
+                                                <Button variant='link' size='sm' className='text-white' onClick={onShowSearchBarClicked}><i className="fa fa-search fa-lg" aria-hidden="true"></i></Button>
+                                            }
+                                            <Button variant='link' size='sm' className='text-white' id="navHelpBtn" onClick={() => setShowNavHelpModal(true)} aria-label="Navigation help" title="Navigation help"><i className="fa fa-info-circle fa-lg" aria-hidden="true"></i></Button>
+                                        </div>
+                                    </div>
+                                ) : (
                                 <Row>
                                     <Col xs={4}>
                                         <Button variant='link' size='sm' className='text-white' onClick={onCoverClicked}><i className="fa fa-book fa-lg" aria-hidden="true"></i></Button>
@@ -110,6 +138,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
                                         </div>
                                     </Col>
                                 </Row>
+                                )}
                             </Card.Body>
                         </Card>
                     </Col>
@@ -138,6 +167,33 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
                             </Col>
                         </Row>
                     </>
+                }
+                {isTwinPaper &&
+                    <Modal show={showNavHelpModal} onHide={() => setShowNavHelpModal(false)} centered className="tw-navhelp-modal">
+                        <Modal.Header closeButton>
+                            <Modal.Title className="tw-navhelp-title">Page navigation</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div className="tw-navhelp-list">
+                                <div className="tw-navhelp-item">
+                                    <span className="tw-navhelp-icon"><i className="fa fa-square-o" aria-hidden="true"></i></span>
+                                    <span className="tw-navhelp-text"><strong>Cover</strong> — open the diary cover.</span>
+                                </div>
+                                <div className="tw-navhelp-item">
+                                    <span className="tw-navhelp-icon"><i className="fa fa-list-ul" aria-hidden="true"></i></span>
+                                    <span className="tw-navhelp-text"><strong>Contents</strong> — view the diary contents for the month.</span>
+                                </div>
+                                <div className="tw-navhelp-item">
+                                    <span className="tw-navhelp-icon"><i className="fa fa-calendar" aria-hidden="true"></i></span>
+                                    <span className="tw-navhelp-text"><strong>Date picker</strong> — jump to another day or month.</span>
+                                </div>
+                                <div className="tw-navhelp-item">
+                                    <span className="tw-navhelp-icon"><i className="fa fa-search" aria-hidden="true"></i></span>
+                                    <span className="tw-navhelp-text"><strong>Search</strong> — search entries by keyword.</span>
+                                </div>
+                            </div>
+                        </Modal.Body>
+                    </Modal>
                 }
 
             </>

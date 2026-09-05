@@ -13,6 +13,7 @@ import Button from 'react-bootstrap/Button';
 import ContentPageLayout from '../../components/layouts/contentPageLayout'
 
 import BSafesStyle from '../../styles/BSafes.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../../lib/twinPaperAppTheme';
 
 import { initWorkspaceThunk, initContainer, changeContainerOnly, setWorkspaceKeyReady, clearActivities, listActivitiesThunk } from '../../reduxStore/containerSlice';
 import { abort, initPage, clearPage, itemPathLoaded } from '../../reduxStore/pageSlice';
@@ -27,6 +28,8 @@ export default function Activities(props) {
     const router = useRouter();
 
     const [readyToList, setReadyToList] = useState(false);
+
+    useTwinPaperAppThemeBody();
 
     const accountVersion = useSelector(state => state.auth.accountVersion);
     const loggedIn = useSelector(state => state.auth.isLoggedIn);
@@ -110,7 +113,7 @@ export default function Activities(props) {
     }, [readyToList, container, workspaceId, workspaceKeyReady]);
 
     return (
-        <div className={BSafesStyle.spaceBackground}>
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.spaceBackground}>
             <ContentPageLayout key={router.pathname}>
                 <Container fluid>
                     <br />

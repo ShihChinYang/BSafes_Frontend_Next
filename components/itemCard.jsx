@@ -21,7 +21,7 @@ export default function ItemCard({ itemIndex, item, onAdd, isOpenable = true }) 
     const router = useRouter();
     const dispatch = useDispatch();
 
-    const cardStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) ? BSafesStyle.boxItemCard : BSafesStyle.safeItem
+    const cardStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) ? `${BSafesStyle.boxItemCard} tw-classic-card` : BSafesStyle.safeItem
     const cardBodyStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) ? BSafesStyle.boxItemCardBody : ''
     const cardRowStyle = (router.asPath.includes('\/box\/contents\/') || router.asPath.includes('\/trashBox\/')) ? 'mx-1' : ''
 

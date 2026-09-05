@@ -77,6 +77,13 @@
   --tw-dropzone-gap: 6px;
   --tw-dropzone-br-display: none;
 
+  /* Container cover panels (box, notebook, diary, folder — BSafes.module.css). */
+  --tw-container-open-btn-bg: var(--tw-orange);
+  /* Diary's original cream (#FEF5E7) reads too close to --tw-ground here —
+     swap in a warmer, more saturated apricot so the cover still pops off the
+     page. */
+  --tw-diary-cover-bg: #f6d2a8;
+
   /* --- Bootstrap globals --- */
   --bs-body-bg: var(--tw-ground);
   --bs-body-color: var(--tw-ink);
@@ -171,6 +178,21 @@ body.tw-app-theme .navbar {
 .tw-app-theme .card.tw-navbar-card:hover {
   border-color: var(--bs-card-border-color);
   box-shadow: 0 1px 2px rgba(26, 29, 37, 0.05), 0 8px 18px rgba(26, 29, 37, 0.08);
+  transform: none;
+}
+
+/* Box contents / trashBox item rows (components/itemCard.jsx, productCard.jsx)
+   keep the original plain BSafes row look — flush rows separated by <hr>,
+   no card chrome — rather than the generic lifted item-card treatment above. */
+.tw-app-theme .card.tw-classic-card {
+  --bs-card-bg: #fff;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+.tw-app-theme .card.tw-classic-card:hover {
+  border-color: transparent;
+  box-shadow: none;
   transform: none;
 }
 
@@ -499,6 +521,14 @@ body.tw-app-theme .modal {
 }
 .tw-app-theme .tw-notebook-toolbar-group:last-child {
   justify-self: end;
+}
+/* Non-paginated containers (box, folder, single page, …) have no page-jump
+   control for the center track, so there's nothing to genuinely center —
+   fall back to a plain two-group bar instead of the empty grid tracks. */
+.tw-app-theme .tw-notebook-toolbar-plain {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .tw-app-theme .tw-notebook-toolbar-jump {
   justify-self: center;

@@ -9,6 +9,7 @@ import format from "date-fns/format";
 
 import BSafesStyle from '../styles/BSafes.module.css'
 import BSafesProductsStyle from '../styles/bsafesProducts.module.css'
+import { isTwinPaper, twinAppThemeClasses, useTwinPaperAppThemeBody } from '../lib/twinPaperAppTheme';
 
 import ContentPageLayout from './layouts/contentPageLayout';
 import PageItemWrapper from "./pageItemWrapper";
@@ -32,6 +33,8 @@ export default function DiaryContentsCommon({ demo = false }) {
     const pageRef = useRef(null);
 
     const [searchValue, setSearchValue] = useState(null);
+
+    useTwinPaperAppThemeBody();
 
     const space = useSelector(state => state.page.space);
 
@@ -170,7 +173,7 @@ export default function DiaryContentsCommon({ demo = false }) {
     }, [itemsState]);
 
     return (
-        <div className={BSafesStyle.pageBackground}>
+        <div className={isTwinPaper ? twinAppThemeClasses : BSafesStyle.pageBackground}>
             <ContentPageLayout>
                 <PageItemWrapper itemId={router.query.itemId}>
                     <br />
@@ -186,7 +189,7 @@ export default function DiaryContentsCommon({ demo = false }) {
                             <div ref={pageRef} className={`${panelStyle}`}>
                                 <br />
                                 <br />
-                                <p className='fs-1 text-center'>{currentMonthYear}</p>
+                                <p className='fs-1 text-center tw-contents-title'>{currentMonthYear}</p>
                                 <Row>
                                     <Col className={dayColStyle}>
                                         <p className="fs-5">Day</p>
