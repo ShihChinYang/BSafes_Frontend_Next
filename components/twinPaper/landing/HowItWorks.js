@@ -13,12 +13,12 @@ const STEPS = [
   {
     n: "02",
     t: "Twin",
-    d: "A snap makes an encrypted twin — an exact image of the page, not text. You hold the keys.",
+    d: "Snap creates an encrypted twin — exact image of the page, not a transcription. You hold the keys. We never see it.",
   },
   {
     n: "03",
     t: "Make it useful",
-    d: "Title, tag, enrich — attach photos, audio, video, and files. Now it's searchable and connected.",
+    d: "Title, tag, enrich. Add a test annotation, prototype photo, experiment video, voice observation, CAD drawing, or specification. It all stays searchable, connected, and private.",
   },
 ];
 

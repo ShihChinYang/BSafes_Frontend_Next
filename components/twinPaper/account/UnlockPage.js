@@ -45,19 +45,21 @@ const PRINCIPLES = [
   },
 ];
 
-export default function UnlockPage() {
-  const [nick, setNick] = useState("");
-  const [pwd, setPwd] = useState("");
+/**
+ * Twin Paper "unlock" view. Presentational only — all state and the real
+ * login/recovery logic live in pages/logIn.jsx (isTwinPaper branch).
+ */
+export default function UnlockPage({
+  nickname = "",
+  onNicknameChange = () => {},
+  password = "",
+  onPasswordChange = () => {},
+  canSubmit = false,
+  busy = false,
+  onSubmit = () => {},
+  onRecover = () => {},
+}) {
   const [showPwd, setShowPwd] = useState(false);
-  const [btnLabel, setBtnLabel] = useState("Unlock");
-
-  const disabled = !(nick.trim().length >= 1 && pwd.length >= 1);
-
-  const submit = () => {
-    if (disabled) return;
-    setBtnLabel("Unlocking…");
-    setTimeout(() => setBtnLabel("Unlock"), 600);
-  };
 
   return (
     <div className="tw-account unlock">
@@ -102,13 +104,18 @@ export default function UnlockPage() {
               <p>Enter your nickname and key password.</p>
             </div>
 
-            <Form onSubmit={(e) => e.preventDefault()}>
+            <Form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (canSubmit) onSubmit();
+              }}
+            >
               <div className="field">
                 <div className="label-row">
                   <label className="label" htmlFor="nick">
                     Nickname
                   </label>
-                  <span className="counter">{nick.length}/24</span>
+                  <span className="counter">{nickname.length}/24</span>
                 </div>
                 <div className="input-wrap">
                   <Form.Control
@@ -117,8 +124,8 @@ export default function UnlockPage() {
                     autoComplete="username"
                     placeholder="Your nickname"
                     maxLength={24}
-                    value={nick}
-                    onChange={(e) => setNick(e.target.value)}
+                    value={nickname}
+                    onChange={(e) => onNicknameChange(e.target.value)}
                   />
                 </div>
               </div>
@@ -136,8 +143,8 @@ export default function UnlockPage() {
                     type={showPwd ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="Enter your key password"
-                    value={pwd}
-                    onChange={(e) => setPwd(e.target.value)}
+                    value={password}
+                    onChange={(e) => onPasswordChange(e.target.value)}
                   />
                   <button
                     className="eye"
@@ -152,17 +159,19 @@ export default function UnlockPage() {
 
               <button
                 className="btn"
-                type="button"
-                disabled={disabled}
-                onClick={submit}
+                type="submit"
+                disabled={!canSubmit || busy}
               >
-                {btnLabel}
+                {busy ? "Unlocking…" : "Unlock"}
               </button>
               <div className="below">
                 <a
                   href="#"
                   className="recover"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onRecover();
+                  }}
                 >
                   Recover access
                 </a>
@@ -175,7 +184,7 @@ export default function UnlockPage() {
               <div className="switch">
                 New to Twin Paper?
                 <br />
-                <Link href="/create">Create a Twin Paper account</Link>
+                <Link href="/keySetup">Create a Twin Paper account</Link>
                 <span className="trial">30-day free</span>
               </div>
             </Form>

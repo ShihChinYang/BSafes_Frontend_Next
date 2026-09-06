@@ -39,31 +39,30 @@ export default function Waitlist() {
                 }}
               >
                 For consultants, researchers, designers, writers, journalers, and
-                founders whose paper holds work worth carrying forward.
+                founders whose paper holds work worth carrying forward. Built for
+                one. Designed to stay private.
               </p>
             </Col>
             <Col lg={5}>
               {!done ? (
-                <Form onSubmit={submit} className="d-flex flex-column gap-3">
-                  <Form.Control
-                    className="input-pill"
-                    placeholder="you@firm.com"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <button
-                    className="btn-dark-ink w-100 d-block text-center"
-                    style={{
-                      padding: "16px 24px",
-                      fontSize: "15px",
-                      textDecoration: "none",
-                    }}
-                    type="submit"
-                  >
-                    Reserve my spot →
-                  </button>
+                <Form onSubmit={submit} className="d-flex flex-column gap-2">
+                  <div className="d-flex gap-2">
+                    <Form.Control
+                      className="input-pill flex-grow-1"
+                      placeholder="you@firm.com"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <button
+                      className="btn-dark-ink"
+                      style={{ padding: "12px 18px" }}
+                      type="submit"
+                    >
+                      Reserve
+                    </button>
+                  </div>
                   <div className="mono" style={{ fontSize: 10, opacity: 0.5 }}>
                     No spam. No AI training. Only when it&rsquo;s ready.
                   </div>

@@ -46,7 +46,7 @@ export default function TwinFooter() {
               className="mono"
               style={{ fontSize: 10, opacity: 0.35, whiteSpace: "nowrap" }}
             >
-              v3.6 — real photos
+              v3.7 — sharpened
             </span>
           </div>
         </div>

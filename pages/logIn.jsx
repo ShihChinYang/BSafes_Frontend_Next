@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useRouter } from "next/router";
 
@@ -12,11 +12,14 @@ import Button from 'react-bootstrap/Button'
 import BSafesStyle from '../styles/BSafes.module.css'
 
 import { debugLog, getNickname } from '../lib/helper'
+import { authActivity } from '../lib/activities'
+import { isTwinPaper } from '../lib/twinPaperAppTheme'
 
 import ContentPageLayout from '../components/layouts/contentPageLayout';
 import KeyInput from "../components/keyInput";
 import RecoverAccountModal from '../components/recoverAccountModal';
 import Turnstile from '../components/turnstile';
+import UnlockPage from '../components/twinPaper/account/UnlockPage';
 
 import { logInAsyncThunk, setGotoFirstPagetAfterLoggedIn } from '../reduxStore/auth'
 
@@ -36,6 +39,8 @@ export default function LogIn() {
     const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
     const memberId = useSelector(state => state.auth.memberId);
     const [toPath, setToPath] = useState(null);
+
+    const busy = (activity & authActivity.LogIn) !== 0;
 
     const nicknameChanged = (e) => {
         setNickname(e.target.value);
@@ -91,6 +96,24 @@ export default function LogIn() {
             }
         }
     }, [isLoggedIn])
+
+    if (isTwinPaper) {
+        return (
+            <ContentPageLayout showNaveBar={false} showNavbarMenu={false} showPathRow={false}>
+                <UnlockPage
+                    nickname={nickname}
+                    onNicknameChange={setNickname}
+                    password={keyPassword}
+                    onPasswordChange={setKeyPassword}
+                    canSubmit={!!(nickname.trim() && keyPassword)}
+                    busy={busy}
+                    onSubmit={handleSubmit}
+                    onRecover={handleRecover}
+                />
+                {recovery && <RecoverAccountModal callback={handleRecoverCallback} />}
+            </ContentPageLayout>
+        );
+    }
 
     return (
         <div className={`${BSafesStyle.minHeight100Percent}`} style={{ backgroundColor: "#F8F9F9" }}>

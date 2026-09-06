@@ -11,8 +11,8 @@ export default function IdeaSection() {
       className="section"
       style={{
         borderTop: "1px solid var(--border)",
-        paddingTop: 96,
-        paddingBottom: 96,
+        paddingTop: 72,
+        paddingBottom: 56,
       }}
     >
       <Container>
@@ -29,6 +29,10 @@ export default function IdeaSection() {
           >
             The page stays. The thought travels.
           </h2>
+          <p style={{ fontSize: 18, opacity: 0.7, marginTop: 12, lineHeight: 1.5 }}>
+            Paper remains the original. The Twin is how that thought survives and
+            continues.
+          </p>
         </div>
 
         <Row className="g-4 justify-content-center mt-4">
@@ -50,7 +54,7 @@ export default function IdeaSection() {
                 <span style={{ width: 16, height: 1, background: "var(--border)" }} />
               </div>
               <div style={{ fontSize: 13, opacity: 0.7, marginTop: 6 }}>
-                Ink, edges, crossings — exactly as you left them.
+                Ink, edges, crossings — unchanged. Never transcribed.
               </div>
             </div>
           </Col>
@@ -78,11 +82,29 @@ export default function IdeaSection() {
                 />
               </div>
               <div style={{ fontSize: 13, opacity: 0.8, marginTop: 6 }}>
-                The same page — plus a title, tags, and anything that belongs with it.
+                Same page. You add title &amp; tags. Attach photos, voice, video,
+                files.
               </div>
             </div>
           </Col>
         </Row>
+
+        <div className="text-center" data-reveal>
+          <p
+            className="serif-italic"
+            style={{
+              fontSize: 16,
+              opacity: 0.55,
+              maxWidth: 520,
+              margin: "24px auto 0",
+              lineHeight: 1.5,
+            }}
+          >
+            We don&rsquo;t use OCR or AI to read your handwriting. Search works
+            because you title and tag the twin. That&rsquo;s why it can stay
+            encrypted — only you know what a page means.
+          </p>
+        </div>
       </Container>
     </section>
   );

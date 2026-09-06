@@ -5,6 +5,7 @@ import TrustBar from "./TrustBar";
 import TpContext from "./TpContext";
 import TwinDemo from "./TwinDemo";
 import WorkspaceSection from "./WorkspaceSection";
+import CloudStorageSection from "./CloudStorageSection";
 import IdeaSection from "./IdeaSection";
 import HowItWorks from "./HowItWorks";
 import PrivacySection from "./PrivacySection";
@@ -57,6 +58,7 @@ export default function LandingPage() {
       <TpContext />
       <TwinDemo />
       <WorkspaceSection />
+      <CloudStorageSection />
       <IdeaSection />
       <HowItWorks />
       <PrivacySection />

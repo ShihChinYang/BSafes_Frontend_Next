@@ -38,10 +38,10 @@ export default function TwinNav() {
               <a href="#pricing" onClick={jump("#pricing")}>
                 Pricing
               </a>
-              <Link href="/unlock" className="nav-account-unlock" onClick={() => setOpen(false)}>
+              <Link href="/logIn" className="nav-account-unlock" onClick={() => setOpen(false)}>
                 Unlock
               </Link>
-              <Link href="/create" className="nav-account-create" onClick={() => setOpen(false)}>
+              <Link href="/keySetup" className="nav-account-create" onClick={() => setOpen(false)}>
                 Create account
               </Link>
             </div>

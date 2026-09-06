@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Link from 'next/link';
 
 import Container from 'react-bootstrap/Container'
@@ -13,6 +13,8 @@ import Modal from 'react-bootstrap/Modal'
 import BSafesStyle from '../styles/BSafes.module.css'
 
 import { debugLog } from '../lib/helper'
+import { authActivity } from '../lib/activities'
+import { isTwinPaper } from '../lib/twinPaperAppTheme'
 
 import ContentPageLayout from '../components/layouts/contentPageLayout';
 import PrivacyPolicyModal from '../components/privacyPolicyModal';
@@ -20,6 +22,7 @@ import TermsOfServiceModal from '../components/termsOfServiceModal';
 import Scripts from '../components/scripts'
 
 import KeyInput from "../components/keyInput";
+import CreatePage from '../components/twinPaper/account/CreatePage';
 
 import { keySetupAsyncThunk } from '../reduxStore/auth'
 
@@ -30,6 +33,9 @@ export default function KeySetup() {
     const debugOn = false;
     const dispatch = useDispatch();
 
+    const authActivityState = useSelector(state => state.auth.activity);
+
+    const [nickname, setNickname] = useState("");
     const [keyPassword, setKeyPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [keyStrength, setKeyStrength] = useState('');
@@ -44,8 +50,9 @@ export default function KeySetup() {
     const [keyReady, setKeyReady] = useState(false);
     const [showPrivacy, setShowPrivacy] = useState(false);
     const [showTerms, setShowTerms] = useState(false);
-    const nicknameRef = useRef(null);
     const [showConfirm, setShowConfirm] = useState(false);
+
+    const busy = (authActivityState & authActivity.KeySetup) !== 0;
 
     function checkKeyStrength(key) {
         debugLog(debugOn, "Checking key strength:", key.length);
@@ -93,7 +100,7 @@ export default function KeySetup() {
     }
 
     const handlePrivacy = (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         setShowPrivacy(true);
     }
 
@@ -102,7 +109,7 @@ export default function KeySetup() {
     }
 
     const handleTerms = (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         setShowTerms(true);
     }
 
@@ -121,7 +128,7 @@ export default function KeySetup() {
     const handleUnderstood = () => {
         setShowConfirm(false);
         debugLog(debugOn, "handleUnderstood");
-        dispatch(keySetupAsyncThunk({ nickname: nicknameRef.current.value, keyPassword: keyPassword }));
+        dispatch(keySetupAsyncThunk({ nickname, keyPassword }));
     }
 
     useEffect(() => {
@@ -131,6 +138,65 @@ export default function KeySetup() {
             setKeyReady(false);
         }
     }, [keyStrength, keyPassword, confirmPassword]);
+
+    const confirmModal = (
+        <Modal
+            show={showConfirm}
+            onHide={handleCloseConfirm}
+            backdrop="static"
+            keyboard={false}
+        >
+            <Modal.Header closeButton>
+                <Modal.Title>Remember your key?</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                Write your nickname and password in a secure location, as we cannot recover your key.
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseConfirm}>
+                    Close
+                </Button>
+                <Button variant="primary" onClick={handleUnderstood}>Understood</Button>
+            </Modal.Footer>
+        </Modal>
+    );
+
+    const modals = (
+        <>
+            {showPrivacy && <PrivacyPolicyModal callback={handlePrivacyCallback} />}
+            {showTerms && <TermsOfServiceModal callback={handleTermsCallback} />}
+        </>
+    );
+
+    if (isTwinPaper) {
+        return (
+            <ContentPageLayout showNaveBar={false} showNavbarMenu={false} showPathRow={false}>
+                <CreatePage
+                    nickname={nickname}
+                    onNicknameChange={setNickname}
+                    password={keyPassword}
+                    onPasswordChange={keyPasswordChanged}
+                    confirm={confirmPassword}
+                    onConfirmChange={confirmPasswordChanged}
+                    rules={{
+                        len: rule1Checked,
+                        num: rule2Checked,
+                        upper: rule3Checked,
+                        lower: rule4Checked,
+                        sym: rule5Checked,
+                        long: rule6Checked,
+                    }}
+                    canSubmit={keyReady && nickname.trim().length >= 2}
+                    busy={busy}
+                    onSubmit={handleSubmit}
+                    onShowPrivacy={handlePrivacy}
+                    onShowTerms={handleTerms}
+                />
+                {confirmModal}
+                {modals}
+            </ContentPageLayout>
+        );
+    }
 
     return (
         <div className={`${BSafesStyle.minHeight100Percent}`} style={{ backgroundColor: "#F8F9F9" }}>
@@ -144,7 +210,7 @@ export default function KeySetup() {
                                 <Form>
                                     <Form.Group className="mb-1" controlId="Nickname">
                                         <Form.Label style={{ fontSize: "1.2rem" }}>Nickname</Form.Label>
-                                        <Form.Control ref={nicknameRef} size="md" type="text" placeholder='Enter a nickname' />
+                                        <Form.Control size="md" type="text" placeholder='Enter a nickname' value={nickname} onChange={(e) => setNickname(e.target.value)} />
                                     </Form.Group>
                                     <h5></h5>
                                     <Form.Group key='keyPassword' className="mb-1" controlId="keyPassword">
@@ -178,33 +244,14 @@ export default function KeySetup() {
                                         <Link href='/logIn' style={{ textDecoration: 'none', fontSize: '0.8rem' }}>Unlock BSafes</Link>
                                     </Col>
                                 </Row>
-                                {showPrivacy && <PrivacyPolicyModal callback={handlePrivacyCallback} />}
-                                {showTerms && <TermsOfServiceModal callback={handleTermsCallback} />}
                             </Card>
                         </Col>
                     </Row>
                     <br />
                     <br />
                     <br />
-                    <Modal
-                        show={showConfirm}
-                        onHide={handleCloseConfirm}
-                        backdrop="static"
-                        keyboard={false}
-                    >
-                        <Modal.Header closeButton>
-                            <Modal.Title>Remember your key?</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            Write your nickname and password in a secure location, as we cannot recover your key.
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={handleCloseConfirm}>
-                                Close
-                            </Button>
-                            <Button variant="primary" onClick={handleUnderstood}>Understood</Button>
-                        </Modal.Footer>
-                    </Modal>
+                    {confirmModal}
+                    {modals}
                 </Container>
                 <Scripts />
             </ContentPageLayout>

@@ -500,6 +500,22 @@ html {
     max-width: 100%;
   }
 }
+/* --- V28: tighter hero rhythm + shorter hero image on phones --- */
+@media (max-width: 991px) {
+  .tw-landing .hero {
+    padding-top: 16px;
+  }
+  .tw-landing .hero-image-frame {
+    margin-bottom: 16px;
+  }
+  .tw-landing .hero-image-frame img {
+    width: 100%;
+    min-height: 40vh;
+    max-height: 48vh;
+    object-fit: cover;
+    object-position: center;
+  }
+}
 .tw-landing .nav-account-unlock,
 .tw-landing .nav-account-create {
   border-radius: 999px;

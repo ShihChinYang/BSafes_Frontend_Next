@@ -1346,3 +1346,127 @@
     min-width: min(100%, 240px);
   }
 }
+
+/* ---------- "Why not just use cloud storage?" section (V28) ---------- */
+.tp-cloud-section {
+  padding: 0 0 88px;
+  background: var(--paper-2, #f6f1e8);
+  color: var(--ink, #1a1a1a);
+}
+.tp-cloud-wrap {
+  width: min(1120px, calc(100% - 40px));
+  margin: auto;
+}
+.tp-cloud-card {
+  border: 1px solid var(--border, #ded7cc);
+  border-radius: 22px;
+  background: #fffdf8;
+  padding: 42px 46px 36px;
+  box-shadow: 0 18px 50px rgba(57, 43, 28, 0.055);
+}
+.tp-cloud-kicker {
+  font: 500 11px/1.2 ui-monospace, monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+.tp-cloud-title {
+  font: 400 clamp(32px, 4.2vw, 50px) / 1.02 Georgia, serif;
+  letter-spacing: -0.035em;
+  margin: 13px 0 30px;
+  max-width: 800px;
+}
+.tp-cloud-paths {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.tp-cloud-path {
+  border: 1px solid #ddd6cb;
+  border-radius: 16px;
+  padding: 22px 24px;
+  min-width: 0;
+}
+.tp-cloud-path-muted {
+  background: #f6f3ed;
+  color: rgba(26, 26, 26, 0.66);
+}
+.tp-cloud-path-twin {
+  background: #1d1d1b;
+  color: #f7f2e9;
+  border-color: #1d1d1b;
+}
+.tp-cloud-label {
+  font: 500 10px/1 ui-monospace, monospace;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 17px;
+}
+.tp-cloud-flow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.tp-cloud-flow b {
+  font-weight: 400;
+  opacity: 0.38;
+}
+.tp-cloud-flow code {
+  font: 12px/1.2 ui-monospace, monospace;
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.05);
+}
+.tp-cloud-path-twin .tp-cloud-flow {
+  font-family: Georgia, serif;
+  font-size: 17px;
+}
+.tp-cloud-twin {
+  padding: 5px 9px;
+  border: 1px solid rgba(199, 155, 87, 0.6);
+  border-radius: 999px;
+  color: #e3b66e;
+}
+.tp-cloud-path p {
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.56;
+  margin: 15px 0 0;
+}
+.tp-cloud-path-twin p {
+  color: rgba(247, 242, 233, 0.78);
+  opacity: 1;
+}
+.tp-cloud-close {
+  font: italic 21px/1.4 Georgia, serif;
+  text-align: center;
+  margin-top: 28px;
+  color: rgba(26, 26, 26, 0.76);
+}
+@media (max-width: 760px) {
+  .tp-cloud-section {
+    padding-bottom: 64px;
+  }
+  .tp-cloud-wrap {
+    width: min(100% - 28px, 1120px);
+  }
+  .tp-cloud-card {
+    padding: 30px 20px 28px;
+    border-radius: 18px;
+  }
+  .tp-cloud-paths {
+    grid-template-columns: 1fr;
+  }
+  .tp-cloud-title {
+    margin-bottom: 24px;
+  }
+  .tp-cloud-close {
+    text-align: left;
+    font-size: 19px;
+    margin-top: 22px;
+  }
+}

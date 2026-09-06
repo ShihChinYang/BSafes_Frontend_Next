@@ -7,8 +7,8 @@ import Col from "react-bootstrap/Col";
 const LOSS_POINTS = [
   {
     n: "01 —",
-    title: "If it's lost or stolen, you still have it.",
-    body: "Your encrypted Twin stays protected, with access only on your device.",
+    title: "Keep building on the page.",
+    body: "Add photos, videos, voice notes, PDFs, and other files to its Twin.",
   },
   {
     n: "02 —",
@@ -63,22 +63,11 @@ export default function Hero() {
                   marginTop: "14px",
                 }}
               >
-                I just don&apos;t want to lose what I wrote.
+                I want my paper to do more&mdash;and never lose what I wrote.
               </em>
             </h1>
 
             <div style={{ marginTop: "32px", maxWidth: "520px" }}>
-              <p
-                style={{
-                  fontSize: "18px",
-                  lineHeight: "1.55",
-                  fontWeight: "600",
-                  color: "var(--ink)",
-                  marginBottom: "10px",
-                }}
-              >
-                That&apos;s why we built Twin Paper.
-              </p>
               <p
                 style={{
                   fontSize: "17px",
@@ -92,16 +81,16 @@ export default function Hero() {
                   Any notebook. Any pen.{" "}
                 </span>
                 <span>
-                  Every page gets a secure, encrypted Twin you can find later—even
-                  if the original is lost, stolen, spilled on, or somewhere else.
+                  Every page gets a secure, encrypted Twin you can find later—and
+                  keep building on.
                 </span>
               </p>
               <div
                 style={{
                   borderTop: "1px solid rgba(26,26,26,0.12)",
                   borderBottom: "1px solid rgba(26,26,26,0.12)",
-                  padding: "18px 0",
-                  marginTop: "22px",
+                  padding: "16px 0",
+                  marginTop: "18px",
                   marginBottom: "8px",
                 }}
               >
@@ -179,16 +168,16 @@ export default function Hero() {
               <h2
                 style={{
                   fontFamily: "var(--display, Georgia, serif)",
-                  fontSize: "clamp(28px, 3.2vw, 40px)",
-                  lineHeight: "0.9",
-                  letterSpacing: "-0.03em",
-                  fontWeight: "700",
-                  textTransform: "uppercase",
+                  fontSize: "clamp(18px, 2vw, 23px)",
+                  lineHeight: "1.15",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "500",
+                  fontStyle: "italic",
                 }}
               >
-                KEEP PAPER.
+                Keep the paper.
                 <br />
-                LOSE THE RISK.
+                Lose the risk.
               </h2>
               <div
                 style={{
@@ -200,17 +189,28 @@ export default function Hero() {
                 }}
               >
                 <a
-                  href="#demo"
-                  className="btn-outline"
+                  href="#waitlist"
+                  className="btn-dark-ink"
                   style={{
                     borderRadius: "999px",
                     padding: "14px 26px",
                     fontSize: "14px",
-                    background: "transparent",
                     textDecoration: "none",
                   }}
                 >
-                  See how it works →
+                  Join the waitlist
+                </a>
+                <a
+                  href="#demo"
+                  style={{
+                    padding: "10px 4px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "var(--ink)",
+                    textDecoration: "none",
+                  }}
+                >
+                  See Twin Paper in action →
                 </a>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Form from "react-bootstrap/Form";
 import AccountNav from "./AccountNav";
 import { HERO } from "../landing/assets";
@@ -28,38 +28,29 @@ const RULES = [
   ["long", "16+ recommended"],
 ];
 
-function checkRules(v) {
-  return {
-    len: v.length >= 8,
-    num: /[0-9]/.test(v),
-    upper: /[A-Z]/.test(v),
-    lower: /[a-z]/.test(v),
-    sym: /[!@#$%^&*]/.test(v),
-    long: v.length >= 16,
-  };
-}
-
-export default function CreatePage() {
-  const [nick, setNick] = useState("");
-  const [pwd, setPwd] = useState("");
-  const [pwd2, setPwd2] = useState("");
+/**
+ * Twin Paper "create account" view. Presentational only — all state and the
+ * real account-creation logic live in pages/keySetup.jsx (isTwinPaper branch).
+ */
+export default function CreatePage({
+  nickname = "",
+  onNicknameChange = () => {},
+  password = "",
+  onPasswordChange = () => {},
+  confirm = "",
+  onConfirmChange = () => {},
+  rules = {},
+  canSubmit = false,
+  busy = false,
+  onSubmit = () => {},
+  onShowPrivacy = () => {},
+  onShowTerms = () => {},
+}) {
   const [showPwd, setShowPwd] = useState(false);
   const [showPwd2, setShowPwd2] = useState(false);
-  const [btnLabel, setBtnLabel] = useState("Create account");
 
-  const r = useMemo(() => checkRules(pwd), [pwd]);
-  const required = r.len && r.num && r.upper && r.lower && r.sym;
-  const match = !!pwd && pwd === pwd2;
-  const nickOk = nick.trim().length >= 2;
-  const disabled = !(nickOk && required && match);
-
-  const matchHint = pwd2 ? (match ? "MATCH" : "NOT YET") : "";
-
-  const submit = () => {
-    if (disabled) return;
-    setBtnLabel("Creating…");
-    setTimeout(() => setBtnLabel("Account created ✓"), 600);
-  };
+  const match = !!confirm && confirm === password;
+  const matchHint = confirm ? (match ? "MATCH" : "NOT YET") : "";
 
   return (
     <div className="tw-account create">
@@ -103,13 +94,18 @@ export default function CreatePage() {
               <p>One private workspace for your paper Twins.</p>
             </div>
 
-            <Form onSubmit={(e) => e.preventDefault()}>
+            <Form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (canSubmit) onSubmit();
+              }}
+            >
               <div className="field">
                 <div className="label-row">
                   <label className="label" htmlFor="nick">
                     Nickname
                   </label>
-                  <span className="counter">{nick.length}/24</span>
+                  <span className="counter">{nickname.length}/24</span>
                 </div>
                 <div className="input-wrap">
                   <Form.Control
@@ -118,8 +114,8 @@ export default function CreatePage() {
                     autoComplete="username"
                     placeholder="Enter a nickname"
                     maxLength={24}
-                    value={nick}
-                    onChange={(e) => setNick(e.target.value)}
+                    value={nickname}
+                    onChange={(e) => onNicknameChange(e.target.value)}
                   />
                 </div>
               </div>
@@ -137,8 +133,8 @@ export default function CreatePage() {
                     type={showPwd ? "text" : "password"}
                     autoComplete="new-password"
                     placeholder="Create a strong password"
-                    value={pwd}
-                    onChange={(e) => setPwd(e.target.value)}
+                    value={password}
+                    onChange={(e) => onPasswordChange(e.target.value)}
                   />
                   <button
                     className="eye"
@@ -151,7 +147,7 @@ export default function CreatePage() {
                 </div>
                 <div className="rules">
                   {RULES.map(([key, label]) => (
-                    <div className={`rule ${r[key] ? "ok" : ""}`} key={key}>
+                    <div className={`rule ${rules[key] ? "ok" : ""}`} key={key}>
                       <span className="dot" />
                       <span>
                         {label}
@@ -186,8 +182,8 @@ export default function CreatePage() {
                     type={showPwd2 ? "text" : "password"}
                     autoComplete="new-password"
                     placeholder="Enter it again"
-                    value={pwd2}
-                    onChange={(e) => setPwd2(e.target.value)}
+                    value={confirm}
+                    onChange={(e) => onConfirmChange(e.target.value)}
                   />
                   <button
                     className="eye"
@@ -202,15 +198,33 @@ export default function CreatePage() {
 
               <p className="agreement">
                 By selecting Create account, you agree to our{" "}
-                <a href="#">Privacy Policy</a> and <a href="#">Terms of Service</a>.
+                <a
+                  href="/public/privacyPolicy"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onShowPrivacy();
+                  }}
+                >
+                  Privacy Policy
+                </a>{" "}
+                and{" "}
+                <a
+                  href="/public/termsOfService"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onShowTerms();
+                  }}
+                >
+                  Terms of Service
+                </a>
+                .
               </p>
               <button
                 className="btn"
-                type="button"
-                disabled={disabled}
-                onClick={submit}
+                type="submit"
+                disabled={!canSubmit || busy}
               >
-                {btnLabel}
+                {busy ? "Creating…" : "Create account"}
               </button>
               <div className="privacy-note">
                 <LockIcon size={15} />
@@ -220,7 +234,7 @@ export default function CreatePage() {
                 </span>
               </div>
               <div className="switch">
-                Already have an account? <Link href="/unlock">Unlock Twin Paper</Link>
+                Already have an account? <Link href="/logIn">Unlock Twin Paper</Link>
                 <span className="trial">30-day free</span>
               </div>
             </Form>

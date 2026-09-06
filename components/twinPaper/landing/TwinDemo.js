@@ -8,13 +8,13 @@ import { DEMO_CAPTURE, DEMO_PAGE } from "./assets";
 
 const CYCLE = 13500;
 const STEP = CYCLE / 3;
-const TABS = ["1 Twin", "2 Enrich", "3 Find"];
+const TABS = ["1 Twin", "2 Add context", "3 Find"];
 const META = [
   ["01", "Twin the page"],
-  ["02", "Tag & enrich"],
-  ["03", "Find"],
+  ["02", "Add context"],
+  ["03", "Find it later"],
 ];
-const STAGES = ["Twin", "Enrich", "Find"];
+const STAGES = ["Twin", "Add context", "Find"];
 
 const Icon = {
   cam: (
@@ -276,7 +276,7 @@ function StepContext({ reduced }) {
             className="mono"
             style={{ marginBottom: 8, fontSize: 10, color: "rgba(26,26,26,.5)" }}
           >
-            Enrich · stays with this twin
+            Context · stays with this twin
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {ATTS.slice(0, atts).map((a) => (
