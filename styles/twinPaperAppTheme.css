@@ -368,6 +368,16 @@ body.tw-app-theme .navbar {
   box-shadow: none;
 }
 
+/* Contents-page search bar (components/topControlPanel.jsx and
+   diaryTopControlPanel.jsx): no focus ring at all — stay identical to the
+   resting state instead of the full glowing box the generic
+   .form-control:focus rule draws everywhere else. */
+.tw-app-theme .tw-contents-search .form-control:focus {
+  background-color: var(--tw-card);
+  border-color: var(--tw-border);
+  box-shadow: none;
+}
+
 /* "Name your …" prompt (components/newItemModal.jsx, Twin Paper only). */
 body.tw-app-theme .tw-title-modal .modal-body {
   padding: 24px 26px 20px;

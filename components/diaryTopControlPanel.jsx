@@ -150,7 +150,7 @@ export default function DiaryTopControlPanel({ datePickerViewMode = "dayMonth", 
                             <Col xs={12} sm={{ span: 10, offset: 1 }} lg={{ span: 8, offset: 2 }}>
                                 <Card className={searchPanelStyle}>
                                     <Form onSubmit={onSearchEntered} className={BSafesStyle.searchBar}>
-                                        <InputGroup>
+                                        <InputGroup className="tw-contents-search">
                                             <Form.Control ref={searchInputRef} type="text" className={`${BSafesStyle.searchBarInput} text-black display-1`}
                                                 value={searchValue}
                                                 onChange={onSearchValueChanged}
