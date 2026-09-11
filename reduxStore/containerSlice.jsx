@@ -62,7 +62,7 @@ function separateActivities(activities, getTitle) {
 
         let updatedText;
         if (activity._source.version < 0) {
-            titleText = 'Trashed item';
+            titleText = 'Moved Item';
             updatedText = activity._source.update;
         } else {
             title = activity._id.charAt(0) === 't' ? "Trash Box" : getTitle(activity);
