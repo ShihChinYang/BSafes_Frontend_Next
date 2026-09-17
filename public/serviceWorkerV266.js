@@ -33,23 +33,37 @@ function helloDB() {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = myIndexedDB.open(DBName, 5);
+    let request;
+
+    try {
+      request = myIndexedDB.open(DBName, 5);
+    } catch (err) {
+      console.log("myIndexedDB.open threw synchronously:", err);
+      return reject(err);
+    }
+
     let upgradedNeeded = false;
 
-
     request.onerror = (e) => {
-      console.log("openDB error: ", error);
-      reject(error);
+      console.log("openDB error: ",  e.target.error);
+      reject( e.target.error);
+    };
+
+    request.onblocked = (e) => {
+      console.log("openDB blocked - an older connection is still open:", e);
+      reject(new Error("openDB blocked"));
     };
 
     request.onsuccess = (e) => {
       const db = e.target.result;
+      db.onversionchange = () => db.close();
       if (!upgradedNeeded) resolve(db);
     }
 
     request.onupgradeneeded = (e) => {
       upgradedNeeded = true;
       const db = e.target.result;
+      db.onversionchange = () => db.close();
       const transaction = e.target.transaction;
       if (!db.objectStoreNames.contains(mediaChunkStoreName))
         db.createObjectStore(mediaChunkStoreName, { keyPath: "chunkId" });
@@ -80,8 +94,10 @@ function openDB() {
 
 function deleteDB() {
   return new Promise((resolve, reject) => {
-    streamDB.close();
-    streamDB = null;
+    if (streamDB) {
+      streamDB.close();
+      streamDB = null;
+    }
     const request = myIndexedDB.deleteDatabase(DBName);
 
     request.onerror = (e) => {
@@ -94,10 +110,12 @@ function deleteDB() {
       resolve();
     }
 
-    request.onblocked = function () {
+    request.onblocked = function (e) {
       console.log("Couldn't delete database due to the operation being blocked");
+      reject(new Error("deleteDB blocked"));
     };
   })
+
 }
 
 function addMediaChunkToDB(videoId, chunkIndex, dataInBinary) {

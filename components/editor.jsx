@@ -72,7 +72,9 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
     const itemKey = useSelector(state => state.page.itemKey);
     const itemIV = useSelector(state => state.page.itemIV);
     const draft = useSelector(state => state.page.draft);
-    const contentType = useSelector(state => state.page.contentType) || 'WritingPage';
+    let contentType = useSelector(state => state.page.contentType);
+    contentType = contentType ? contentType : "WritingPage";
+
     const pageTemplate = useSelector(state => state.page.pageTemplate);
     const draftInterval = useSelector(state => state.page.draftInterval);
     const productId = useSelector(state => state.product.currentProduct);
@@ -883,7 +885,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                         <div className="px-2">
                             <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                                 {!showContentEditor && <div className="inner-html" style={{ overflowX: 'auto' }}>
-                                    {content && parse(content)}
+                                    {content && (typeof content === 'string') && parse(content)}
                                 </div>}
                                 {showContentEditor && <div id='contentEditor' className="inner-html" ref={editorRef} style={{ overflowX: 'auto' }}>
                                 </div>}
@@ -895,7 +897,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                         <div className="px-2">
                             <Row style={{ margin: "0px" }} className={`${(editorId === 'title') ? BSafesStyle.titleEditorRow : BSafesStyle.editorRow} fr-element fr-view`}>
                                 <div className="inner-html" ref={editorRef} style={{ overflowX: 'auto' }}>
-                                    {content && parse(content)}
+                                    {content && (typeof content === 'string') && parse(content)}
                                 </div>
                             </Row>
                         </div>

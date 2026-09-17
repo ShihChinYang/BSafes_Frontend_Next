@@ -7,7 +7,7 @@ import { debugLog, PostCall, clearLocalData } from '../lib/helper'
 import { decryptBinaryString, saveLocalCredentials, clearLocalCredentials } from '../lib/crypto';
 import { v1AccountActivity } from '../lib/activities';
 
-import { setDisplayName, loggedIn, loggedOut, setAccountVersion, cleanMemoryThunk} from './auth';
+import { setDisplayName, loggedIn, loggedOut, setAccountVersion, cleanMemoryThunk, clearLocalDataAndIndexDB} from './auth';
 
 const debugOn = false;
 

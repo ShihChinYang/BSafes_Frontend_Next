@@ -1,0 +1,25 @@
+The whole function body runs inside `new Promise((resolve, reject) => {...})`, and `request.onerror/onsuccess/onupgradeneeded` are only ever attached if `myIndexedDB.open(DBName, 5)` returns successfully. If that call throws synchronously, `request` is never created, so none of those three handlers can ever run — the promise just auto-rejects with whatever was thrown (Promise executors catch synchronous throws and turn them into a rejection).
+
+That throws synchronously in a few common situations:
+- `myIndexedDB` is undefined/null at call time (e.g. not yet initialized, wrong import, or a polyfill fallback that didn't load) -> TypeError: Cannot read properties of undefined (reading 'open').
+- `DBName` isn't actually in scope where this runs (typo/case mismatch with wherever it's really declared, e.g. `dbName`) -> ReferenceError: DBName is not defined.
+- Safari private browsing / storage disabled — indexedDB.open() can throw immediately instead of firing onerror.
+
+Since none of that ever reaches your onerror handler, you get no "openDB error" console log at all — it just silently disappears unless whatever calls openDB() has a .catch(...).
+
+To confirm, check the browser console for an uncaught rejection, or add a try/catch:
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    let request;
+    try {
+      request = myIndexedDB.open(DBName, 5);
+    } catch (err) {
+      console.log("myIndexedDB.open threw synchronously:", err);
+      return reject(err);
+    }
+    ...
+
+Questions to check:
+- Is `DBName` defined in the same scope/module as this function?
+- Does whatever calls `openDB()` have a `.catch` on it?
