@@ -52,7 +52,7 @@ function MyApp({ Component, pageProps }) {
     import("bootstrap/dist/js/bootstrap.min.js");
     // twinPaper is a plain marketing/account site: skip all the BSafes-only
     // native bridge, excalidraw and service-worker wiring.
-    if (isTwinPaper) return;
+    //if (isTwinPaper) return;
     window.EXCALIDRAW_ASSET_PATH = "/js/excalidraw/";
     if (process.env.NEXT_PUBLIC_platform === 'iOS') {
       function getAccessKeyFromNative() {
