@@ -88,6 +88,14 @@ const newActivity = async (dispatch, type, activity) => {
     }
 }
 
+// Returns the "i_<timestamp>" part of the pending backup s3Key, or null if there is no signed URL.
+export const getPendingBackupKey = (getState) => {
+    if (!ITEM_VERSIONS_BACKUP_FEATURE) return null;
+    const signedUrlForBackup = getState().localBackup.signedUrlForBackup;
+    if (!signedUrlForBackup || !signedUrlForBackup.s3Key) return null;
+    return signedUrlForBackup.s3Key.split('/').pop();
+}
+
 export const backupAnItemVersionToS3 = (item, dispatch, getState) => {
     return new Promise(async (resolve, reject) => {
         try {

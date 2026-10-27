@@ -6,7 +6,7 @@ const DOMPurify = require('dompurify');
 import { setPaymentIntentData } from './accountSlice';
 import { setNavigationInSameContainer } from './containerSlice';
 import { setCurrentProduct } from './productSlice';
-import { setSignedUrlForBackup, backupAnItemVersionToS3, getPageItemFromLocalBackup } from './localBackupSlice';
+import { setSignedUrlForBackup, backupAnItemVersionToS3, getPageItemFromLocalBackup, getPendingBackupKey } from './localBackupSlice';
 import { getBrowserInfo, usingServiceWorker, convertBinaryStringToUint8Array, debugLog, PostCall, extractHTMLElementText, requestAppleReview } from '../lib/helper'
 import { generateNewItemKey, decryptBinaryString, encryptBinaryString, encryptLargeBinaryString, decryptChunkBinaryStringToBinaryStringAsync, decryptLargeBinaryString, encryptChunkBinaryStringToBinaryStringAsync, stringToEncryptedTokensCBC, stringToEncryptedTokensECB, tokenfieldToEncryptedArray, tokenfieldToEncryptedTokensCBC, tokenfieldToEncryptedTokensECB } from '../lib/crypto';
 import { pageActivity } from '../lib/activities';
@@ -2917,6 +2917,13 @@ async function createNewItemVersion(itemCopy, dispatch, getState) {
         itemCopy.version = itemCopy.version + 1;
         debugLog(debugOn, "item copy version: ", itemCopy.version);
         if (!workspace.startsWith("d:")) {
+            // itemCopy comes from the previous version, so drop its backupKey when there is no new one.
+            const backupKey = getPendingBackupKey(getState);
+            if (backupKey) {
+                itemCopy.backupKey = backupKey;
+            } else {
+                delete itemCopy.backupKey;
+            }
             backupAnItemVersionToS3(itemCopy, dispatch, getState);
             PostCall({
                 api: '/memberAPI/createNewItemVersion',
@@ -3101,7 +3108,14 @@ function createANotebookPage(data, dispatch, getState) {
     return new Promise(async (resolve, reject) => {
         const workspace = data.space;
         if (!workspace.startsWith("d:")) {
+            const backupKey = getPendingBackupKey(getState);
+            if (backupKey) {
+                data.backupKey = backupKey;
+            } else {
+                delete data.backupKey;
+            }
             const backupItem = prepareAnIndexedPageBackup('NotebookPage', data, getState);
+            if (backupKey) backupItem.backupKey = backupKey;
             backupAnItemVersionToS3(backupItem, dispatch, getState);
             PostCall({
                 api: '/memberAPI/createANotebookPage',
@@ -3153,7 +3167,14 @@ function createADiaryPage(data, dispatch, getState) {
     return new Promise(async (resolve, reject) => {
         const workspace = data.space;
         if (!workspace.startsWith("d:")) {
+            const backupKey = getPendingBackupKey(getState);
+            if (backupKey) {
+                data.backupKey = backupKey;
+            } else {
+                delete data.backupKey;
+            }
             const backupItem = prepareAnIndexedPageBackup('DiaryPage', data, getState);
+            if (backupKey) backupItem.backupKey = backupKey;
             backupAnItemVersionToS3(backupItem, dispatch, getState);
             PostCall({
                 api: '/memberAPI/createADiaryPage',
