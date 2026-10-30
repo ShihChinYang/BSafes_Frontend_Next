@@ -11,6 +11,7 @@ import teamSlice, {teamReducer} from './teamSlice';
 import v1AccountSlice, { v1AccountReducer } from './v1AccountSlice';
 import productSlice, {productReducer} from './productSlice';
 import localBackupSlice, {localBackupReducer} from './localBackupSlice';
+import localExportSlice, {localExportReducer} from './localExportSlice';
 
 
 const reduxStore = configureStore({
@@ -25,6 +26,7 @@ const reduxStore = configureStore({
         [accountSlice.name]:accountReducer,
         [productSlice.name]:productReducer,
         [localBackupSlice.name]:localBackupReducer,
+        [localExportSlice.name]:localExportReducer,
     },
     devTools: true,
     middleware: (getDefaultMiddleware) =>

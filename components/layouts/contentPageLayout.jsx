@@ -39,6 +39,9 @@ import { resetPageActivity } from '../../reduxStore/pageSlice';
 import { resetTeamActivity } from '../../reduxStore/teamSlice';
 import { resetV1AccountActivity } from '../../reduxStore/v1AccountSlice';
 import { updateLocalBackupThunk, updateStatusBarMessageThunk } from '../../reduxStore/localBackupSlice';
+import { cancelExportThunk } from '../../reduxStore/localExportSlice';
+import ExportModal from '../exportModal';
+import ExportSyncFailureModal from '../exportSyncFailureModal';
 
 import { setNextAuthStep, lockAsyncThunk, signOutAsyncThunk, signedOut } from '../../reduxStore/v1AccountSlice';
 
@@ -63,6 +66,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     const [nextRoute, setNextRoute] = useState(null);
     const [showPrefilightErrorModal, setShowPrefilightErrorModal] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
 
     const accountState = useSelector(state => state.account.accountState);
     debugLog(debugOn, "accountState: ", accountState);
@@ -99,6 +103,9 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     const workspaceName = useSelector(state => state.container.workspaceName);
 
     const statusBarMessage = useSelector(state => state.localBackup.statusBarMessage);
+    const localExportStatusBarMessage = useSelector(state => state.localExport.statusBarMessage);
+    const localExportInProgress = useSelector(state => state.localExport.exportInProgress);
+    const updatingLocalBackup = useSelector(state => state.localBackup.updatingBackup);
 
     const displayPaymentBanner = !(router.asPath.startsWith('/logIn')) && !(router.asPath.startsWith('/services/')) && !(router.asPath.startsWith('/apps/'));
 
@@ -117,6 +124,18 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
     const localBackup = (e) => {
         dispatch(updateLocalBackupThunk());
+    }
+
+    const openExport = (e) => {
+        router.push('/openExport');
+    }
+
+    const showExportDialog = (e) => {
+        setShowExportModal(true);
+    }
+
+    const cancelExport = (e) => {
+        dispatch(cancelExportThunk());
     }
 
     const mfaSetup = (e) => {
@@ -615,7 +634,9 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                                     <>
                                         <a href="https://support.bsafes.com" target='_blank' className='' style={{ color: "#000000" }}><i className="fa fa-lg fa-question" aria-hidden="true"></i></a>
                                         <Button variant='link' size='md' className='' onClick={refresh} style={{ color: 'black' }}><i className="fa fa-refresh" aria-hidden="true"></i></Button>
-                                        <Button variant='link' size='md' className='' onClick={localBackup} style={{ color: 'black' }}><i className="fa fa-download" aria-hidden="true"></i></Button>
+                                        <Button variant='link' size='md' className='' onClick={localBackup} disabled={updatingLocalBackup || localExportInProgress} style={{ color: 'black' }}><i className="fa fa-download" aria-hidden="true"></i></Button>
+                                        {process.env.NEXT_PUBLIC_app === 'localBackup' && <Button variant='link' size='md' className='' title='Export decrypted content to a folder' onClick={showExportDialog} disabled={localExportInProgress || updatingLocalBackup} style={{ color: 'black' }}><i className="fa fa-suitcase" aria-hidden="true"></i></Button>}
+                                        {process.env.NEXT_PUBLIC_app === 'localBackup' && <Button variant='link' size='md' className='' title='Open an export folder' onClick={openExport} disabled={localExportInProgress} style={{ color: 'black' }}><i className="fa fa-archive" aria-hidden="true"></i></Button>}
                                         <Button variant='dark' size='sm' onClick={logOut}>Lock</Button>
                                     </>
                                 }
@@ -628,10 +649,10 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
             {!isLoggedIn && offlineMode && (
                 <div className={BSafesStyle.offlineStatusBar}>
                     <Row>
-                        <Col xs={10}>
+                        <Col xs={8}>
                             <p>Your are now offline.</p>
                         </Col>
-                        <Col xs={2} className='text-end'>
+                        <Col xs={4} className='text-end'>
                             <Button variant="primary" size="sm" onClick={goOnline}>
                                 Go Online
                             </Button>
@@ -655,6 +676,24 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
 
                 </div>
             )}
+            {process.env.NEXT_PUBLIC_app === 'localBackup' && isLoggedIn && localExportStatusBarMessage && (
+                <div className={BSafesStyle.offlineStatusBar}>
+                    <Row>
+                        <Col xs={localExportInProgress ? 10 : 12}>
+                            <p>
+                                {localExportStatusBarMessage}
+                            </p>
+                        </Col>
+                        {localExportInProgress && <Col xs={2} className='text-end'>
+                            <Button variant="primary" size="sm" onClick={cancelExport}>
+                                Cancel
+                            </Button>
+                        </Col>}
+                    </Row>
+                </div>
+            )}
+            {process.env.NEXT_PUBLIC_app === 'localBackup' && <ExportModal show={showExportModal} onClose={() => setShowExportModal(false)} />}
+            {process.env.NEXT_PUBLIC_app === 'localBackup' && <ExportSyncFailureModal />}
             {false && (workspace && workspace.startsWith("d:")) &&
                 <DemoNotice />
             }
