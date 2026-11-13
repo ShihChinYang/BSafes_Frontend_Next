@@ -1,0 +1,162 @@
+[
+  {
+    "path": "app.css",
+    "sha256": "406b75992cb497cdf96ad842807f265ac474296efd892a424d925cfdb9881acf",
+    "size": 358931
+  },
+  {
+    "path": "export.css",
+    "sha256": "707837edc5cf7424a2018a2ee8dcd4bda7cb57d46e4f078377cd2d9636f33c20",
+    "size": 3671
+  },
+  {
+    "path": "fonts/dancing-script-latin-ext-wght-normal.woff2",
+    "sha256": "35f77ad59c29ee47c90397fc1016a1c75a8313ea5292d64643eeae6a90a75ba2",
+    "size": 22652
+  },
+  {
+    "path": "fonts/dancing-script-latin-wght-normal.woff2",
+    "sha256": "51acdc0e009e1d84cca6b654c4218275d8ee33dd243f3df25f7412a824a78d99",
+    "size": 42708
+  },
+  {
+    "path": "fonts/dancing-script-vietnamese-wght-normal.woff2",
+    "sha256": "aa3c9daba1d1614e9bf02a1009908dd20f57b6658aaf8c07e77bdda1b7951cad",
+    "size": 7712
+  },
+  {
+    "path": "fonts/edu-sa-beginner-latin-wght-normal.woff2",
+    "sha256": "6b6ab8f9b89c6d57dedd39f2b8c24806da7a77667a441b8adc1467f0cc456e26",
+    "size": 17252
+  },
+  {
+    "path": "fonts/fontawesome-webfont.woff",
+    "sha256": "a7c7e4930090e038a280fd61d88f0dc03dad4aeaedbd8c9be3dd9aa4c3b6f8d1",
+    "size": 81284
+  },
+  {
+    "path": "fonts/fontawesome-webfont.woff2",
+    "sha256": "3c4a1bb7ce3234407184f0d80cc4dec075e4ad616b44dcc5778e1cfb1bc24019",
+    "size": 64464
+  },
+  {
+    "path": "fonts/montserrat-cyrillic-ext-wght-normal.woff2",
+    "sha256": "0f7f5f2fbb4eae126790fe6f01659ab3ee0806e8038a941908e893020569f51a",
+    "size": 26368
+  },
+  {
+    "path": "fonts/montserrat-cyrillic-wght-normal.woff2",
+    "sha256": "a187b077090fe8ae3fd2d7496aabbeae604819c718a282e0afc92df72b450766",
+    "size": 23828
+  },
+  {
+    "path": "fonts/montserrat-latin-ext-wght-normal.woff2",
+    "sha256": "54d9a78b7ff60b689ad9f3017ffac8547b5d871afec733f6c1c3ae36577ee504",
+    "size": 70688
+  },
+  {
+    "path": "fonts/montserrat-latin-wght-normal.woff2",
+    "sha256": "06b16db7a969135d48d38c49183be7fb88d4452e2a3011957c7851941f4e4879",
+    "size": 37956
+  },
+  {
+    "path": "fonts/montserrat-vietnamese-wght-normal.woff2",
+    "sha256": "26b2403f995ed65fb49037a6498c074d3ec3c36031a69fc368c4c2180e2c01fa",
+    "size": 12928
+  },
+  {
+    "path": "fonts/noto-serif-cyrillic-ext-wght-normal.woff2",
+    "sha256": "7c7afb20d33e30ec38245187464419281115615db288f294414f49802396b612",
+    "size": 89100
+  },
+  {
+    "path": "fonts/noto-serif-cyrillic-wght-normal.woff2",
+    "sha256": "54e3bd0c4a002b0f76bf9c758507fe9bb170f9e364ea4ecc85fc8b22819bca7e",
+    "size": 24572
+  },
+  {
+    "path": "fonts/noto-serif-greek-ext-wght-normal.woff2",
+    "sha256": "9b3f4c4ff3adefd2476a2ac234ac3c72bea116c21a6f98dbe5d524c38b239c46",
+    "size": 12704
+  },
+  {
+    "path": "fonts/noto-serif-greek-wght-normal.woff2",
+    "sha256": "1252037b6f1d6e86c49f59cd4b2cc953413fcad1fc3659a55aacfb4ae5f42531",
+    "size": 27844
+  },
+  {
+    "path": "fonts/noto-serif-latin-ext-wght-normal.woff2",
+    "sha256": "2654f8d1261a420fc81628122bee9d494b493227e3d7d9baa4238360b92b11d3",
+    "size": 186552
+  },
+  {
+    "path": "fonts/noto-serif-latin-wght-normal.woff2",
+    "sha256": "46281456234014ceb2a79bff447245de0f76b8d803be0738972ed374c3206c5b",
+    "size": 36756
+  },
+  {
+    "path": "fonts/noto-serif-math-wght-normal.woff2",
+    "sha256": "d4a6aba2cb4636b371991a197aed964f2308b7e3d5f5748bfe8d1b9af191f3a7",
+    "size": 65124
+  },
+  {
+    "path": "fonts/noto-serif-vietnamese-wght-normal.woff2",
+    "sha256": "fb6a5ed734c2fbe39794a1e11ea075c70676ed82b8e8cd57c175ebbb4af805c1",
+    "size": 14704
+  },
+  {
+    "path": "fonts/oswald-cyrillic-ext-wght-normal.woff2",
+    "sha256": "ff62316167dc2f9cae9dea3707afcc4cf571b7f6744304ba45f2fbc40dd74179",
+    "size": 19404
+  },
+  {
+    "path": "fonts/oswald-cyrillic-wght-normal.woff2",
+    "sha256": "9307b75d3508236a0bae4f29ee3d2ce9aee545120ec9ef29e2cd1187bf6b0e5b",
+    "size": 15688
+  },
+  {
+    "path": "fonts/oswald-latin-ext-wght-normal.woff2",
+    "sha256": "7989ccc7770f5aeffa67e088bcd3b294d42fae2f8b0eca3c3c51b953d1f735cc",
+    "size": 23952
+  },
+  {
+    "path": "fonts/oswald-latin-wght-normal.woff2",
+    "sha256": "bd73278ee0c50041b91b4c03d1229e35b501637f46b6409e7da2d3a758446ea5",
+    "size": 28488
+  },
+  {
+    "path": "fonts/oswald-vietnamese-wght-normal.woff2",
+    "sha256": "ca8ab22d32ea765f3a8f7112b8bea5af717fa7f4b65fa3823ae4cf3d4a95189c",
+    "size": 7576
+  },
+  {
+    "path": "fonts/roboto-flex-cyrillic-ext-wght-normal.woff2",
+    "sha256": "09837dc0d8ecb711b40c5c58685986052211d955428ea467f54421f1ea86c0c9",
+    "size": 10392
+  },
+  {
+    "path": "fonts/roboto-flex-cyrillic-wght-normal.woff2",
+    "sha256": "c4e64ccd19eee5fca87557f04eec410ef0e69b16baf2a577219f40f6014bbbb2",
+    "size": 15652
+  },
+  {
+    "path": "fonts/roboto-flex-greek-wght-normal.woff2",
+    "sha256": "a7b3fbca30df516e1789451046bc59ed8d4836aa016bbdb50527a110242e6d10",
+    "size": 11436
+  },
+  {
+    "path": "fonts/roboto-flex-latin-ext-wght-normal.woff2",
+    "sha256": "860475bc6d859474547084d6b7ab158d2c6a107b024abe7d9831faf968e9ec83",
+    "size": 23480
+  },
+  {
+    "path": "fonts/roboto-flex-latin-wght-normal.woff2",
+    "sha256": "8aabd65a22003f488ba7d2da8a8155a7f90e195ab2a11cd006615d00a0ee5eff",
+    "size": 34320
+  },
+  {
+    "path": "fonts/roboto-flex-vietnamese-wght-normal.woff2",
+    "sha256": "65b5dfa63cf775fa416f136e679f08150ea65f013a44f5b54027dc2506f0740f",
+    "size": 9772
+  }
+]

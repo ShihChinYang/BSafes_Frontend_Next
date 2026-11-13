@@ -38,8 +38,13 @@ function openDB() {
 
 
     request.onerror = (e) => {
+      const error = e.target.error;
       console.log("openDB error: ", error);
       reject(error);
+    };
+
+    request.onblocked = (e) => {
+      console.log("openDB blocked: another connection to the database is still open");
     };
 
     request.onsuccess = (e) => {
