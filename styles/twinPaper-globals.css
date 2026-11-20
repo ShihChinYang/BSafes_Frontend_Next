@@ -28,3 +28,49 @@
   display: block;
   max-width: 100%;
 }
+
+/* --- Lower-left "working" indicator (components/twinPaper/TwLoadingIndicator.js) --- */
+.tw-loading {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 2000;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 14px 0 11px;
+  background: rgba(254, 252, 248, 0.94);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid #e8e0d5;
+  border-radius: 999px;
+  box-shadow: 0 10px 28px rgba(40, 31, 22, 0.12), 0 1px 3px rgba(40, 31, 22, 0.06);
+  pointer-events: none;
+  animation: tw-loading-in 0.2s ease-out both;
+}
+.tw-loading-ring {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #e6ded3;
+  border-top-color: #ff6a1a;
+  animation: tw-loading-spin 0.75s linear infinite;
+}
+.tw-loading-label {
+  font: 500 10px/1 var(--font-jetbrains-mono), ui-monospace, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6f6a63;
+}
+@keyframes tw-loading-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes tw-loading-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tw-loading { animation: none; }
+  .tw-loading-ring { animation-duration: 2.4s; }
+}

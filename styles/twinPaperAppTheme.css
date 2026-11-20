@@ -633,6 +633,176 @@ body.tw-app-theme .offcanvas {
   --bs-offcanvas-border-color: var(--tw-border);
 }
 
+/* Twin Paper services panel markup (contentPageLayout.jsx, isTwinPaper branch).
+   Self-contained: the panel opens on pages that don't put .tw-app-theme on
+   <body> (e.g. /services/*), so it carries its own tokens. */
+.offcanvas.tw-services {
+  --tw-paper: #fdf8f0;
+  --tw-paper-2: #f5efe6;
+  --tw-card: #fffdf9;
+  --tw-ink: #1a1d25;
+  --tw-navy: #121e3a;
+  --tw-orange: #ff6a1a;
+  --tw-orange-ink: #c8500f;
+  --tw-border: #e8e0d2;
+  --tw-muted: #6f6a63;
+  --tw-font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tw-font-display: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  --bs-offcanvas-bg: var(--tw-paper);
+  --bs-offcanvas-color: var(--tw-ink);
+  --bs-offcanvas-border-color: var(--tw-border);
+  --bs-offcanvas-width: 360px;
+  font-family: var(--tw-font-body);
+  border-right: 1px solid var(--tw-border);
+  box-shadow: 24px 0 60px rgba(40, 31, 22, 0.12);
+}
+.tw-services .tw-services-header {
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid var(--tw-border);
+  align-items: flex-start;
+}
+.tw-services .tw-services-header .btn-close {
+  margin-top: 2px;
+  opacity: 0.55;
+}
+.tw-services .tw-services-eyebrow {
+  font: 500 10px/1.2 var(--font-jetbrains-mono), monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tw-orange-ink);
+  margin-bottom: 8px;
+}
+.tw-services .tw-services-title {
+  font: 400 32px/1 var(--tw-font-display);
+  letter-spacing: -0.03em;
+  color: var(--tw-navy);
+}
+.tw-services .tw-services-body {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 18px 22px;
+  font-family: var(--tw-font-body);
+}
+.tw-services .tw-services-id {
+  background: var(--tw-card);
+  border: 1px solid var(--tw-border);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.tw-services .tw-services-label {
+  font: 500 10px/1 var(--font-jetbrains-mono), monospace;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--tw-muted);
+  margin-bottom: 8px;
+}
+.tw-services .tw-services-id-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tw-services .tw-services-id-row code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 400 13px/1.4 var(--font-jetbrains-mono), monospace;
+  color: var(--tw-ink);
+  background: none;
+  padding: 0;
+}
+.tw-services .tw-services-id-row button {
+  flex: 0 0 auto;
+  border: 1px solid var(--tw-border);
+  background: var(--tw-paper);
+  color: var(--tw-ink);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.tw-services .tw-services-id-row button:hover {
+  background: var(--tw-paper-2);
+}
+.tw-services .tw-services-nav {
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 18px;
+}
+.tw-services .tw-services-nav .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 10px;
+  border-radius: 14px;
+  color: var(--tw-ink);
+  transition: background 0.15s;
+}
+.tw-services .tw-services-nav .nav-link:hover,
+.tw-services .tw-services-nav .nav-link:focus-visible {
+  background: var(--tw-card);
+  box-shadow: inset 0 0 0 1px var(--tw-border);
+}
+.tw-services .tw-services-icon {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--tw-navy);
+  color: var(--tw-paper);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+}
+.tw-services .tw-services-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tw-services .tw-services-text strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tw-navy);
+}
+.tw-services .tw-services-text small {
+  font-size: 12.5px;
+  color: var(--tw-muted);
+  line-height: 1.35;
+}
+.tw-services .tw-services-chevron {
+  color: #b0a89e;
+  font-size: 16px;
+}
+.tw-services .tw-services-nav .nav-link:hover .tw-services-chevron {
+  color: var(--tw-orange);
+}
+.tw-services .tw-services-foot {
+  margin-top: auto;
+  padding-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 10px/1 var(--font-jetbrains-mono), monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tw-muted);
+}
+.tw-services .tw-services-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #2f7a5e;
+  box-shadow: 0 0 0 4px rgba(47, 122, 94, 0.1);
+}
+@media (max-width: 420px) {
+  .offcanvas.tw-services {
+    --bs-offcanvas-width: 88vw;
+  }
+}
+
 /* --- ListGroup (move-item picker in the items toolbar) --- */
 body.tw-app-theme .list-group {
   --bs-list-group-bg: var(--tw-card);
@@ -894,4 +1064,83 @@ body.tw-app-theme .tw-type-modal .tw-type-item::after {
   color: var(--tw-muted);
   font-size: 0.95rem;
   line-height: 1.35;
+}
+
+/* --- Empty-workspace welcome panel (components/workspace.jsx, Twin Paper only) --- */
+.tw-app-theme .tw-welcome {
+  background: var(--tw-card);
+  border: 1px solid var(--tw-card-border);
+  border-radius: 20px;
+  padding: clamp(24px, 4vw, 36px);
+  box-shadow: 0 1px 2px rgba(26, 29, 37, 0.05), 0 12px 30px rgba(26, 29, 37, 0.07);
+  color: var(--tw-ink);
+  font-family: var(--tw-font-body);
+}
+.tw-app-theme .tw-welcome-eyebrow {
+  font: 500 10px/1.2 var(--font-jetbrains-mono), monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tw-orange-ink);
+  margin-bottom: 10px;
+}
+.tw-app-theme .tw-welcome-title {
+  font: 400 clamp(30px, 4.5vw, 40px)/1.05 var(--tw-font-display);
+  letter-spacing: -0.03em;
+  color: var(--tw-navy);
+  margin: 0;
+}
+.tw-app-theme .tw-welcome-lede {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--tw-muted);
+}
+.tw-app-theme .tw-welcome-steps {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--tw-border);
+}
+.tw-app-theme .tw-welcome-steps li {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--tw-border);
+}
+.tw-app-theme .tw-welcome-steps li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.tw-app-theme .tw-welcome-num {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  font: 500 11px/1 var(--font-jetbrains-mono), monospace;
+  letter-spacing: 0.08em;
+  color: var(--tw-orange);
+}
+.tw-app-theme .tw-welcome-steps strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tw-navy);
+  margin-bottom: 4px;
+}
+.tw-app-theme .tw-welcome-steps li > div > span {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--tw-muted);
+}
+.tw-app-theme .tw-welcome-plus {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--tw-orange);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  vertical-align: -3px;
 }

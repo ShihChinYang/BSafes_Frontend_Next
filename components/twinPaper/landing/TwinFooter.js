@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { LOGO } from "./assets";
 import Container from "react-bootstrap/Container";
 
@@ -35,6 +36,13 @@ export default function TwinFooter() {
             >
               Privacy
             </a>
+            <Link
+              href="/support"
+              className="mono"
+              style={{ fontSize: 10, opacity: 0.55, textDecoration: "none", color: "var(--ink)" }}
+            >
+              Support
+            </Link>
             <a
               href="#pricing"
               className="mono"

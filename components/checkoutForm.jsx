@@ -7,11 +7,13 @@ import {
 
 import { useStripe, useElements } from '@stripe/react-stripe-js';
 
-export default function CheckoutForm() {
+// variant="twin": Twin Paper button/message markup (styles in account.css).
+export default function CheckoutForm({ variant = null, submitLabel = "Submit" }) {
     const stripe = useStripe();
     const elements = useElements();
     const [message, setMessage] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [loadError, setLoadError] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -40,7 +42,7 @@ export default function CheckoutForm() {
         if (error.type === "card_error" || error.type === "validation_error") {
             setMessage(error.message);
         } else {
-            setMessage("An unexpected error occured.");
+            setMessage("An unexpected error occurred.");
         }
 
         setIsLoading(false);
@@ -57,7 +59,22 @@ export default function CheckoutForm() {
             // Prefill the email field like so:
             // options={{defaultValues: {email: 'foo@bar.com'}}}
             />}
-            <PaymentElement id="payment-element" />
+            {variant === 'twin' ?
+                <PaymentElement
+                    id="payment-element"
+                    onReady={() => setLoadError(null)}
+                    onLoadError={(e) => setLoadError((e && e.error && e.error.message) || 'The payment form could not load.')}
+                />
+                :
+                <PaymentElement id="payment-element" />
+            }
+            {variant === 'twin' ? <>
+                {loadError && <p className="tw-field-error" role="alert">Payment form error: {loadError}</p>}
+                {message && <p className="tw-field-error" role="alert">{message}</p>}
+                <button type="submit" className="btn tw-checkout-submit" disabled={isLoading || !stripe || !elements}>
+                    {isLoading ? 'Processing…' : submitLabel}
+                </button>
+            </> : <>
             <button disabled={isLoading || !stripe || !elements} id="submit">
                 <span id="button-text">
                     {isLoading ? <div className="spinner" id="spinner"></div> : "Submit"}
@@ -65,6 +82,7 @@ export default function CheckoutForm() {
             </button>
             {/* Show any error or success messages */}
             {message && <div id="payment-message">{message}</div>}
+            </>}
         </form>
     )
 

@@ -242,7 +242,43 @@ export default function Workspace({ readyToList = false }) {
                     </Col>
                 </Row>
             }
-            {(listingDone && (mode !== 'search') && (items.length === 0)) &&
+            {isTwinPaper && listingDone && (mode !== 'search') && (items.length === 0) &&
+                <Row className='justify-content-center'>
+                    <Col sm={10} md={8}>
+                        <section className="tw-welcome" aria-labelledby="tw-welcome-title">
+                            <div className="tw-welcome-eyebrow">Your workspace is ready</div>
+                            <h2 id="tw-welcome-title" className="tw-welcome-title">Welcome to Twin Paper</h2>
+                            <p className="tw-welcome-lede">
+                                This is your private workspace. Everything you add here is encrypted on your device before it&apos;s saved.
+                            </p>
+                            <ol className="tw-welcome-steps">
+                                <li>
+                                    <span className="tw-welcome-num">01</span>
+                                    <div>
+                                        <strong>Add your first page</strong>
+                                        <span>Tap the <span className="tw-welcome-plus" aria-label="plus">+</span> button above, choose an item type, then add your writing, photos, videos and files.</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <span className="tw-welcome-num">02</span>
+                                    <div>
+                                        <strong>Find it later</strong>
+                                        <span>Type keywords in the search field above. Titles and tags you add make pages easy to find.</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <span className="tw-welcome-num">03</span>
+                                    <div>
+                                        <strong>Lock when you&apos;re done</strong>
+                                        <span>Use the Lock button at the top right to close your workspace on this device.</span>
+                                    </div>
+                                </li>
+                            </ol>
+                        </section>
+                    </Col>
+                </Row>
+            }
+            {!isTwinPaper && (listingDone && (mode !== 'search') && (items.length === 0)) &&
                 <Row className='justify-content-center'>
                     <Col sm={8}>
                         <Card>
@@ -251,7 +287,7 @@ export default function Workspace({ readyToList = false }) {
                                 <Card.Title>Instructions</Card.Title>
                                 <ul>
                                     <li><strong>Get Started</strong> - Add a page item, then write and add photos, videos, and files.</li>
-                                    <li><strong>Adding an items</strong> - Click on the central blue button, then select an item type.</li>
+                                    <li><strong>Adding an item</strong> - Click on the central blue button, then select an item type.</li>
                                     <li><strong>Searching for items</strong> - Enter keywords in central field, then click on search button.</li>
                                     <li><strong>Opening a new tab</strong> - Click on the blue button on upper right, then select an item.</li>
                                     <li><strong>Lock</strong> - Click on the Lock button on upper right.</li>

@@ -13,6 +13,7 @@ const forge = require('node-forge');
 import parse from 'html-react-parser';
 
 import { Blocks } from 'react-loader-spinner';
+import TwLoadingIndicator from './twinPaper/TwLoadingIndicator';
 
 import jquery from "jquery"
 
@@ -942,6 +943,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                         </>
                     }
                 </div> :
+                (isTwinPaper ? <TwLoadingIndicator /> :
                 <div className={BSafesStyle.screenBottomLeft}>
                     <Blocks
                         visible={true}
@@ -951,7 +953,7 @@ export default function Editor({ editorId, mode, content, onContentRendered, onC
                         wrapperStyle={{}}
                         wrapperClass="blocks-wrapper"
                     />
-                </div>
+                </div>)
             }
         </>
     );

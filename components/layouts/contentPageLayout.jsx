@@ -16,6 +16,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 import { Blocks } from 'react-loader-spinner';
+import TwLoadingIndicator from '../twinPaper/TwLoadingIndicator';
 import { ToastContainer, toast } from 'react-toastify';
 
 import ItemPath from '../itemPath'
@@ -31,6 +32,13 @@ import BSafesStyle from '../../styles/BSafes.module.css'
 import { debugLog, getNickname } from '../../lib/helper';
 import { getErrorMessages } from '../../lib/activities';
 import { getFirstPageAfterLoggedIn } from '../../lib/productID'
+import { isTwinPaper } from '../../lib/twinPaperAppTheme';
+import { inter, instrumentSerif, jetbrainsMono } from '../../lib/twinPaperFonts';
+
+// Twin Paper has its own help center (pages/support); BSafes keeps its knowledge base.
+const supportUrl = isTwinPaper ? '/support' : 'https://support.bsafes.com';
+// The services panel portals to <body>, outside the font-variable wrapper in _app.
+const twinFontVars = `${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`;
 
 import { resetAccountActivity, setAccountHashVerified } from '../../reduxStore/accountSlice';
 import { resetAuthActivity, preflightAsyncThunk, setPreflightReady, setLocalSessionState, createCheckSessionIntervalThunk, loggedOut, cleanMemoryThunk, setV2NextAuthStep, logOutAsyncThunk, setGotoFirstPagetAfterLoggedIn, setOfflineMode } from '../../reduxStore/auth';
@@ -119,6 +127,13 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
         dispatch(updateLocalBackupThunk());
     }
 
+    const [memberIdCopied, setMemberIdCopied] = useState(false);
+    const copyMemberId = () => {
+        navigator.clipboard.writeText(memberId);
+        setMemberIdCopied(true);
+        setTimeout(() => setMemberIdCopied(false), 1500);
+    }
+
     const mfaSetup = (e) => {
         router.push('/services/mfaSetup');
     }
@@ -172,12 +187,16 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     }
 
     const ifRedirectToHome = (path) => {
-        if ((path !== '/') && (!path.startsWith('/public/') && !path.startsWith('/apps/') && !path.startsWith('/appPreviews/') && !path.startsWith('/getStarted') && !path.startsWith('/logIn') && (path !== '/keySetup') && (!path.startsWith('/n/')))) {
+        if ((path !== '/') && (!path.startsWith('/public/') && !path.startsWith('/apps/') && !path.startsWith('/appPreviews/') && !path.startsWith('/getStarted') && !path.startsWith('/logIn') && !path.startsWith('/keySetup') && (!path.startsWith('/n/')))) {
             return true;
         } else return false;
     }
 
     const goHome = () => {
+        if (isTwinPaper) {
+            changePage('/');
+            return;
+        }
         switch (process.env.NEXT_PUBLIC_app) {
             case 'bsafes':
                 changePage('/apps/bsafes');
@@ -428,7 +447,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
         switch (nextAuthStep.step) {
             case 'Home':
                 let homePath;
-                switch (process.env.NEXT_PUBLIC_app) {
+                switch (isTwinPaper ? null : process.env.NEXT_PUBLIC_app) {
                     case 'bsafes':
                         homePath = '/apps/bsafes'
                         break;
@@ -499,6 +518,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
     return (
         <div>
             {(generateDrawingSnapshot || (accountActivity !== 0) || (authActivity !== 0) || (v1AccountActivity !== 0) || (teamsActivity !== 0) || (containerActivity !== 0) || (pageActivity !== 0) || (iOSActivity !== 0)) &&
+                (isTwinPaper ? <TwLoadingIndicator /> :
                 <div className={BSafesStyle.screenBottomLeft}>
                     <Blocks
                         visible={true}
@@ -508,7 +528,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                         wrapperStyle={{}}
                         wrapperClass="blocks-wrapper"
                     />
-                </div>
+                </div>)
             }
             {((process.env.NEXT_PUBLIC_platform === "Web") || isLoggedIn) && <>
                 {(!workspace || (workspace && !workspace.startsWith("d:"))) && showNaveBar && ((accountVersion === '' || accountVersion === 'v1' || (accountVersion === 'v2' && !((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn)))) &&
@@ -567,7 +587,7 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                                             Terms of Service
                                         </NavDropdown.Item>
                                     </NavDropdown>
-                                    <Nav.Link href="https://support.bsafes.com" className={BSafesStyle.navLink}>Support</Nav.Link>
+                                    <Nav.Link href={supportUrl} className={BSafesStyle.navLink}>Support</Nav.Link>
                                     <Nav.Link href="/public/pricing" className={BSafesStyle.navLink}>Pricing</Nav.Link>
                                 </Nav>
                                 <Button size='sm' variant='light' align="end" className="justify-content-end" onClick={() => publicHooks.onOpen()}>
@@ -592,8 +612,49 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                                         id={`offcanvasNavbar-expand-false`}
                                         aria-labelledby={`offcanvasNavbarLabel-expand-false`}
                                         placement="start"
-                                        style={{ border: 'solid' }}
+                                        style={isTwinPaper ? undefined : { border: 'solid' }}
+                                        className={isTwinPaper ? `tw-services ${twinFontVars}` : undefined}
                                     >
+                                        {isTwinPaper ? <>
+                                        <Offcanvas.Header closeButton className="tw-services-header">
+                                            <Offcanvas.Title id={`offcanvasNavbarLabel-expand-false`} as="div">
+                                                <div className="tw-services-eyebrow">Twin Paper</div>
+                                                <div className="tw-services-title">Account</div>
+                                            </Offcanvas.Title>
+                                        </Offcanvas.Header>
+                                        <Offcanvas.Body className="tw-services-body">
+                                            <div className="tw-services-id">
+                                                <div className="tw-services-label">Your ID</div>
+                                                <div className="tw-services-id-row">
+                                                    <code>{memberId}</code>
+                                                    <button type="button" onClick={copyMemberId} aria-label="Copy your ID">{memberIdCopied ? 'Copied' : 'Copy'}</button>
+                                                </div>
+                                            </div>
+                                            <Nav className="tw-services-nav">
+                                                <Nav.Link onClick={payment}>
+                                                    <span className="tw-services-icon"><i className="fa fa-credit-card" aria-hidden="true"></i></span>
+                                                    <span className="tw-services-text"><strong>Payment</strong><small>Plan and billing</small></span>
+                                                    <i className="fa fa-angle-right tw-services-chevron" aria-hidden="true"></i>
+                                                </Nav.Link>
+                                                <Nav.Link onClick={mfaSetup}>
+                                                    <span className="tw-services-icon"><i className="fa fa-shield" aria-hidden="true"></i></span>
+                                                    <span className="tw-services-text"><strong>Two-factor authentication</strong><small>Add a code from an authenticator app</small></span>
+                                                    <i className="fa fa-angle-right tw-services-chevron" aria-hidden="true"></i>
+                                                </Nav.Link>
+                                                <Nav.Link onClick={dataCenter}>
+                                                    <span className="tw-services-icon"><i className="fa fa-globe" aria-hidden="true"></i></span>
+                                                    <span className="tw-services-text"><strong>Data center</strong><small>Where your encrypted data is stored</small></span>
+                                                    <i className="fa fa-angle-right tw-services-chevron" aria-hidden="true"></i>
+                                                </Nav.Link>
+                                                <Nav.Link href={supportUrl} target='_blank' rel="noopener noreferrer">
+                                                    <span className="tw-services-icon"><i className="fa fa-question" aria-hidden="true"></i></span>
+                                                    <span className="tw-services-text"><strong>Help center</strong><small>Guides and answers</small></span>
+                                                    <i className="fa fa-external-link tw-services-chevron" aria-hidden="true"></i>
+                                                </Nav.Link>
+                                            </Nav>
+                                            <div className="tw-services-foot"><i className="tw-services-dot" /> End-to-end encrypted</div>
+                                        </Offcanvas.Body>
+                                        </> : <>
                                         {true && <Offcanvas.Header closeButton style={{ backgroundColor: '#abdbe3' }}>
                                             <Offcanvas.Title id={`offcanvasNavbarLabel-expand-false`}>
                                                 <h4><i className="fa fa-info-circle" aria-hidden="true" style={{ width: '32px' }}></i> Services</h4>
@@ -606,16 +667,17 @@ const ContentPageLayout = ({ children, publicPage = false, publicHooks = null, s
                                                 <Nav.Link onClick={payment} style={{ borderBottom: 'solid' }}><h5><i className="fa fa-credit-card" aria-hidden="true" style={{ width: '32px' }}></i> Payment</h5></Nav.Link>
                                                 <Nav.Link onClick={mfaSetup} style={{ borderBottom: 'solid' }}><h5><i className="fa fa-shield" aria-hidden="true" style={{ width: '32px' }}></i> 2FA</h5></Nav.Link>
                                                 <Nav.Link onClick={dataCenter} style={{ borderBottom: 'solid' }}><h5><i className="fa fa-globe" aria-hidden="true" style={{ width: '32px' }}></i> Data Center</h5></Nav.Link>
-                                                <Nav.Link href="https://support.bsafes.com" target='_blank' rel="noopener noreferrer" style={{ borderBottom: 'solid' }}><h5><i className="fa fa-question" aria-hidden="true" style={{ width: '32px' }}></i> Support</h5></Nav.Link>
+                                                <Nav.Link href={supportUrl} target='_blank' rel="noopener noreferrer" style={{ borderBottom: 'solid' }}><h5><i className="fa fa-question" aria-hidden="true" style={{ width: '32px' }}></i> Support</h5></Nav.Link>
                                             </Nav>
                                         </Offcanvas.Body>
+                                        </>}
                                     </Navbar.Offcanvas>
                                 }
                                 {((localSessionState && localSessionState.authState === 'MFARequired') || isLoggedIn) &&
                                     <>
-                                        <a href="https://support.bsafes.com" target='_blank' className='' style={{ color: "#000000" }}><i className="fa fa-lg fa-question" aria-hidden="true"></i></a>
+                                        <a href={supportUrl} target='_blank' className='' style={{ color: "#000000" }}><i className="fa fa-lg fa-question" aria-hidden="true"></i></a>
                                         <Button variant='link' size='md' className='' onClick={refresh} style={{ color: 'black' }}><i className="fa fa-refresh" aria-hidden="true"></i></Button>
-                                        <Button variant='link' size='md' className='' onClick={localBackup} style={{ color: 'black' }}><i className="fa fa-download" aria-hidden="true"></i></Button>
+                                        {process.env.NEXT_PUBLIC_app === 'localBackup' && <Button variant='link' size='md' className='' onClick={localBackup} style={{ color: 'black' }}><i className="fa fa-download" aria-hidden="true"></i></Button>}
                                         <Button variant='dark' size='sm' onClick={logOut}>Lock</Button>
                                     </>
                                 }

@@ -7,6 +7,8 @@ import Button from 'react-bootstrap/Button'
 
 import LoadStripe from '../../components/loadStripe';
 import ContentPageLayout from '../../components/layouts/contentPageLayout';
+import PaymentResultPage from '../../components/twinPaper/account/PaymentResultPage';
+import { isTwinPaper } from '../../lib/twinPaperAppTheme';
 
 import { paymentCompletedThunk } from '../../reduxStore/accountSlice';
 
@@ -33,6 +35,29 @@ export default function PaymentCompletion() {
             }
         });
     }, [stripePromise]);
+
+    if (isTwinPaper) {
+        // Stripe "processing" means the payment is still clearing; it is not a failure.
+        let status = 'loading';
+        if (paymentError) status = 'failed';
+        else if (paymentIntentData) {
+            status = paymentIntentData.status === 'succeeded' ? 'succeeded'
+                : paymentIntentData.status === 'processing' ? 'processing' : 'failed';
+        }
+        const detail = paymentError ? paymentError.message
+            : (status === 'failed' && paymentIntentData) ? `Status: ${paymentIntentData.status.replace(/_/g, ' ')}` : null;
+        return (
+            <ContentPageLayout showNaveBar={false} showNavbarMenu={false} showPathRow={false}>
+                <PaymentResultPage
+                    status={status}
+                    detail={detail}
+                    onDone={() => { router.push('/safe') }}
+                    onRetry={() => { router.push('/services/payment') }}
+                />
+                <LoadStripe setStripePromise={setStripePromise} />
+            </ContentPageLayout>
+        );
+    }
 
     return (
         <ContentPageLayout>

@@ -5,9 +5,19 @@ import Container from 'react-bootstrap/Container'
 import Button from 'react-bootstrap/Button'
 
 import ContentPageLayout from '../../components/layouts/contentPageLayout';
+import PaymentResultPage from '../../components/twinPaper/account/PaymentResultPage';
+import { isTwinPaper } from '../../lib/twinPaperAppTheme';
 
 export default function InAppPurchaseCompletion() {
     const router = useRouter();
+
+    if (isTwinPaper) {
+        return (
+            <ContentPageLayout showNaveBar={false} showNavbarMenu={false} showPathRow={false}>
+                <PaymentResultPage status="succeeded" onDone={() => { router.push('/safe') }} />
+            </ContentPageLayout>
+        );
+    }
 
     return (
         <ContentPageLayout>

@@ -8,6 +8,8 @@ import format from "date-fns/format";
 
 
 import { debugLog } from "../lib/helper";
+import { isTwinPaper } from "../lib/twinPaperAppTheme";
+import PaymentNotice from "./twinPaper/account/PaymentNotice";
 
 export default function PaymentBanner({ upgradeRequired = false }) {
     const debugOn = false;
@@ -21,6 +23,10 @@ export default function PaymentBanner({ upgradeRequired = false }) {
 
     const handlePay = () => {
         router.push('/services/payment')
+    }
+
+    if (isTwinPaper) {
+        return <PaymentNotice kind={upgradeRequired ? 'upgrade' : 'due'} />;
     }
 
     return (
@@ -49,7 +55,7 @@ export default function PaymentBanner({ upgradeRequired = false }) {
                         <Offcanvas.Title>Upgrade Required</Offcanvas.Title>
                     </Offcanvas.Header>
                     <Offcanvas.Body>
-                        {true && <p>{`Hello, just wanted to remind you that your cuurent storage usage exceeds your storage quota. Please upgrade as soon as possible.`}</p>}
+                        {true && <p>{`Hello, just wanted to remind you that your current storage usage exceeds your storage quota. Please upgrade as soon as possible.`}</p>}
                         <div className="text-center">
                             <Button onClick={handlePay}>Upgrade</Button>
                         </div>

@@ -23,6 +23,7 @@ import Scripts from '../components/scripts'
 
 import KeyInput from "../components/keyInput";
 import CreatePage from '../components/twinPaper/account/CreatePage';
+import RememberKeyModal from '../components/twinPaper/account/RememberKeyModal';
 
 import { keySetupAsyncThunk } from '../reduxStore/auth'
 
@@ -192,7 +193,11 @@ export default function KeySetup() {
                     onShowPrivacy={handlePrivacy}
                     onShowTerms={handleTerms}
                 />
-                {confirmModal}
+                <RememberKeyModal
+                    show={showConfirm}
+                    onClose={handleCloseConfirm}
+                    onUnderstood={handleUnderstood}
+                />
                 {modals}
             </ContentPageLayout>
         );

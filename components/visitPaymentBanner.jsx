@@ -7,6 +7,8 @@ import Button from "react-bootstrap/Button";
 
 import format from "date-fns/format";
 import { debugLog } from "../lib/helper";
+import { isTwinPaper } from "../lib/twinPaperAppTheme";
+import PaymentNotice from "./twinPaper/account/PaymentNotice";
 
 export default function VisitPaymentBanner({ upgradeRequired = false, suspended = false, overflow = false }) {
     const debugOn = false;
@@ -22,6 +24,10 @@ export default function VisitPaymentBanner({ upgradeRequired = false, suspended 
         router.push('/services/payment')
     }
 
+    if (isTwinPaper) {
+        return <PaymentNotice kind={upgradeRequired ? 'upgrade' : suspended ? 'suspended' : 'overflow'} />;
+    }
+
     return (
         <>
             <Offcanvas show={true} placement='bottom' scroll={true} backdrop={false} style={{ backgroundColor: '#fdf1bc', zIndex: '20000' }}>
@@ -31,7 +37,7 @@ export default function VisitPaymentBanner({ upgradeRequired = false, suspended 
                         <Offcanvas.Title>Upgrade Required</Offcanvas.Title>
                     </Offcanvas.Header>
                     <Offcanvas.Body>
-                        {true && <p>{`Hello, just wanted to remind you that your cuurent storage usage exceeds your storage quota. Please visit the`} <Link href="/services/payment">payment page</Link>.</p>}
+                        {true && <p>{`Hello, just wanted to remind you that your current storage usage exceeds your storage quota. Please visit the`} <Link href="/services/payment">payment page</Link>.</p>}
                         <div className="text-center">
                             <Button onClick={handleVisitPayment}>Go</Button>
                         </div>

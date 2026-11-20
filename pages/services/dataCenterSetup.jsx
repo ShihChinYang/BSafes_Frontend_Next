@@ -9,6 +9,8 @@ import Container from 'react-bootstrap/Container';
 import Badge from 'react-bootstrap/Badge';
 
 import ContentPageLayout from "../../components/layouts/contentPageLayout";
+import DataCenterPage from "../../components/twinPaper/account/DataCenterPage";
+import { isTwinPaper } from "../../lib/twinPaperAppTheme";
 
 import { changeDataCenterThunk, getDataCentersThunk } from '../../reduxStore/accountSlice';
 import { setGotoFirstPagetAfterLoggedIn } from '../../reduxStore/auth';
@@ -36,6 +38,20 @@ export default function DataCenterSetup() {
         if (isLoggedIn)
             dispatch(getDataCentersThunk());
     }, [isLoggedIn]);
+
+    if (isTwinPaper) {
+        return (
+            <ContentPageLayout showNaveBar={!dataCenterModal} showNavbarMenu={!dataCenterModal} showPathRow={false}>
+                <DataCenterPage
+                    onboarding={!!dataCenterModal}
+                    dataCenters={dataCenters}
+                    currentDataCenter={currentDataCenter}
+                    onSelect={(dataCenter) => dispatch(changeDataCenterThunk({ dataCenter }))}
+                    onAccept={handleAccept}
+                />
+            </ContentPageLayout>
+        );
+    }
 
     return (
         <ContentPageLayout showNaveBar={!dataCenterModal} showPathRow={!dataCenterModal}>

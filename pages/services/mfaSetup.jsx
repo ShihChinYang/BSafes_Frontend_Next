@@ -14,6 +14,8 @@ import QRCode from 'qrcode'
 import BSafesStyle from '../../styles/BSafes.module.css'
 import ContentPageLayout from "../../components/layouts/contentPageLayout";
 import KeyInput from '../../components/keyInput'
+import MfaSetupPage from '../../components/twinPaper/account/MfaSetupPage'
+import { isTwinPaper } from '../../lib/twinPaperAppTheme'
 
 import { calculateAccountHash } from '../../lib/crypto'
 import { debugLog } from '../../lib/helper'
@@ -153,6 +155,43 @@ export default function MFASetup() {
             }
         }
     }, [mfa]);
+
+    if (isTwinPaper) {
+        return (
+            <ContentPageLayout showPathRow={false}>
+                <MfaSetupPage
+                    ready={!!mfa}
+                    enabled={extraMFAEnabled}
+                    qrCode={qrCode}
+                    secretKey={(mfa && mfa.key) || ''}
+                    keyCopied={keyCopied}
+                    onCopyKey={handleCopyKey}
+                    token={token}
+                    onTokenChange={setToken}
+                    onVerify={handleVerify}
+                    invalidToken={!!(mfa && !mfa.mfaSetup && mfa.error === 'InvalidToken')}
+                    password={password}
+                    showPassword={showPasswordModal}
+                    onPasswordChange={passwordChanged}
+                    onPasswordSubmit={handlePassword}
+                    passwordFailed={!!(accountHashVerified && !accountHashVerified.verified)}
+                    showDisable={showDeleteModal}
+                    onRequestDisable={() => setShowDeleteModal(true)}
+                    onCancelDisable={handleCloseDeleteTrigger}
+                    onConfirmDisable={handleDelete}
+                    recovery={{
+                        show: showRecoveryWords,
+                        words: mfa && mfa.recoveryWords,
+                        copied,
+                        onCopy: handleCopy,
+                        downloadUrl,
+                        showDownload: process.env.NEXT_PUBLIC_platform !== 'iOS' && process.env.NEXT_PUBLIC_platform !== 'android',
+                        onDone: () => setShowRecoveryWords(false),
+                    }}
+                />
+            </ContentPageLayout>
+        );
+    }
 
     return (
         <ContentPageLayout>

@@ -13,9 +13,12 @@ import Table from 'react-bootstrap/Table'
 import format from "date-fns/format";
 
 import ContentPageLayout from '../../components/layouts/contentPageLayout';
+import PaymentPage from '../../components/twinPaper/account/PaymentPage';
+import { isTwinPaper } from '../../lib/twinPaperAppTheme';
 
 import { accountActivity } from '../../lib/activities'
 import { getInvoiceThunk, getTransactionsThunk, setCheckoutPlan } from '../../reduxStore/accountSlice';
+import { setGotoFirstPagetAfterLoggedIn } from '../../reduxStore/auth';
 
 import { debugLog } from '../../lib/helper'
 
@@ -135,6 +138,24 @@ export default function Payment() {
             dispatch(getTransactionsThunk());
         }
     }, [isLoggedIn])
+
+    if (isTwinPaper) {
+        return (
+            <ContentPageLayout showPathRow={false}>
+                <PaymentPage
+                    invoice={invoice}
+                    transactions={transactions}
+                    storageUsageString={storageUsageString}
+                    plan={plan}
+                    onPlanChange={changePlan}
+                    onCheckout={handleCheckout}
+                    onUpgrade={handleUpgrade}
+                    showTransactions={process.env.NEXT_PUBLIC_platform !== 'iOS' && process.env.NEXT_PUBLIC_platform !== 'android'}
+                    onExit={() => dispatch(setGotoFirstPagetAfterLoggedIn(true))}
+                />
+            </ContentPageLayout>
+        );
+    }
 
     return (
         <ContentPageLayout>

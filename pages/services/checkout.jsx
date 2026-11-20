@@ -12,6 +12,8 @@ import { Elements } from '@stripe/react-stripe-js';
 import ContentPageLayout from '../../components/layouts/contentPageLayout';
 import LoadStripe from '../../components/loadStripe'
 import CheckoutForm from '../../components/checkoutForm'
+import CheckoutPage from '../../components/twinPaper/account/CheckoutPage'
+import { isTwinPaper } from '../../lib/twinPaperAppTheme'
 
 import { accountActivity } from '../../lib/activities'
 import { createPaymentIntentThunk, createApplePaymentIntentThunk, reportAnAppleTransactionThunk, reportAnAndroidPurchaseThunk, activityStart, activityDone, clearAppleClientSecret, createAndroidPaymentIntentThunk } from '../../reduxStore/accountSlice';
@@ -259,6 +261,29 @@ export default function Checkout() {
             dispatch(clearAppleClientSecret())
         }
     }, [androidClientSecret])
+
+    if (isTwinPaper) {
+        const platform = process.env.NEXT_PUBLIC_platform;
+        const purchaseError =
+            (platform === 'iOS' && reportAnAppleTransactionError && !reportAnAppleTransactionError.startsWith('Invalid transaction') && reportAnAppleTransactionError) ||
+            (platform === 'android' && reportAnAndroidPurchaseError && !reportAnAndroidPurchaseError.startsWith('Invalid purchase') && reportAnAndroidPurchaseError) ||
+            null;
+        return (
+            <ContentPageLayout showNaveBar={false} showNavbarMenu={false} showPathRow={false}>
+                <CheckoutPage
+                    checkoutPlan={checkoutPlan}
+                    checkoutItem={checkoutItem}
+                    planOptions={planOptions}
+                    isWeb={platform === 'Web'}
+                    stripePromise={stripePromise}
+                    stripeClientSecret={stripeClientSecret}
+                    purchaseError={purchaseError}
+                    onFixIt={handleFixIt}
+                />
+                {platform === 'Web' && <LoadStripe setStripePromise={setStripePromise} />}
+            </ContentPageLayout>
+        );
+    }
 
     return (
         <ContentPageLayout showNaveBar={false}>

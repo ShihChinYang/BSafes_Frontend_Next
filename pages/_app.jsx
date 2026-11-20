@@ -26,6 +26,7 @@ import 'swiper/css/autoplay';
 import '../components/twinPaper/landing/landing.css';
 import '../components/twinPaper/landing/sections.css';
 import '../components/twinPaper/account/account.css';
+import '../components/twinPaper/support/support.css';
 import '../styles/twinPaper-globals.css';
 // Shared Twin Paper skin for the authenticated workspace pages (/safe, /team/[teamId]).
 // Scoped to .tw-app-theme, inert everywhere else. See lib/twinPaperAppTheme.js.

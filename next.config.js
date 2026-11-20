@@ -17,8 +17,9 @@ if (isTwinPaper) {
 const nextConfig = {
   reactStrictMode: true,
   output: 'export',
-  // twinPaper's static host resolves /create/ -> /create/index.html.
-  trailingSlash: isTwinPaper,
+  // Keep false for both sites: shared code compares router.asPath exactly
+  // (e.g. '/logIn', '/keySetup'). Cloudflare Pages serves /foo from foo.html.
+  trailingSlash: false,
   images: {
     unoptimized: true
   },
